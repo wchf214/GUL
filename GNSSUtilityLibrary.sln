@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.902
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNSSUtilityLibrary", "GNSSUtilityLibrary\GNSSUtilityLibrary.vcxproj", "{A1AD2905-B259-40D5-8E2D-103164C55C6E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNSSMathUtilityLib", "GNSSMathUtilityLib\GNSSMathUtilityLib.vcxproj", "{53357A31-75BC-4674-8636-31137125045F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GULTestTool", "GULTestTool\GULTestTool.vcxproj", "{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GNSSTest", "GNSSTest\GNSSTest.vcxproj", "{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Debug|x64.ActiveCfg = Debug|x64
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Debug|x64.Build.0 = Debug|x64
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Debug|x86.ActiveCfg = Debug|Win32
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Debug|x86.Build.0 = Debug|Win32
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Release|x64.ActiveCfg = Release|x64
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Release|x64.Build.0 = Release|x64
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Release|x86.ActiveCfg = Release|Win32
+		{A1AD2905-B259-40D5-8E2D-103164C55C6E}.Release|x86.Build.0 = Release|Win32
+		{53357A31-75BC-4674-8636-31137125045F}.Debug|x64.ActiveCfg = Debug|x64
+		{53357A31-75BC-4674-8636-31137125045F}.Debug|x64.Build.0 = Debug|x64
+		{53357A31-75BC-4674-8636-31137125045F}.Debug|x86.ActiveCfg = Debug|Win32
+		{53357A31-75BC-4674-8636-31137125045F}.Debug|x86.Build.0 = Debug|Win32
+		{53357A31-75BC-4674-8636-31137125045F}.Release|x64.ActiveCfg = Release|x64
+		{53357A31-75BC-4674-8636-31137125045F}.Release|x64.Build.0 = Release|x64
+		{53357A31-75BC-4674-8636-31137125045F}.Release|x86.ActiveCfg = Release|Win32
+		{53357A31-75BC-4674-8636-31137125045F}.Release|x86.Build.0 = Release|Win32
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Debug|x64.ActiveCfg = Debug|x64
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Debug|x64.Build.0 = Debug|x64
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Debug|x86.ActiveCfg = Debug|Win32
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Debug|x86.Build.0 = Debug|Win32
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Release|x64.ActiveCfg = Release|x64
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Release|x64.Build.0 = Release|x64
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Release|x86.ActiveCfg = Release|Win32
+		{20FA76C7-338F-4E38-BFA0-18FF94C62D2E}.Release|x86.Build.0 = Release|Win32
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Debug|x64.ActiveCfg = Debug|x64
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Debug|x64.Build.0 = Debug|x64
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Debug|x86.ActiveCfg = Debug|Win32
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Debug|x86.Build.0 = Debug|Win32
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Release|x64.ActiveCfg = Release|x64
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Release|x64.Build.0 = Release|x64
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Release|x86.ActiveCfg = Release|Win32
+		{16A4E4E1-7079-4D8D-8623-8BC0A7A7D149}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4B6FBA7E-1395-4E75-8D9D-6A4D48545CE2}
+	EndGlobalSection
+EndGlobal

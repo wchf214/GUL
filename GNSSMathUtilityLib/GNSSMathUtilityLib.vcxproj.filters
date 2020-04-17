@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\DllMain">
+      <UniqueIdentifier>{22a6a111-5a3a-4b93-b0b0-eb680e5b60e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\DllMain">
+      <UniqueIdentifier>{0fa1c24b-815c-4e6d-8b5d-e0474ac792ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\GNSSMatrix">
+      <UniqueIdentifier>{d163987b-15ce-4e8d-9505-e472ba22188d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\GNSSMatrix">
+      <UniqueIdentifier>{3a7b0d97-5d26-4ece-8f97-3c216569b4b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen">
+      <UniqueIdentifier>{20f57667-de41-4983-aca2-d67118b8b770}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src">
+      <UniqueIdentifier>{3e09fc64-99ab-4a44-a71a-1aad35657126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\Core">
+      <UniqueIdentifier>{cc336345-e4c9-4f9c-9113-1073175d19e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\LU">
+      <UniqueIdentifier>{f91b737d-72fe-4cc6-9b44-25f4492e0b59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\Cholesky">
+      <UniqueIdentifier>{87485038-88c1-4a79-b1cb-ba208fbc47f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\QR">
+      <UniqueIdentifier>{ce453d1d-3113-4193-b7ed-ebe17fce6773}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\SVD">
+      <UniqueIdentifier>{20800df9-f079-4911-aca9-5dc02f34bc24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\Geometry">
+      <UniqueIdentifier>{b9bfce4f-846b-4ed8-9b09-1fccf61c0c70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Eigen\src\Eigenvalues">
+      <UniqueIdentifier>{377c7082-e1a1-4ed3-a229-7cd4646522c9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GNSSMatrix\CGNSSMatrix.h">
+      <Filter>头文件\GNSSMatrix</Filter>
+    </ClInclude>
+    <ClInclude Include="Eigen\eigen-eigen-323c052e1731\Eigen\src\LU\InverseImpl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GNSSCommonStruct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GNSSMathInterface.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GNSSMatrix\CGNSSMatrix.cpp">
+      <Filter>源文件\GNSSMatrix</Filter>
+    </ClCompile>
+    <ClCompile Include="GNSSMathInterface.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
