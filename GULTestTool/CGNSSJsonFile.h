@@ -1,0 +1,4 @@
+#ifndef CGNSSJSONFILE_H
+#define CGNSSJSONFILE_H
+
+#endif // CGNSSJSONFILE_H

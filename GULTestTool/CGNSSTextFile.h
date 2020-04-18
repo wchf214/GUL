@@ -1,0 +1,4 @@
+#ifndef CGNSSTEXTFILE_H
+#define CGNSSTEXTFILE_H
+
+#endif // CGNSSTEXTFILE_H
