@@ -1,6 +1,4 @@
-#include "CGNSSTime.h"
-
-#include <ctime>
+Ôªø#include "CGNSSTime.h"
 #include <iostream>
 
 namespace sixents
@@ -38,17 +36,35 @@ namespace sixents
             return m_standardTime;
         }
 
+        int CGNSSTime::SatTime2Epoch(const double* m_epochTime)
+        {
+            do
+            {
+                const int doy[] = { 1,32,60,91,121,152,182,213,244,274,305,335 };
+                time_t time = { 0 };
+                int days, sec, year = (int)m_epochTime[0], mon = (int)m_epochTime[1], day = (int)m_epochTime[2];
+                if (year < 1970 || 2099 < year || mon < 1 || 12 < mon)
+                    return time;
+                /* leap year if year%4==0 in 1901-2099 */
+                days = (year - 1970) * 365 + (year - 1969) / 4 + doy[mon - 1] + day - 2 + (year % 4 == 0 && mon >= 3 ? 1 : 0);
+                sec = (int)floor(m_epochTime[5]);
+                time = (time_t)days * 86400 + (int)m_epochTime[3] * 3600 + (int)m_epochTime[4] * 60 + sec;
+            } while (false);
+            return 1;
+        }
+
         int CGNSSTime::StandardToString(SStandardTime m_standardTime, char* timeString, int& len)
         {
             do
             {
-                std::string year = std::to_string(m_standardTime.m_year) + "-";
-                std::string month = std::to_string(m_standardTime.m_month) + "-";
-                std::string day = std::to_string(m_standardTime.m_day) + " ";
-                std::string hour = std::to_string(m_standardTime.m_hour) + ":";
-                std::string minute = std::to_string(m_standardTime.m_minute) + ":";
-                std::string second = std::to_string(m_standardTime.m_hour);
-                std::string output = year + month + day + hour + minute + second;
+                std::string m_year = std::to_string(m_standardTime.m_year) + "-";
+                std::string m_month = std::to_string(m_standardTime.m_month) + "-";
+                std::string m_day = std::to_string(m_standardTime.m_day) + " ";
+                std::string m_hour = std::to_string(m_standardTime.m_hour) + ":";
+                std::string m_minute = std::to_string(m_standardTime.m_minute) + ":";
+                std::string m_second = std::to_string(m_standardTime.m_hour);
+                std::string output = m_year + m_month + m_day + m_hour + m_minute + m_second;
+
                 int dataBufLen = strlen(output.c_str()) + 1;
                 if (timeString == nullptr || len == 0 || len != dataBufLen)
                 {
@@ -66,7 +82,7 @@ namespace sixents
             {
                 if (satType == GPS)
                 {
-                    GPS2Time(gnssTime, standardTime);
+                    GPST2Time(gnssTime, standardTime);
                 }
                 else if (satType == GLONASS)
                 {
@@ -82,7 +98,7 @@ namespace sixents
                 }
                 else
                 {
-                    std::cout << "«Î ‰»Î’˝»∑µƒµº∫ΩœµÕ≥" << std::endl;
+                    std::cout << "ËØ∑ËæìÂÖ•Ê≠£Á°ÆÁöÑÂØºËà™Á≥ªÁªü" << std::endl;
                     return 0;
                 }
             } while (false);
@@ -95,7 +111,7 @@ namespace sixents
             {
                 if (satType == GPS)
                 {
-                    GPS2UTC(gnssTime, standardTime);
+                    GPST2UTC(gnssTime, standardTime);
                 }
                 else if (satType == GLONASS)
                 {
@@ -111,7 +127,7 @@ namespace sixents
                 }
                 else
                 {
-                    std::cout << "«Î ‰»Î’˝»∑µƒµº∫ΩœµÕ≥" << std::endl;
+                    std::cout << "ËØ∑ËæìÂÖ•Ê≠£Á°ÆÁöÑÂØºËà™Á≥ªÁªü" << std::endl;
                     return 0;
                 }
             } while (false);
@@ -187,41 +203,27 @@ namespace sixents
         {
         }
 
-        int CGNSSTime::epoch2time(const double* ep)
-        {
-            const int doy[] = { 1,32,60,91,121,152,182,213,244,274,305,335 };
-            time_t time = { 0 };
-            int days, sec, year = (int)ep[0], mon = (int)ep[1], day = (int)ep[2];
-            if (year < 1970 || 2099 < year || mon < 1 || 12 < mon)
-                return time;
-            /* leap year if year%4==0 in 1901-2099 */
-            days = (year - 1970) * 365 + (year - 1969) / 4 + doy[mon - 1] + day - 2 + (year % 4 == 0 && mon >= 3 ? 1 : 0);
-            sec = (int)floor(ep[5]);
-            time = (time_t)days * 86400 + (int)ep[3] * 3600 + (int)ep[4] * 60 + sec;
-            return time;
-        }
-
-        int CGNSSTime::GPS2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime)
+        int CGNSSTime::GPST2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime)
         {
             do
             {
-                //GPST ◊œ»ªÒ»°µ±«∞œµÕ≥ ±º‰
-
-                double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-
-                time_t t = epoch2time(gpst0);
+                //Ëé∑ÂèñÊØ´ÁßíÊï∞
+                double m_millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
+                //ËΩ¨ÂåñÊàêÁßí
+                time_t m_sec = SatTime2Epoch(GPST0);
                 if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+                {
                     m_GNSSTime.m_secAndMsec = 0.0;
-                t += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
-
-                //∞—√Î◊™ƒÍ‘¬»’
-                struct tm* standTime = gmtime(&t);
+                }
+                m_sec += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+                //ÊääÁßíËΩ¨Âπ¥ÊúàÊó•Ë°®ËææÂΩ¢Âºè
+                struct tm* standTime = gmtime(&m_sec);
                 m_StandardTime.m_year = standTime->tm_year + 1900;
                 m_StandardTime.m_month = standTime->tm_mon + 1;
                 m_StandardTime.m_day = standTime->tm_mday;
                 m_StandardTime.m_hour = standTime->tm_hour;
                 m_StandardTime.m_minute = standTime->tm_min;
-                m_StandardTime.m_seconde = standTime->tm_sec + Millisecond;
+                m_StandardTime.m_seconde = standTime->tm_sec + m_millisecond;
             } while (false);
             return 1;
         }
@@ -230,17 +232,18 @@ namespace sixents
         {
             do
             {
-                //GLO ◊œ»ªÒ»°µ±«∞œµÕ≥ ±º‰
-                time_t gloNowTime = time(nullptr);
-                double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-                //∞—√Î◊™ƒÍ‘¬»’
-                struct tm* standTime = gmtime(&gloNowTime);
+                //GLOÈ¶ñÂÖàËé∑ÂèñÂΩìÂâçÁ≥ªÁªüÊó∂Èó¥
+                time_t m_gloNowTime = time(nullptr);
+                //Ëé∑ÂèñÊØ´ÁßíÊï∞
+                double m_Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
+                //ÊääÁßíËΩ¨Âπ¥ÊúàÊó•
+                struct tm* standTime = gmtime(&m_gloNowTime);
                 m_StandardTime.m_year = standTime->tm_year + 1900;
                 m_StandardTime.m_month = standTime->tm_mon + 1;
                 m_StandardTime.m_day = standTime->tm_mday;
                 m_StandardTime.m_hour = standTime->tm_hour;
                 m_StandardTime.m_minute = standTime->tm_min;
-                m_StandardTime.m_seconde = standTime->tm_sec + Millisecond;
+                m_StandardTime.m_seconde = standTime->tm_sec + m_Millisecond;
             } while (false);
             return 1;
         }
@@ -249,21 +252,25 @@ namespace sixents
         {
             do
             {
-                double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-                //∞—GST ±º‰◊™√Î
-                time_t t = epoch2time(gst0);
+                //Ëé∑ÂèñÊØ´ÁßíÊï∞
+                double m_Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
+                //ÊääGSTÊó∂Èó¥ËΩ¨Áßí
+                time_t m_sec = SatTime2Epoch(GST0);
                 if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+                {
                     m_GNSSTime.m_secAndMsec = 0.0;
-                t += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+                }
 
-                //∞—√Î◊™ƒÍ‘¬»’
-                struct tm* standTime = gmtime(&t);
+                m_sec += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+
+                //ÊääÁßíËΩ¨Âπ¥ÊúàÊó•
+                struct tm* standTime = gmtime(&m_sec);
                 m_StandardTime.m_year = standTime->tm_year + 1900;
                 m_StandardTime.m_month = standTime->tm_mon + 1;
                 m_StandardTime.m_day = standTime->tm_mday;
                 m_StandardTime.m_hour = standTime->tm_hour;
                 m_StandardTime.m_minute = standTime->tm_min;
-                m_StandardTime.m_seconde = standTime->tm_sec + Millisecond;
+                m_StandardTime.m_seconde = standTime->tm_sec + m_Millisecond;
             } while (false);
             return 1;
         }
@@ -271,61 +278,75 @@ namespace sixents
         int CGNSSTime::BDT2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime)
         {
             do
-            {   //∞—BDT ±º‰◊™√Î
-                double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-                time_t t = epoch2time(bdt0);
+            {
+                //Ëé∑ÂèñÊØ´ÁßíÊï∞
+                double m_Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
+                //ÊääBDTÊó∂Èó¥ËΩ¨Áßí
+                time_t m_sec = SatTime2Epoch(BDT0);
                 if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+                {
                     m_GNSSTime.m_secAndMsec = 0.0;
-                t += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+                }
 
-                //∞—√Î◊™ƒÍ‘¬»’
-                struct tm* standTime = gmtime(&t);
+                m_sec += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+
+                //ÊääÁßíËΩ¨Âπ¥ÊúàÊó•
+                struct tm* standTime = gmtime(&m_sec);
                 m_StandardTime.m_year = standTime->tm_year + 1900;
                 m_StandardTime.m_month = standTime->tm_mon + 1;
                 m_StandardTime.m_day = standTime->tm_mday;
                 m_StandardTime.m_hour = standTime->tm_hour;
                 m_StandardTime.m_minute = standTime->tm_min;
-                m_StandardTime.m_seconde = standTime->tm_sec + Millisecond;
+                m_StandardTime.m_seconde = standTime->tm_sec + m_Millisecond;
             } while (false);
             return 1;
         }
 
-        int CGNSSTime::GPS2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime)
+        int CGNSSTime::GPST2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime)
         {
-            double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-            time_t tu = epoch2time(gpst0);
-            if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
-                m_GNSSTime.m_secAndMsec = 0.0;
-            tu += 86400 * 7 * m_GNSSTime.m_week + (int)m_GNSSTime.m_secAndMsec;
-            for (int i = 0; leaps[i][0] > 0; i++)
+            do
             {
-                tu = tu + leaps[i][6];
-                if ((tu - epoch2time(leaps[i])) >= 0.0)
+                double m_Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
+                time_t m_sec = SatTime2Epoch(GPST0);
+                if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
                 {
-                    break;
+                    m_GNSSTime.m_secAndMsec = 0.0;
                 }
-            }
-            struct tm* local = gmtime(&tu);
-            m_UtcTime.m_year = local->tm_year + 1900;
-            m_UtcTime.m_month = local->tm_mon + 1;
-            m_UtcTime.m_day = local->tm_mday;
-            m_UtcTime.m_hour = local->tm_hour;
-            m_UtcTime.m_minute = local->tm_min;
-            m_UtcTime.m_seconde = local->tm_sec + Millisecond;
+
+                m_sec += 86400 * 7 * m_GNSSTime.m_week + static_cast<int>(m_GNSSTime.m_secAndMsec);
+                for (int i = 0; leaps[i][0] > 0; i++)
+                {
+                    m_sec = m_sec + leaps[i][6];
+                    if ((m_sec - SatTime2Epoch(leaps[i])) >= 0.0)
+                    {
+                        break;
+                    }
+                }
+                struct tm* local = gmtime(&m_sec);
+                m_UtcTime.m_year = local->tm_year + 1900;
+                m_UtcTime.m_month = local->tm_mon + 1;
+                m_UtcTime.m_day = local->tm_mday;
+                m_UtcTime.m_hour = local->tm_hour;
+                m_UtcTime.m_minute = local->tm_min;
+                m_UtcTime.m_seconde = local->tm_sec + m_Millisecond;
+            } while (false);
             return 1;
         }
 
         int CGNSSTime::GLOT2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime)
         {
             double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-            time_t tu = epoch2time(gpst0);
+            time_t tu = SatTime2Epoch(GPST0);
             if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+            {
                 m_GNSSTime.m_secAndMsec = 0.0;
+            }
+
             tu += 86400 * 7 * m_GNSSTime.m_week + (int)m_GNSSTime.m_secAndMsec;
             for (int i = 0; leaps[i][0] > 0; i++)
             {
                 tu = tu + leaps[i][6];
-                if ((tu - epoch2time(leaps[i])) >= 0.0)
+                if ((tu - SatTime2Epoch(leaps[i])) >= 0.0)
                 {
                     break;
                 }
@@ -343,14 +364,17 @@ namespace sixents
         int CGNSSTime::GST2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime)
         {
             double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-            time_t tu = epoch2time(gst0);
+            time_t tu = SatTime2Epoch(GST0);
             if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+            {
                 m_GNSSTime.m_secAndMsec = 0.0;
+            }
+
             tu += 86400 * 7 * m_GNSSTime.m_week + (int)m_GNSSTime.m_secAndMsec;
             for (int i = 0; leaps[i][0] > 0; i++)
             {
                 tu = tu + leaps[i][6];
-                if ((tu - epoch2time(leaps[i])) >= 0.0)
+                if ((tu - SatTime2Epoch(leaps[i])) >= 0.0)
                 {
                     break;
                 }
@@ -368,14 +392,17 @@ namespace sixents
         int CGNSSTime::BDT2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime)
         {
             double Millisecond = m_GNSSTime.m_secAndMsec - floor(m_GNSSTime.m_secAndMsec);
-            time_t tu = epoch2time(bdt0) - 14;
+            time_t tu = SatTime2Epoch(BDT0) - 14;
             if (m_GNSSTime.m_secAndMsec < -1E9 || 1E9 < m_GNSSTime.m_secAndMsec)
+            {
                 m_GNSSTime.m_secAndMsec = 0.0;
+            }
+
             tu += 86400 * 7 * m_GNSSTime.m_week + (int)m_GNSSTime.m_secAndMsec;
             for (int i = 0; leaps[i][0] > 0; i++)
             {
                 tu = tu + leaps[i][6];
-                if ((tu - epoch2time(leaps[i])) >= 0.0)
+                if ((tu - SatTime2Epoch(leaps[i])) >= 0.0)
                 {
                     break;
                 }
@@ -407,6 +434,12 @@ namespace sixents
                 time_t gpst = tu + 18 - CPU2GPST0;
                 m_GNSSTime.m_week = gpst / 604800;
                 m_GNSSTime.m_secAndMsec = gpst % 604800 + Millisecond;
+
+                for (int i = 0; leaps[i][0] > 0; i++)
+                {
+                    if (tu - SatTime2Epoch(leaps[i]) >= 0.0)
+                        return tu - leaps[i][6];
+                }
             } while (false);
 
             return 1;
@@ -424,6 +457,17 @@ namespace sixents
                 localTime.tm_hour = m_UtcTime.m_hour;
                 localTime.tm_min = m_UtcTime.m_minute;
                 localTime.tm_sec = m_UtcTime.m_seconde + Millisecond;
+
+                time_t tu = mktime(&localTime);
+                time_t glot = tu + 3 * 60 * 60;
+                m_GNSSTime.m_week = glot / 604800;
+                m_GNSSTime.m_secAndMsec = glot % 604800 + Millisecond;
+
+                for (int i = 0; leaps[i][0] > 0; i++)
+                {
+                    if (tu - SatTime2Epoch(leaps[i]) >= 0.0)
+                        return tu - leaps[i][6];
+                }
             } while (false);
 
             return 1;
@@ -446,6 +490,12 @@ namespace sixents
                 time_t gpst = tu + 18 - CPU2GPST0;
                 m_GNSSTime.m_week = gpst / 604800;
                 m_GNSSTime.m_secAndMsec = gpst % 604800 + Millisecond;
+
+                for (int i = 0; leaps[i][0] > 0; i++)
+                {
+                    if (tu - SatTime2Epoch(leaps[i]) >= 0.0)
+                        return tu - leaps[i][6];
+                }
             } while (false);
 
             return 1;
@@ -472,6 +522,12 @@ namespace sixents
                 m_GNSSTime.m_week = gpst / 604800;
 
                 m_GNSSTime.m_secAndMsec = gpst % 604800 + Millisecond;
+
+                for (int i = 0; leaps[i][0] > 0; i++)
+                {
+                    if (tu - SatTime2Epoch(leaps[i]) >= 0.0)
+                        return tu - leaps[i][6];
+                }
             } while (false);
 
             return 1;
@@ -530,6 +586,11 @@ namespace sixents
         {
             m_TARGNSSTime.m_secAndMsec = m_GPSTime.m_secAndMsec - 1024;
             m_TARGNSSTime.m_week = m_GPSTime.m_week;
+            return 1;
+        }
+
+        long CGNSSTime::weekToSec(int week, double Sec, double& OutputWeek)
+        {
             return 1;
         }
     } // end namespace GNSSUtilityLib

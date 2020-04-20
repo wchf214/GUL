@@ -528,6 +528,7 @@ namespace sixents
             int m_hour;
             int m_minute;
             double m_seconde;
+            int m_timeType;
         };
 
         struct SGNSSTime

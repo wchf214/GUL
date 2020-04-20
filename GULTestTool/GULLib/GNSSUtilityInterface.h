@@ -120,6 +120,22 @@ namespace sixents
             // sec: 输出参数，秒
             DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int satType, double& sec);
 
+            // Glonass与UTC互转  2020.04.20新增
+            DLL_API int STD_CALL UTCTimeToGlonassTime(const int year, const int month, const int day,
+                                                      const int hour, const int minute, const double second,
+                                                      int& gyear, int& gmonth, int& gday,
+                                                      int& ghour, int& gminute, double& gsec);
+            DLL_API int STD_CALL GlonassTimeToUTCTime(const int year, const int month, const int day,
+                                                      const int hour, const int minute, const double second,
+                                                      int& utcYear, int& utcMonth, int& utcDay,
+                                                      int& utcHour, int& utcMinute, double& utcSec);
+            // Glonass与GPS互转  2020.04.20新增
+            DLL_API int STD_CALL GPSTimeToGlonassTime(const int week, const double second,
+                                                      int& gyear, int& gmonth, int& gday,
+                                                      int& ghour, int& gminute, double& gsec);
+            DLL_API int STD_CALL GlonassTimeToGPSTime(const int year, const int month, const int day,
+                                                      const int hour, const int minute, const double second,
+                                                      int& week, double& sec);
             // 坐标相关接口
             // 坐标结构
             // 空间直角坐标格式为x,y,z

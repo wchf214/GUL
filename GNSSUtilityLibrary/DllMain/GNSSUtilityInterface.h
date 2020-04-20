@@ -48,7 +48,7 @@ namespace sixents
             // formatString: 输出参数，时间格式化后字符串
             // len: 输出参数，formatString的长度
             DLL_API int STD_CALL FormatWeekSecTime(const int week, const double sec, const int satType, char* formatString, int& len);
-            
+
             // 格式化标准时间
             // year: 输入参数，年
             // month: 输入参数，月
@@ -75,14 +75,14 @@ namespace sixents
             // second: 输出参数，秒
             DLL_API int STD_CALL GNSSTimeToUTCTime(const int week, const double sec, const int satType,
                 int& year, int& month, int& day, int& hour, int& minute, double& second);
-            
+
             // GNSS时间转UTC时间，以秒为单位 2020.04.17新增
             // week: 输入参数，周
             // sec: 输入参数，秒
             // satType: 输入参数，卫星类型
             // sec: 输出参数，秒
             DLL_API int STD_CALL GNSSTimeToUTCSecTime(const int week, const double second, const int satType, double& sec);
-            
+
             // UTC时间转GNSS时间
             // year: 输入参数，年
             // month: 输入参数，月
@@ -119,6 +119,12 @@ namespace sixents
             // satType: 输入参数，卫星类型
             // sec: 输出参数，秒
             DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int satType, double& sec);
+
+            // Glonass与GPS互转  2020.04.20新增
+            DLL_API int STD_CALL UTCTimeToGlonassTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& gyear, int& gmonth, int& gday, int& ghour, int& gminute, double& gsec);
+            DLL_API int STD_CALL GlonassTimeToUTCTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& utcYear, int& utcMonth, int& utcDay, int& utcHour, int& utcMinute, double& utcSec);
+            DLL_API int STD_CALL GPSTimeToGlonassTime(const int week, const double second, int& gyear, int& gmonth, int& gday, int& ghour, int& gminute, double& gsec);
+            DLL_API int STD_CALL GlonassTimeToGPSTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& week, double& sec);
 
             // 坐标相关接口
             // 坐标结构

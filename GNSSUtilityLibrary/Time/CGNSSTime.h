@@ -12,7 +12,7 @@
 #define _GNSS_TIME_H
 
 #include <string>
-
+#include <time.h>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
 
@@ -55,16 +55,19 @@ namespace sixents
             SGNSSTime GetGNSSTime();
             SStandardTime GetStandardTime();
 
+            long weekToSec(int week, double Sec, double& OutputWeek);
         private:
             SStandardTime m_standardTime;
             SGNSSTime m_gnssTime;
             std::string m_formatString;
             SAT_SYS_TYPE m_curSatType;
 
-            int epoch2time(const double* ep);
+            //
+
+            int SatTime2Epoch(const double* m_epochTime);
 
             //GUL_UC_001
-            int GPS2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
+            int GPST2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
             //GUL_UC_002
             int GLOT2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
             //GUL_UC_003
@@ -73,7 +76,7 @@ namespace sixents
             int BDT2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
 
             //GUL_UC_005
-            int GPS2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
+            int GPST2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
             //GUL_UC_006
             int GLOT2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
             //GUL_UC_007

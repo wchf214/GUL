@@ -94,18 +94,18 @@ namespace sixents
         {
             do
             {
-                double a = 6378137;//aÎªÍÖÇòµÄ³¤°ëÖá:a=6378.137km
-                double b = 6356752.3141;//bÎªÍÖÇòµÄ¶Ì°ëÖá:a=6356.7523141km
+                double a = 6378137;//aä¸ºæ¤­çƒçš„é•¿åŠè½´:a=6378.137km
+                double b = 6356752.3141;//bä¸ºæ¤­çƒçš„çŸ­åŠè½´:a=6356.7523141km
                 double H0 = origin_H + a;
-                double e = sqrt(1 - pow(b, 2) / pow(a, 2)); //eÎªÍÖÇòµÄµÚÒ»Æ«ĞÄÂÊ
-                // double e=sqrt(0.006693421622966); //¿ËÀ­Ë÷·òË¹»ùÍÖÇò
-                // double e=sqrt(0.006694384999588); //1975Äê¹ú¼ÊÍÖÇò
-                // double e=sqrt(0.0066943799013); //WGS-84ÍÖÇò
-                double m = 3.1415926 / 180;//¾­¶ÈÎ¬¶ÈĞèÒª×ª»»³É»¡¶È.
+                double e = sqrt(1 - pow(b, 2) / pow(a, 2)); //eä¸ºæ¤­çƒçš„ç¬¬ä¸€åå¿ƒç‡
+                // double e=sqrt(0.006693421622966); //å…‹æ‹‰ç´¢å¤«æ–¯åŸºæ¤­çƒ
+                // double e=sqrt(0.006694384999588); //1975å¹´å›½é™…æ¤­çƒ
+                // double e=sqrt(0.0066943799013); //WGS-84æ¤­çƒ
+                double m = 3.1415926 / 180;//ç»åº¦ç»´åº¦éœ€è¦è½¬æ¢æˆå¼§åº¦.
                 double B0 = origin_B * m;
                 double L0 = origin_L * m;
                 double W = sqrt(1 - pow(e, 2)*pow(sin(B0), 2));
-                double N0 = a / W; //NÎªÍÖÇòµÄÃ®ÓÏÈ¦ÇúÂÊ°ë¾¶
+                double N0 = a / W; //Nä¸ºæ¤­çƒçš„å¯é…‰åœˆæ›²ç‡åŠå¾„
                 target_X = (N0 + H0)*cos(B0)*cos(L0)
                     - sin(B0)*cos(L0)*target_East - sin(L0)*target_North + cos(B0)*cos(L0)*target_Z;
                 target_Y = (N0 + H0)*cos(B0)*sin(L0)

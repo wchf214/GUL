@@ -33,36 +33,43 @@ void MainWindow::InitTestIFs()
 {
     mIFs.clear();
     mIFs.push_back(ChoiceOneIF);
-    mIFs.push_back("01FormatWeekSecTime");
-    mIFs.push_back("02FormatStandardTime");
-    mIFs.push_back("03GNSSTimeToUTCTime");
-    mIFs.push_back("04GNSSTimeToUTCSecTime");
-    mIFs.push_back("05UTCTimeToGNSSTime");
-    mIFs.push_back("06UTCTimeToGNSSSecTime");
-    mIFs.push_back("07GNSSTimeConvert");
-    mIFs.push_back("08WeekSecToSec");
-    mIFs.push_back("09XYZ2BLH");
-    mIFs.push_back("10BLH2XYZ");
-    mIFs.push_back("11XYZ2ENU");
-    mIFs.push_back("12ENU2XYZ");
-    mIFs.push_back("13CalcGlonassEphSatClock");
-    mIFs.push_back("14CalcEphSatClock");
-    mIFs.push_back("15CalcGlonassEphSatPos");
-    mIFs.push_back("16CalcEphSatPos");
-    mIFs.push_back("17FormatAngleByDegree");
-    mIFs.push_back("18FormatAngleByDMS");
-    mIFs.push_back("19Deg2Rad");
-    mIFs.push_back("20DMS2Rad");
-    mIFs.push_back("21Rad2Deg");
-    mIFs.push_back("22Rad2DMS");
-    mIFs.push_back("23MatrixAdd");
-    mIFs.push_back("24MatrixSub");
-    mIFs.push_back("25MatrixMul");
-    mIFs.push_back("26MatrixTransposition");
-    mIFs.push_back("27MatrixInverse");
-    mIFs.push_back("28MatrixAddRowCol");
-    mIFs.push_back("29MatrixSubRowCol");
-
+    mIFs.push_back(QString::fromLocal8Bit("GPS时间格式化"));
+    mIFs.push_back(QString::fromLocal8Bit("GLONASS时间格式化"));
+    mIFs.push_back(QString::fromLocal8Bit("Galileo时间格式化"));
+    mIFs.push_back(QString::fromLocal8Bit("北斗时间格式化"));
+    mIFs.push_back(QString::fromLocal8Bit("GPS时间转为UTC时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GLONASS时间转为UTC时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GALILEO时间转为UTC时间"));
+    mIFs.push_back(QString::fromLocal8Bit("北斗时间转为UTC时间"));
+    mIFs.push_back(QString::fromLocal8Bit("UTC时间转为GPS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("UTC时间转为GLONASS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("UTC时间转为GALILEO时间"));
+    mIFs.push_back(QString::fromLocal8Bit("UTC时间转为北斗时间"));
+    mIFs.push_back(QString::fromLocal8Bit("北斗时间转为GPS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GLONASS时间转为GPS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GALILEO时间转为GPS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GPS时间转为北斗时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GPS时间转为GLONASS时间"));
+    mIFs.push_back(QString::fromLocal8Bit("GPS时间转为GALILEO时间"));
+    mIFs.push_back(QString::fromLocal8Bit("计算卫星钟差（GLONASS）"));
+    mIFs.push_back(QString::fromLocal8Bit("计算卫星钟差（非GLONASS）"));
+    mIFs.push_back(QString::fromLocal8Bit("计算卫星位置（非GLONASS）"));
+    mIFs.push_back(QString::fromLocal8Bit("计算卫星位置（GLONASS）"));
+    mIFs.push_back(QString::fromLocal8Bit("大地坐标转换为空间直角坐标"));
+    mIFs.push_back(QString::fromLocal8Bit("空间直角坐标转换为大地坐标"));
+    mIFs.push_back(QString::fromLocal8Bit("空间直角坐标转换为站心坐标"));
+    mIFs.push_back(QString::fromLocal8Bit("站心坐标转换为空间直角坐标"));
+    mIFs.push_back(QString::fromLocal8Bit("度转换为弧度"));
+    mIFs.push_back(QString::fromLocal8Bit("弧度转换为度"));
+    mIFs.push_back(QString::fromLocal8Bit("角度以度格式化输出"));
+    mIFs.push_back(QString::fromLocal8Bit("角度以度分秒格式化输出"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵加法"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵减法"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵乘法"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵转置"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵求逆"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵增加行列"));
+    mIFs.push_back(QString::fromLocal8Bit("矩阵减少行列"));
 }
 
 void MainWindow::InitComboBox()
@@ -82,9 +89,9 @@ void MainWindow::InitConnect()
 
 void MainWindow::OpenFileDlg()
 {
-    QString title("请选择一个测试数据文件");
+    QString title(QString::fromLocal8Bit("请选择一个测试数据文件"));
     QString fileFilter = tr("All Files(*.*);;JSon Files(*.json);;Text Files(*.txt)");
-    QString defaultFileFileter = tr("JSon Files(*.json)");
+    QString defaultFileFileter = tr("Text Files(*.txt)");
     dataFilePath = QFileDialog::getOpenFileName(nullptr, title, ".", fileFilter, &defaultFileFileter);
     if (dataFilePath.isEmpty()) {
         return;
@@ -94,7 +101,7 @@ void MainWindow::OpenFileDlg()
 
 void MainWindow::OpenFolderDlg()
 {
-    QString title("请选择测试结果要保存的位置");
+    QString title(QString::fromLocal8Bit("请选择测试结果要保存的位置"));
     QString startIndexPos("");
     resultFolderPath = QFileDialog::getExistingDirectory(nullptr, title, startIndexPos, QFileDialog::ShowDirsOnly);
     if (resultFolderPath.isEmpty()) {
@@ -111,23 +118,30 @@ void MainWindow::ExecTest()
     int funcIdx = ui->comboTestIF->currentIndex();
     if (funcIdx == 0) {
         return;
-    } else if ((funcIdx >= 13 && funcIdx <= 16) || (funcIdx >= 23 && funcIdx <=29)) { // 文件类数据
-        if (!(ui->txtTestDataPath->text().isEmpty() && ui->txtResultPath->text().isEmpty())) {
+    } else if (funcIdx >= 22 && funcIdx <= 25) { // 星历运算, 源数据由文件和时间组成
+        if (!(ui->txtTestDataPath->text().isEmpty() && ui->txtSimpleTestData->text().isEmpty())) {
             return;
         }
-        testData = ui->txtTestDataPath->text();
-        result = ui->txtResultPath->text();
+        testData = ui->txtTestDataPath->text() + ";" + ui->txtSimpleTestData->text();
+        result = QString("");
+    } else if (funcIdx >= 30 && funcIdx <= 36) { // 矩阵运算，源数据由两个文件组成
+        if (ui->txtTestDataPath->text().isEmpty() || ui->txtResultPath->text().isEmpty()) {
+            return;
+        }
+        testData = ui->txtTestDataPath->text() + ";" + ui->txtResultPath->text();
+        result = QString("");
         dataType = true;
     } else { // 简单数据
         if (ui->txtSimpleTestData->text().isEmpty()) {
             return;
         }
         testData = ui->txtSimpleTestData->text();
-        ui->txtRtkResult->text().clear();
-        ui->txtGULResult->text().clear();
     }
 
     // 执行测试用例
+    ui->txtRtkResult->text().clear();
+    ui->txtGULResult->text().clear();
+
     CTestFunc testFunc;
     testFunc.ExecuteTest(testData, ui->comboTestIF->currentIndex(), result);
 

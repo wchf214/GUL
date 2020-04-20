@@ -29,12 +29,12 @@ namespace sixents
             SGlonassEphemeris GetGloEph();
 
             // Clock and Position except Glonass
-            int CalcEphSatClock(const SEpochSatObs& obsObj, const SEphemeris& ephObj, double& clockVal);
-            int CalcEphSatPos(const SEpochSatObs& obsObj, const SEphemeris& ephObj, SXYZ& coord);
+            int CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+            int CalcEphSatPos(const double& sec, const SEphemeris& ephObj, double& x, double& y, double& z);
 
             // Glonass Clock and Position
-            int CalcGloEphSatClock(const SEpochSatObs& obsObj, const SGlonassEphemeris& ephObj, double& clockVal);
-            int CalcGloEphSatPos(const SEpochSatObs& obsObj, const SGlonassEphemeris& ephObj, SXYZ& coord);
+            int CalcGloEphSatClock(const double& sec, const SGlonassEphemeris& ephObj, double& clockVal);
+            int CalcGloEphSatPos(const double& sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
         private:
             SEphemeris m_ephObj;
             SGlonassEphemeris m_gloEphObj;

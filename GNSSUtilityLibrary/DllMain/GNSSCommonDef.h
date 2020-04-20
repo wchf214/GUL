@@ -59,9 +59,9 @@ namespace sixents
         // 常量定义
         // For Angle
         const static int ANGLE_LENGTH = 11;
-        const static double gpst0[] = { 1980,1, 6,0,0,0 }; /* gps time reference */
-        const static double gst0[] = { 1999,8,22,0,0,0 };  /* galileo system time reference */
-        const static double bdt0[] = { 2006,1, 1,0,0,0 };  /* beidou time reference */
+        const static double GPST0[] = { 1980,1, 6,0,0,0 }; /* gps time reference */
+        const static double GST0[] = { 1999,8,22,0,0,0 };  /* galileo system time reference */
+        const static double BDT0[] = { 2006,1, 1,0,0,0 };  /* beidou time reference */
         const static double PI = 3.1415926535897932;  /* pi */
         const static double D2R = (PI / 180.0);          /* deg to rad */
         const static double R2D = (180.0 / PI);          /* rad to deg */
@@ -87,6 +87,33 @@ namespace sixents
 {1981,7,1,0,0,0, -1},
 {0}
         };
+
+#define SIN_5 -0.0871557427476582 /* sin(-5.0 deg) */
+#define COS_5  0.9961946980917456 /* cos(-5.0 deg) */
+#define RE_GLO   6378136.0        /* radius of earth (m)            ref [2] */
+#define MU_GPS   3.9860050E14     /* gravitational constant         ref [1] */
+#define MU_GLO   3.9860044E14     /* gravitational constant         ref [2] */
+#define MU_GAL   3.986004418E14   /* earth gravitational constant   ref [7] */
+#define MU_CMP   3.986004418E14   /* earth gravitational constant   ref [9] */
+#define J2_GLO   1.0826257E-3     /* 2nd zonal harmonic of geopot   ref [2] */
+#define OMGE_GLO 7.292115E-5      /* earth angular velocity (rad/s) ref [2] */
+#define OMGE_GAL 7.2921151467E-5  /* earth angular velocity (rad/s) ref [7] */
+#define OMGE_CMP 7.292115E-5      /* earth angular velocity (rad/s) ref [9] */
+#define OMGE        7.2921151467E-5     /* earth angular velocity (IS-GPS) (rad/s) */
+#define MAX_ITER_KEPLER 30        /* max number of iteration of Kelpler */
+#define RTOL_KEPLER 1E-14         /* relative tolerance for Kepler equation */
+
+#define SQR(x)   ((x)*(x))
+#define RE_GLO   6378136.0        /* radius of earth (m)            ref [2] */
+#define MU_GPS   3.9860050E14     /* gravitational constant         ref [1] */
+#define MU_GLO   3.9860044E14     /* gravitational constant         ref [2] */
+#define MU_GAL   3.986004418E14   /* earth gravitational constant   ref [7] */
+#define MU_CMP   3.986004418E14   /* earth gravitational constant   ref [9] */
+#define J2_GLO   1.0826257E-3     /* 2nd zonal harmonic of geopot   ref [2] */
+
+#define OMGE_GLO 7.292115E-5      /* earth angular velocity (rad/s) ref [2] */
+#define OMGE_GAL 7.2921151467E-5  /* earth angular velocity (rad/s) ref [7] */
+#define OMGE_CMP 7.292115E-5      /* earth angular velocity (rad/s) ref [9] */
 
         const time_t CPU2GALT0 = 935280000;
         const time_t CPU2GPST0 = 315964800;

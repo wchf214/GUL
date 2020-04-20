@@ -45,7 +45,6 @@ namespace sixents
                 GNSSTime.StandardToString(sStandardTime, formatString, len);
             } while (false);
             return 1;
-            return 0;
         }
 
         //GUL_UC_005-GUL_UC_008解决
@@ -129,22 +128,22 @@ namespace sixents
             return 0;
         }
 
-        extern "C" DLL_API int STD_CALL CalcGlonassEphSatClock(const SEpochSatObs& obsObj, const SGlonassEphemeris& ephObj, double& clockVal)
+        extern "C" DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec, const SGlonassEphemeris& ephObj, double& clockVal)
         {
             return 0;
         }
-
-        extern "C" DLL_API int STD_CALL CalcEphSatClock(const SEpochSatObs& obsObj, const SEphemeris& ephObj, double& clockVal)
+        extern "C"   DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal)
         {
             return 0;
         }
-
-        extern "C" DLL_API int STD_CALL CalcGlonassEphSatPos(const SEpochSatObs& obsObj, const SGlonassEphemeris& ephObj, double& x, double& y, double& z)
+        // 计算位置
+        // ephObj: 输入参数，星历数据
+        // x,y,z: 输出参数，计算出来的位置值
+        extern "C"   DLL_API int STD_CALL CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z)
         {
             return 0;
         }
-
-        extern "C" DLL_API int STD_CALL CalcEphSatPos(const SEpochSatObs& obsObj, const SEphemeris& ephObj, double& x, double& y, double& z)
+        extern "C"   DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z)
         {
             return 0;
         }
@@ -220,11 +219,6 @@ namespace sixents
                 angleObj.DegToDMS(RadToDeg, degree, minute, sec);
             } while (false);
             return 1;
-        }
-
-        extern "C" DLL_API int STD_CALL Rad2DMS111()
-        {
-            return 0;
         }
     }
 }

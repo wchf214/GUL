@@ -116,7 +116,7 @@
          </rect>
         </property>
         <property name="title">
-         <string>测试接口选择区</string>
+         <string>业务需求选择区</string>
         </property>
         <widget class="QWidget" name="horizontalLayoutWidget_3">
          <property name="geometry">
@@ -131,7 +131,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>请选择测试接口：</string>
+             <string>请选择业务需求：</string>
             </property>
            </widget>
           </item>

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "GNSSCommonStruct.h"
+#include "GNSSMatrix/CGNSSMatrix.h"
 
 namespace sixents
 {
@@ -39,7 +40,7 @@ namespace sixents
             // 矩阵乘法
             // destMatrix：输入/输出参数，既是被乘数，又是结果
             // srcMatrix 输入参数，乘数
-            DLL_API int STD_CALL MatrixMul(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
+            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 
             // 矩阵转置
             // desMatrix：输入/输出参数，待转置矩阵，同时也是结果

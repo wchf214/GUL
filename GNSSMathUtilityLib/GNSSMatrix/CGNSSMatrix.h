@@ -32,9 +32,9 @@ namespace sixents
             // 计算方法
             int MatrixTransposition(SGNSSMatrix& matrix); // 转置
             int MatrixInverse(SGNSSMatrix& matrix);       // 求逆
-            CGNSSMatrix operator+(CGNSSMatrix& matrix); // 加法
+            CGNSSMatrix operator+(CGNSSMatrix& matrix) const; // 加法
             CGNSSMatrix operator-(CGNSSMatrix& matrix); // 减法
-            CGNSSMatrix operator*(const CGNSSMatrix& matrix); // 乘法
+            CGNSSMatrix operator*(CGNSSMatrix& matrix); // 乘法
 
         private:
             SGNSSMatrix m_matrix;

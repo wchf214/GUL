@@ -1,9 +1,16 @@
 #include "CGNSSMatrix.h"
+
+#include <iostream>
+
 #include "../Eigen/eigen-eigen-323c052e1731/Eigen/Dense"
 namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
+        CGNSSMatrix::CGNSSMatrix(const SGNSSMatrix& matrix)
+        {
+            m_matrix = matrix;
+        }
         CGNSSMatrix::CGNSSMatrix()
         {
         }
@@ -16,38 +23,85 @@ namespace sixents
         {
         }
 
-        CGNSSMatrix CGNSSMatrix::operator+(CGNSSMatrix& matrix)  // 加法
+        SGNSSMatrix CGNSSMatrix::GetMatrix()
         {
-            if (matrix.GetMatrix().row != this->GetMatrix().row || matrix.GetMatrix().col != this->GetMatrix().col)
+            return m_matrix;
+        }
+
+        CGNSSMatrix CGNSSMatrix::operator+(CGNSSMatrix& matrix)  const // 加法
+        {
+            CGNSSMatrix mat;
+            if (matrix.GetMatrix().row != m_matrix.row || matrix.GetMatrix().col != m_matrix.col)
             {
+                return mat;
             }
             for (int i = 0; i < matrix.GetMatrix().row; i++)
             {
                 for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    matrix.GetMatrix().matrixNum[i][j] = this->GetMatrix().matrixNum[i][j] + matrix.GetMatrix().matrixNum[i][j];
+                    mat.GetMatrix().matrixNum[i][j] = m_matrix.matrixNum[i][j] + matrix.GetMatrix().matrixNum[i][j];
                 }
             }
             return matrix;
         }
+
         CGNSSMatrix CGNSSMatrix::operator-(CGNSSMatrix& matrix)  // 减法
         {
-            if (matrix.GetMatrix().row != this->GetMatrix().row || matrix.GetMatrix().col != this->GetMatrix().col)
+            CGNSSMatrix mat;
+
+            if (matrix.GetMatrix().row != m_matrix.row || matrix.GetMatrix().col != m_matrix.col)
             {
+                return mat;
             }
             for (int i = 0; i < matrix.GetMatrix().row; i++)
             {
                 for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    matrix.GetMatrix().matrixNum[i][j] = this->GetMatrix().matrixNum[i][j] - matrix.GetMatrix().matrixNum[i][j];
+                    mat.GetMatrix().matrixNum[i][j] = m_matrix.matrixNum[i][j] - matrix.GetMatrix().matrixNum[i][j];
                 }
             }
             return matrix;
         }
-        //CGNSSMatrix CGNSSMatrix::operator*(const CGNSSMatrix& matrix) const// 乘法
-        //{
-        //    return matrix;
-        //}
+
+        CGNSSMatrix CGNSSMatrix::operator*(CGNSSMatrix& matrix) // 乘法
+        {
+            //分配被乘数
+            Eigen::MatrixXd mat1(this->GetMatrix().row, this->GetMatrix().col);
+            //分配乘数
+            Eigen::MatrixXd mat2(matrix.GetMatrix().row, matrix.GetMatrix().col);
+            //分配结果
+            Eigen::MatrixXd matall(this->GetMatrix().row, matrix.GetMatrix().col);
+            if (this->GetMatrix().col != matrix.GetMatrix().row)
+            {
+                return matrix;
+            }
+
+            for (int i = 0; i < matrix.GetMatrix().row; i++)
+            {
+                for (int j = 0; j < matrix.GetMatrix().col; j++)
+                {
+                    mat1(i, j) = m_matrix.matrixNum[i][j];
+                }
+            }
+
+            for (int i = 0; i < m_matrix.row; i++)
+            {
+                for (int j = 0; j < m_matrix.col; j++)
+                {
+                    mat2(i, j) = matrix.GetMatrix().matrixNum[i][j];
+                }
+            }
+
+            matall = mat1 * mat2;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    std::cout << matall(i, j) << std::endl;
+                }
+            }
+            return matrix;
+        }
 
         int GNSSMathUtilityLib::CGNSSMatrix::MatrixInverse(SGNSSMatrix& matrix)
         {
@@ -55,7 +109,6 @@ namespace sixents
             {
                 return 0;
             }
-
             Eigen::MatrixXd mat(matrix.row, matrix.col);
             for (int i = 0; i < matrix.row; i++)
             {
