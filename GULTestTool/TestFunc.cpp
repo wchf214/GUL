@@ -13,6 +13,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
+#include <QDataStream>
+
+#include <stdio.h>
 
 namespace sixents {
     namespace GNSSUtilityLib {
@@ -88,6 +91,8 @@ EXPORT int  matinv(double *A, int n);
 // 常量定义
 const static int COORDINATE_ACCURACY = 9;
 const static int BLH_ACCURACY = 11;
+const static int MSEC_ACCURACY = 3;
+const static int MATRIX_ACCURACY = 6;
 
 CTestFunc::CTestFunc()
     : mLoadRtkLibFlag(false)
@@ -428,7 +433,7 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     gtime_t rtkRetTime = gpst2utc(rtkTime);
     char* chRet = new char[50];
     memset(chRet, 0, sizeof (char)*50);
-    int n = 3;
+    int n = MSEC_ACCURACY;
     time2str(rtkRetTime, chRet, n);
     if (chRet == nullptr) {
         return false;
@@ -492,7 +497,7 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
         break;
     }
 
-    QString rtkRet = QString::number(week) + "," + QString::number(second, 'f', 3);
+    QString rtkRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
     // 执行GUL接口
     QString gulRet("null");
     // 组装结果
@@ -507,19 +512,49 @@ bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
     }
     result.clear();
     // 拆分参数
-    QStringList weekSecData = testData.split(",");
-    if (weekSecData.count() != 4) {
+    QStringList testDatas = testData.split(";");
+    if (testDatas.count() != 2) {
+        return false;
+    }
+
+    QStringList flagList = testDatas[1].split(",");
+    if (flagList.count() != 2) {
+        return false;
+    }
+    int srcType = flagList[0].toInt();
+    int destType = flagList[1].toInt();
+
+    QStringList weekSecData = testDatas[0].split(",");
+    if (weekSecData.count() != 2) {
         return false;
     }
     int srcWeek = weekSecData[0].toInt();
     double srcSec = weekSecData[1].toDouble();
-    int srcSatType = weekSecData[2].toInt();
-    int destSatType = weekSecData[3].toInt();
 
     int destWeek = 0;
     double destSec = 0.0;
     // 执行Rtk接口，未实现该结果
+    if (srcType == 1) {  // GPS to BD or Galileo
+        gtime_t gpsTime = gpst2time(srcWeek, srcSec);
+        if (destType == 3) { // to Galileo
+            // 暂不处理
+        } else if (destType == 4){ // to BD
+            gtime_t bdTime = gpst2bdt(gpsTime);
+            destSec = time2bdt(bdTime, &destWeek);
+        }
+    } else if (destType == 1) { // BD or Galileo to GPS
+        if (srcType == 3) {
+            // 暂不处理
+        } else if (srcType == 4) {
+            gtime_t bdTime = bdt2time(srcWeek, srcSec);
+            gtime_t gpsTime = bdt2gpst(bdTime);
+            destSec = time2gpst(gpsTime, &destWeek);
+        }
+    }
     QString rtkRet("null");
+    if (destWeek != 0) {
+        rtkRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
+    }
     // 执行GUL接口
     QString gulRet("null");
     // 组装结果
@@ -751,15 +786,36 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
     }
     int hour = timeList[0].toInt();
     int minute = timeList[1].toInt();
-    double seconde = timeList[2].toDouble();
+    double second = timeList[2].toDouble();
 
     // 从文件中读取星历电文
-
+    QString binFilePath("");
+    FileConvertToBin(testDataFilePath, binFilePath);
+    FILE *rtkFP = new FILE();
+    std::string temp = binFilePath.toStdString();
+    const char* fileName = temp.c_str();
+    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+    if (openFlag != 0) {
+        return false;
+    }
+    // 文本文件转二进制文件
+    rtcm_t rtcm;
+    init_rtcm(&rtcm);
+    int ret = input_rtcm3f(&rtcm, rtkFP);
+    if (ret < 0) {
+        return false;
+    }
+    fclose(rtkFP);
     // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口，解码星历电文
-
     // 调用Rtk接口解算
-    QString rtkRet("null");
+    gtime_t rtkClk;
+    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                           static_cast<double>(hour), static_cast<double>(minute), second};
+    gtime_t tTemp = epoch2time(epochTime);
+    rtkClk = utc2gpst(tTemp);
+    double rtkClkRet = geph2clk(rtkClk, rtcm.nav.geph);
+    free_rtcm(&rtcm);
+    QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
 
@@ -802,15 +858,36 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
     }
     int hour = timeList[0].toInt();
     int minute = timeList[1].toInt();
-    double seconde = timeList[2].toDouble();
+    double second = timeList[2].toDouble();
 
     // 从文件中读取星历电文
-
+    QString binFilePath("");
+    FileConvertToBin(testDataFilePath, binFilePath);
+    FILE *rtkFP = new FILE();
+    std::string temp = binFilePath.toStdString();
+    const char* fileName = temp.c_str();
+    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+    if (openFlag != 0) {
+        return false;
+    }
+    // 文本文件转二进制文件
+    rtcm_t rtcm;
+    init_rtcm(&rtcm);
+    int ret = input_rtcm3f(&rtcm, rtkFP);
+    if (ret < 0) {
+        return false;
+    }
+    fclose(rtkFP);
     // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口，解码星历电文
-
     // 调用Rtk接口解算
-    QString rtkRet("null");
+    gtime_t rtkClk;
+    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                           static_cast<double>(hour), static_cast<double>(minute), second};
+    gtime_t timeTemp = epoch2time(epochTime);
+    rtkClk = utc2gpst(timeTemp);
+    double rtkClkRet = eph2clk(rtkClk, rtcm.nav.eph);
+    free_rtcm(&rtcm);
+    QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
 
@@ -853,15 +930,41 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
     }
     int hour = timeList[0].toInt();
     int minute = timeList[1].toInt();
-    double seconde = timeList[2].toDouble();
+    double second = timeList[2].toDouble();
 
     // 从文件中读取星历电文
-
+    QString binFilePath("");
+    FileConvertToBin(testDataFilePath, binFilePath);
+    FILE *rtkFP = new FILE();
+    std::string temp = binFilePath.toStdString();
+    const char* fileName = temp.c_str();
+    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+    if (openFlag != 0) {
+        return false;
+    }
+    // 文本文件转二进制文件
+    rtcm_t rtcm;
+    init_rtcm(&rtcm);
+    int ret = input_rtcm3f(&rtcm, rtkFP);
+    if (ret < 0) {
+        return false;
+    }
+    fclose(rtkFP);
     // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口，解码星历电文
-
     // 调用Rtk接口解算
-    QString rtkRet("null");
+    gtime_t rtkClk;
+    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                           static_cast<double>(hour), static_cast<double>(minute), second};
+    gtime_t timeTemp = epoch2time(epochTime);
+    rtkClk = utc2gpst(timeTemp);
+    double rtkClkRet = 0.0;
+    double rtkPos[3] = {0.0, 0.0, 0.0};
+    double rtkVar = 0.0;
+    geph2pos(rtkClk, rtcm.nav.geph, rtkPos, &rtkClkRet, &rtkVar);
+    free_rtcm(&rtcm);
+    QString rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + "," +
+                     QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + "," +
+                     QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
 
@@ -904,15 +1007,41 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
     }
     int hour = timeList[0].toInt();
     int minute = timeList[1].toInt();
-    double seconde = timeList[2].toDouble();
+    double second = timeList[2].toDouble();
 
     // 从文件中读取星历电文
-
+    QString binFilePath("");
+    FileConvertToBin(testDataFilePath, binFilePath);
+    FILE *rtkFP = new FILE();
+    std::string temp = binFilePath.toStdString();
+    const char* fileName = temp.c_str();
+    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+    if (openFlag != 0) {
+        return false;
+    }
+    // 文本文件转二进制文件
+    rtcm_t rtcm;
+    init_rtcm(&rtcm);
+    int ret = input_rtcm3f(&rtcm, rtkFP);
+    if (ret < 0) {
+        return false;
+    }
+    fclose(rtkFP);
     // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口，解码星历电文
-
     // 调用Rtk接口解算
-    QString rtkRet("null");
+    gtime_t rtkClk;
+    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                           static_cast<double>(hour), static_cast<double>(minute), second};
+    gtime_t timeTemp = epoch2time(epochTime);
+    rtkClk = utc2gpst(timeTemp);
+    double rtkClkRet = 0.0;
+    double rtkPos[3] = {0.0, 0.0, 0.0};
+    double rtkVar = 0.0;
+    eph2pos(rtkClk, rtcm.nav.eph, rtkPos, &rtkClkRet, &rtkVar);
+    free_rtcm(&rtcm);
+    QString rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + "," +
+                     QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + "," +
+                     QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
 
@@ -1063,7 +1192,7 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     result.clear();
     // 解析testData
     QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
+    if (srcTestData.count()!= 2) {
         return false;
     }
     QString srcDataFilePath = srcTestData[0];
@@ -1103,7 +1232,7 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     int destRow = destRowAndCol[0].toInt();
     const int destCol = destRowAndCol[1].toInt();
 
-    double* srcMatrixData = new double[srcRow * srcCol];
+    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull");
     // 执行GUL接口
@@ -1165,7 +1294,7 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     int destRow = destRowAndCol[0].toInt();
     const int destCol = destRowAndCol[1].toInt();
 
-    double* srcMatrixData = new double[srcRow * srcCol];
+    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull");
     // 执行GUL接口
@@ -1226,10 +1355,52 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
     }
     int destRow = destRowAndCol[0].toInt();
     const int destCol = destRowAndCol[1].toInt();
+    if (srcCol != destRow) {
+        return false;
+    }
 
-    double* srcMatrixData = new double[srcRow * srcCol];
+    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
+    memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
+    int dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < srcRow; rowIdx++) {
+        QStringList colDatas = srcData[rowIdx + 1].split(",");
+        for (int colIdx = 0; colIdx < srcCol; colIdx++) {
+            srcMatrixData[dataIdx] = colDatas[colIdx].toDouble();
+            dataIdx++;
+        }
+    }
+
+    double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
+    memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
+    dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < destRow; rowIdx++) {
+        QStringList colDatas = destData[rowIdx + 1].split(",");
+        for (int colIdx = 0; colIdx < destCol; colIdx++) {
+            destMatrixData[dataIdx] = colDatas[colIdx].toDouble();
+            dataIdx++;
+        }
+    }
+
+    double* resultMatrixData = new double[static_cast<unsigned long long>(srcRow * destCol)];
+    memset(resultMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * destCol));
+
+    double alpha = 1.0;
+    double beta = 0.0;
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result");
+    matmul("NN", srcRow, srcCol, destCol, alpha, srcMatrixData, destMatrixData, beta, resultMatrixData);
+    QString rtkRet("");
+    rtkRet = QString::number(srcRow) + "," + QString::number(destCol) + "\n";
+    dataIdx = 0;
+    for (int rIdx = 0; rIdx < srcRow; rIdx ++) {
+        for (int cIdx = 0; cIdx < destCol; cIdx++) {
+            rtkRet += QString::number(resultMatrixData[dataIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != destCol - 1) {
+                rtkRet += ",";
+            }
+            dataIdx ++;
+        }
+        rtkRet = rtkRet + "\n";
+    }
     // 执行GUL接口
     QString gulRet("GUL Result");
     // 写文件
@@ -1270,7 +1441,7 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
     int row = rowAndCol[0].toInt();
     const int col = rowAndCol[1].toInt();
 
-    double* data = new double[row * col];
+    double* data = new double[static_cast<unsigned long long>(row * col)];
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull");
     // 执行GUL接口
@@ -1312,10 +1483,35 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     }
     int row = rowAndCol[0].toInt();
     const int col = rowAndCol[1].toInt();
+    if (row != col) {
+        return false;
+    }
 
-    double* data = new double[row * col];
+    double* data = new double[static_cast<unsigned long long>(row * col)];
+    memset(data, 0, sizeof (double)* static_cast<unsigned long long>(row * col));
+    int dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < row; rowIdx++) {
+        QStringList colDatas = allData[rowIdx + 1].split(",");
+        for (int colIdx = 0; colIdx < col; colIdx++) {
+            data[dataIdx] = colDatas[colIdx].toDouble();
+            dataIdx++;
+        }
+    }
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\n");
+    matinv(data, row);
+    QString rtkRet("");
+    rtkRet = QString::number(row) + "," + QString::number(col) + "\n";
+    dataIdx = 0;
+    for (int rIdx = 0; rIdx < row; rIdx ++) {
+        for (int cIdx = 0; cIdx < col; cIdx++) {
+            rtkRet += QString::number(data[dataIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != col - 1) {
+                rtkRet += ",";
+            }
+            dataIdx ++;
+        }
+        rtkRet = rtkRet + "\n";
+    }
     // 执行GUL接口
     QString gulRet("GUL Result");
     // 写文件
@@ -1438,6 +1634,28 @@ void CTestFunc::WriteTxtFile(const QString &filePath, const QString &data)
     fileDataObj << data << endl;
     fileObj.flush();
     fileObj.close();
+}
+
+void CTestFunc::FileConvertToBin(const QString &filePath, QString &outFilePath)
+{
+    QString destFilePath(".dat");
+    QStringList filePaths = filePath.split(".");
+    outFilePath = filePaths[0] + destFilePath;
+    QFile srcFileObj(filePath);
+    QFile destFileObj(outFilePath);
+    if (!srcFileObj.open(QIODevice::ReadOnly) || !destFileObj.open(QIODevice::WriteOnly)) {
+        return;
+    }
+    QTextStream srcStream(&srcFileObj);
+    QString srcData = srcStream.readAll();
+    srcData.trimmed();
+    QByteArray srcDataArr = QByteArray::fromHex(srcData.toLocal8Bit());
+    QDataStream destStream(&destFileObj);
+//    destStream.setByteOrder(QDataStream::BigEndian); // 设置大端在前
+    destStream.setByteOrder(QDataStream::LittleEndian); // 设置小端在前
+    destStream << srcDataArr;
+    destFileObj.close();
+    srcFileObj.close();
 }
 
 

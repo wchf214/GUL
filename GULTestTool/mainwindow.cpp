@@ -118,8 +118,8 @@ void MainWindow::ExecTest()
     int funcIdx = ui->comboTestIF->currentIndex();
     if (funcIdx == 0) {
         return;
-    } else if (funcIdx >= 22 && funcIdx <= 25) { // 星历运算, 源数据由文件和时间组成
-        if (!(ui->txtTestDataPath->text().isEmpty() && ui->txtSimpleTestData->text().isEmpty())) {
+    } else if (funcIdx >= 19 && funcIdx <= 22) { // 星历运算, 源数据由文件和时间组成
+        if (ui->txtTestDataPath->text().isEmpty() || ui->txtSimpleTestData->text().isEmpty()) {
             return;
         }
         testData = ui->txtTestDataPath->text() + ";" + ui->txtSimpleTestData->text();

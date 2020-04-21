@@ -68,7 +68,7 @@ private:
     void WriteTxtFile(const QString& filePath, const QString& data);
 
     // 读星历文件
-
+    void FileConvertToBin(const QString& filePath, QString& outFilePath);
     // 生成文件名
     // 新生成的结果文件命名规则：接口名+当前时间（精确到秒）
     // 示例：FormatWeekSecTime20200416102203
