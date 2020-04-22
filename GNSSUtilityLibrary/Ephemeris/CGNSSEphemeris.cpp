@@ -95,7 +95,6 @@ namespace sixents
             if (sys == BDS && prn <= 5)
             {
                 O = ephObj.m_dbOmega0 + ephObj.m_dbOmegaDot*tk - omge;
-
                 double xg = x * cosO - y * cosi*sinO;
                 double yg = x * sinO + y * cosi*cosO;
                 double zg = y * sin(i);
@@ -164,13 +163,23 @@ namespace sixents
             double k1[6], k2[6], k3[6], k4[6], w[6];
             int i;
             deq(x, k1, acc);
-            for (i = 0; i < 6; i++) w[i] = x[i] + k1[i] * t / 2.0;
+            for (i = 0; i < 6; i++)
+            {
+                w[i] = x[i] + k1[i] * t / 2.0;
+            }
             deq(w, k2, acc);
             for (i = 0; i < 6; i++) w[i] = x[i] + k2[i] * t / 2.0;
-            deq(w, k3, acc);
+            {
+                deq(w, k3, acc);
+            }
             for (i = 0; i < 6; i++) w[i] = x[i] + k3[i] * t;
-            deq(w, k4, acc);
-            for (i = 0; i < 6; i++) x[i] += (k1[i] + 2.0*k2[i] + 2.0*k3[i] + k4[i])*t / 6.0;
+            {
+                deq(w, k4, acc);
+            }
+            for (i = 0; i < 6; i++)
+            {
+                x[i] += (k1[i] + 2.0*k2[i] + 2.0*k3[i] + k4[i])*t / 6.0;
+            }
         }
 
         int CGNSSEphemeris::CalcGloEphSatPos(const double& sec, const SGlonassEphemeris& ephObj, double& xPos, double& yPos, double& zPos)
@@ -196,7 +205,6 @@ namespace sixents
             xPos = x[0];
             yPos = x[1];
             zPos = x[2];
-
             return 1;
         }
     }

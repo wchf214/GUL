@@ -122,15 +122,12 @@ namespace sixents
                 {
                     sign = -1;
                 }
-
                 Degree = fabs(Degree);
                 degree = floor(Degree);
                 double degreetomin = (Degree - degree)*60.0;
                 minute = floor(degreetomin);
-
                 double mintosec = (degreetomin - minute)*60.0;
                 second = floor(mintosec);
-
                 degree *= sign;
             } while (false);
             return 1;

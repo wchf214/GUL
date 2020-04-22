@@ -12,7 +12,7 @@
 #define _GNSS_TIME_H
 
 #include <string>
-#include <time.h>
+#include <ctime>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
 
@@ -30,12 +30,11 @@ namespace sixents
             CGNSSTime(const int year, const int month, const int day, const int hour, const int minute, const double sec, const SAT_SYS_TYPE satType);
             CGNSSTime(const SStandardTime& time, const SAT_SYS_TYPE satType = GPS);
             CGNSSTime(const CGNSSTime& time);
-
             ~CGNSSTime();
 
             // format time and output string
-            int StandardToString(SStandardTime m_standardTime, char* timeString, int& len);  // yyyy-MM-dd HH:mm:ss.sss
-            int GNSSToString(char* timeString, int& len); // ***w,**.*****s
+            int StandardTimeToString(SStandardTime standardTime, char* timeString, int& len);  // yyyy-MM-dd HH:mm:ss.sss
+            // int GNSSToString(char* timeString, int& len); // ***w,**.*****s
             int StandardTimeToGNSSTime(const SStandardTime& standardTime, SGNSSTime& gnssTime, const int satType);
             // transform standard time to GNSS time;
 
@@ -56,56 +55,61 @@ namespace sixents
             SStandardTime GetStandardTime();
 
             long weekToSec(int week, double Sec, double& OutputWeek);
-        private:
-            SStandardTime m_standardTime;
-            SGNSSTime m_gnssTime;
+        public:
+            SStandardTime standardTime;
+            SGNSSTime GNSSTime;
             std::string m_formatString;
             SAT_SYS_TYPE m_curSatType;
 
-            //
+            int Time2Epoch(int m_year, int m_month, int m_day, int m_hour, int m_min, int sec, time_t& time);
 
             int SatTime2Epoch(const double* m_epochTime);
 
             //GUL_UC_001
-            int GPST2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
+            int GPST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_002
-            int GLOT2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
+            //这个函数不需要了
             //GUL_UC_003
-            int GST2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
+            int GST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_004
-            int BDT2Time(SGNSSTime m_GNSSTime, SStandardTime& m_StandardTime);
-
+            int BDT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_005
-            int GPST2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
+            int GPST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_006
-            int GLOT2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
+            int GLOT2UTC(SStandardTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_007
-            int GST2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
+            int GST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_008
-            int BDT2UTC(SGNSSTime m_GNSSTime, SStandardTime& m_UtcTime);
+            int BDT2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
 
             //GUL_UC_09
-            int UTC2GPST(SStandardTime m_UtcTime, SGNSSTime& m_GNSSTime);
+            int UTC2GPST(SStandardTime utcTime, SGNSSTime& GNSSTime);
             //GUL_UC_010
-            int UTC2GLOT(SStandardTime m_UtcTime, SGNSSTime& m_GNSSTime);
+            int UTC2GLOT(SStandardTime utcTime, SStandardTime& GNSSTime);
             //GUL_UC_011
-            int UTC2GST(SStandardTime m_UtcTime, SGNSSTime& m_GNSSTime);
+            int UTC2GST(SStandardTime utcTime, SGNSSTime& GNSSTime);
             //GUL_UC_012
-            int UTC2BDT(SStandardTime m_UtcTime, SGNSSTime& m_GNSSTime);
+            int UTC2BDT(SStandardTime utcTime, SGNSSTime& GNSSTime);
 
             //GUL_UC_013
-            int BDT2GPST(SGNSSTime m_SRCGNSSTime, SGNSSTime& m_GPSTime);
+            int BDT2GPST(SGNSSTime SRCGNSSTime, SGNSSTime& GPSTime);
             //GUL_UC_014
-            int GLOT2GPST(SGNSSTime m_SRCGNSSTime, SGNSSTime& m_GPSTime);
+            int GLOT2GPST(SStandardTime SRCGNSSTime, SGNSSTime& GPSTime);
             //GUL_UC_015
-            int GST2GPST(SGNSSTime m_SRCGNSSTime, SGNSSTime& m_GPSTime);
+            int GST2GPST(SGNSSTime SRCGNSSTime, SGNSSTime& GPSTime);
 
             //GUL_UC_016
-            int GPST2BDT(SGNSSTime m_GPSTime, SGNSSTime& m_TARGNSSTime);
+            int GPST2BDT(SGNSSTime GPSTime, SGNSSTime& TARGNSSTime);
             //GUL_UC_017
-            int GPST2GLOT(SGNSSTime m_GPSTime, SGNSSTime& m_TARGNSSTime);
+            int GPST2GLOT(SGNSSTime GPSTime, SStandardTime& TARGNSSTime);
             //GUL_UC_018
-            int GPST2GST(SGNSSTime m_GPSTime, SGNSSTime& m_TARGNSSTime);
+            int GPST2GST(SGNSSTime GPSTime, SGNSSTime& TARGNSSTime);
+
+            bool TimeConvert(const double srcTime, const int srcSatType, double& destTime, const int destSatType);
+            int WeekSecToSec(SGNSSTime srcTime, time_t& TarSec);
+            int SecToWeekSec(time_t srcSec, int satType, SGNSSTime& tarTime);
+            int StandTimeToSec(SStandardTime SrcTime, time_t& tarSec);
+            int SecToStandTime(time_t srcSec, SStandardTime& tarTime);
         };
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

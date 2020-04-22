@@ -115,9 +115,10 @@ namespace sixents
 #define OMGE_GAL 7.2921151467E-5  /* earth angular velocity (rad/s) ref [7] */
 #define OMGE_CMP 7.292115E-5      /* earth angular velocity (rad/s) ref [9] */
 
-        const time_t CPU2GALT0 = 935280000;
-        const time_t CPU2GPST0 = 315964800;
-        const time_t CPU2BDT0 = 1136073600;
+        const time_t EPOCH_TO_GPST0 = 315964800;
+        const time_t EPOCH_TO_GALT0 = 935280000;
+        const time_t EPOCH_TO_BDT0 = 1136073600;
+        const time_t WEEKSEC = 604800;;
     } // end namespace GNSSUtilityLib
 } // end namespace sixents
 
