@@ -1,14 +1,14 @@
-/**@file           CGNSSCoord
- *  @brief         坐标类
- *  @details       所有坐标相关的算法
+/** @file          AppInterface
+ *  @brief         接口类
+ *  @details       提供与外部接口和内部逻辑的接口
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
  *  @note          暂无
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
-#ifndef _APP_INTERFACE_H_
-#define _APP_INTERFACE_H_
+#ifndef _CAPP_INTERFACE_H_
+#define _CAPP_INTERFACE_H_
 
 #include "../DllMain/GNSSDataStruct.h"
 

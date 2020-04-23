@@ -21,6 +21,7 @@ SOURCES += \
     GULLib/GNSSMathUtilityLib/GNSSMathInterface.cpp \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.cpp \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.cpp \
+    GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.cpp \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.cpp \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.cpp \
@@ -349,6 +350,7 @@ HEADERS += \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.h \
     GULLib/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.h \
+    GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.h \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSCommonDef.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h \

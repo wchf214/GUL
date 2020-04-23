@@ -19,6 +19,12 @@ namespace sixents
 {
     namespace GNSSUtilityLib
     {
+        /**
+         *  @class       CGNSSTime
+         *  @brief       GNSS时间类
+         *  @author      wuchuanfei@sixents.com
+         *  @note        N/A
+         */
         class CGNSSTime
         {
         public:
