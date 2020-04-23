@@ -10,190 +10,35 @@
 #ifndef _GNSS_DATA_STRUCT_H
 #define _GNSS_DATA_STRUCT_H
 
-#include <map>
-
 namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        /**
-         * @class   : SSignalValue
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : 信号数据结构体
-         * @note    : 保存一颗卫星中一个信号的数据
-         */
-        struct SSignalValue
-        {
-            //  MSM 1-7 satellite data part
-            // Signal Data
-            // DF400: GNSS 信号精确伪距观测值
-            double m_dbFinePseudoranges = 0.0;
+        // bool类型
+        using BOOL_T = bool; // 注意此类型不能用vector<BOOL>
 
-            // DF401: GNSS 信号精确相位距离数据
-            double m_dbFinePhaserange = 0.0;
+        // 有符号类型定义
+        using INT8 = signed char; // 8位整型 用来代替char
+        using INT16 = short;      // 16位整型 用来代替short
+        using INT32 = int;        // 32位整型
+        using INT64 = long long;  // 64位整型
 
-            // DF402: GNSS 相位距离锁定时间标志，提供接收机连续锁定卫星信号的时间长度。
-            unsigned char m_ui8LockTimeIndicator = 0U;
+        // 无符号类型定义
+        using CHAR = char;                 // 8位符号 char
+        using BYTE = unsigned char;        // 8位无符号整型 unsigned char 和 byte类型
+        using UINT8 = unsigned char;       // 8位无符号整型 unsigned char 和 byte类型
+        using WORD = unsigned short;       // 双字节
+        using UINT16 = unsigned short;     // 双字节 同(WORD)
+        using UINT32 = unsigned int;       // 32位无符号整型
+        using UINT64 = unsigned long long; // 64位无符号整型
 
-            // DF403: GNSS 信号CNR，提供卫星信号的载噪比，单位dB-Hz。DF403=0 表示数值未计算或不可用。
-            double m_dbSignalCnr = 0.0;
+        // 浮点类型数据定义
+        using FLOAT = float;   // 32位浮点数
+        using DOUBLE = double; // 64位浮点数
 
-            // DF404: GNSS 信号精确相位距离变化率
-            // FP means FinePhaserange
-            double m_dbFPRates = 0.0;
-
-            // DF405: 具有扩展分辨率的GNSS 信号精确伪距值
-            // ER means ExtendedResolution
-            double m_dbFinePseudorangesWithER = 0.0;
-
-            // DF406: 具有扩展分辨率的GNSS 信号精确相位距离
-            // ER means ExtendedResolution
-            double m_dbFinePhaserangeWithER = 0.0;
-
-            // DF407: 具有扩展范围和分辨率的GNSS 相位距离时间锁定标志
-            // PLTI means PhaserangeLockTimeIndicator
-            // ERAR means WithExtendedRangeAndResolution
-            unsigned short m_ui16PLTIWithERAR = 0U;
-
-            // DF408: 具有扩展分辨率的GNSS 信号信噪比
-            // WER means WithExtendedResolution
-            double m_dbSignalCnrsWER = 0.0;
-
-            // DF420: 半周模糊度指标，0=没有半周模糊度；1=半周模糊度。
-            // HCAI means HalfCycleAmbiguityIndicator
-            unsigned char m_ui8HCAI = 0U;
-
-            // DF010 : GPS L1 码标志
-            // DF010 : GPS L1 Code Indicator
-            // DF039 : GLONASS L1 码标志
-            // DF030 : GLONASS L1 Code Indicator
-            // DF016 : GPS L2 码标志
-            // DF016 : GPS L2 Code Indicator
-            // DF046 : GLONASS L2 码标志
-            // DF046 : GLONASS L2 Code Indicator
-            unsigned char m_ui8CodeMark = 0U;
-
-            // 对于标准精度电文（MSM1~MSM3），有：
-            // Pseudorange(i) = c / 1000 ×(Nms + Rough_range + Fine_Pseudorange(i))
-            // PhaseRange(i) = c / 1000 ×(Nms + Rough_range + Fine_PhaseRange(i))
-            // PhaseRangeRate(i) = Rough_PhaseRangeRate + Fine_PhaseRangeRate(i)
-            // 对于高精度电文（MSM4~MSM7），有：
-            // Pseudorange(i) = c / 1000 ×(Nms + Rough_range + Fine_Pseudorange(i))
-            // PhaseRange(i) = c / 1000 ×(Nms + Rough_range + Fine_PhaseRange(i))
-            // PhaseRangeRate(i) = Rough_PhaseRangeRate + Fine_PhaseRangeRate(i)
-            // GNSS 计算后信号精确伪距
-            double m_dbPseudoranges = 0.0;
-
-            // GNSS 计算后信号精确相位距离
-            double m_dbPhaserange = 0.0;
-
-            // GNSS 计算后信号精确相位距离变化率
-            double m_dbPhaseRangeRate = 0.0;
-        };
-
-        /**
-         * @class   : SSatelliteValue
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : 卫星数据结构体（包含信号数据）
-         * @note    : 保存观测值每颗卫星的数据
-         */
-        struct SSatelliteValue
-        {
-            // Satellite Data
-            // DF397: GNSS 卫星概略距离的整毫秒数，用于恢复某颗卫星的完整观测值。
-            unsigned char m_ui8Milliseconds = 0U;
-
-            // 扩展卫星信息
-            unsigned char m_ui8ExtendedSatInfo = 0U;
-
-            // DF398: GNSS 卫星概略距离的毫秒余数，可以1/1024ms（约300m）的精度恢复完整的GNSS概略距离
-            double m_dbModulo1Millisecond = 0.0;
-
-            // DF399: GNSS 卫星概略相位距离变化率
-            int m_i32RoughPhaseRangeRates = 0U;
-
-            // DF040: GLONASS 卫星的频率通道号。通过 DF038 和 DF040，用户无需历书就可知道卫星的频率。
-            // 注意编码时这个值需要从1020取值（1087扩展信息DF419） Glonass专用
-            // 注意Glonass编码时必须赋值, 否则编码失败
-            unsigned char m_ui8SatFrequencyChannelNumber = 255;
-
-            std::map< int, SSignalValue > m_mapSignalValues;
-        };
-
-        /**
-         * @class   : SEpochSatObs
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : 观测值数据结构体
-         * @note    : 保存观测值所有数据
-         */
-        struct SEpochSatObs
-        {
-            // MSM 1-7  head part
-            // DF002: 电文类型号,用于区分差分电文。
-            unsigned short m_ui16MsgType = 0U;
-
-            // DF003: 参考站 ID 由服务提供者确定。
-            unsigned int m_ui32GmNtiRefStationID = 0U;
-            // DF416: GLONASS 卫星导航电文和信号的星期数
-            unsigned char m_ui8DayOfWeek = 0U;
-
-            // GNSS 历元时刻：GPS DF004
-            // GNSS 历元时刻：Galileo DF248
-            // GNSS 历元时刻：Glonass DF034
-            // GNSS 历元时刻：SBAS DF004
-            // GNSS 历元时刻：QZSS DF428
-            // GNSS 历元时刻：BeiDou DF427
-            unsigned int m_ui32GnssEpochTime = 0U;
-
-            // DF005: 同步GNSS电文标志
-            // DF393: MSM 后续电文情况：1 = 还有相对给定时刻与参考站ID 的更多电文；0 = 本条电文时给定时刻与参考站ID
-            // 的最后一条。
-            unsigned char m_ui8MultiMsgBit = 0U;
-
-            // DF409: 表示测站数据期卷号（Issue Of Data
-            // Station），为保留字段，用于将MSM与今后的测站说明（接收机、天线说明等）联系起来。DF409 = 0
-            // 表示未使用本数据字段。
-            unsigned char m_ui8IODS = 0U;
-
-            // DF001: 预留数据，保留7位
-            signed char m_i8Reserved = 0U;
-
-            // DF411: 时钟校准标志，表示时钟校准的情况。
-            //  0 = 未使用时钟校准，此时，接收机钟差必须保持小于±1ms（约±300km）；
-            //  1 = 使用了时钟校准，此时，接收机钟差必须保持小于±1 微秒（约±300m）；
-            //  2 = 未知的时钟校准状态；
-            //  3 = 保留。
-            unsigned char m_ui8ClockSteeringIndicator = 0U;
-
-            // DF412: 扩展时钟标志，表示时钟校准的情况。
-            //  0 = 使用内部时钟；
-            //  1 = 使用外部时钟，状态为“锁定”；
-            //  2 = 使用外部时钟，状态为“未锁定”，表示外部时钟失效，传输的数据可能不可靠；
-            //  3 = 使用时钟状态未知。
-            unsigned char m_ui8ExternalClockIndicator = 0U;
-
-            // DF007: GPS 无弥散平滑标志
-            // DF036: GLONASS 无弥散平滑标志
-            // DF417: GNSS 平滑类型标志，1=使用非无弥散平滑；0=其他平滑类型。
-            unsigned char m_ui8GnssSmoothingIndicator = 0U;
-
-            // DF008: GPS 平滑间隔
-            // DF037: GLONASS 平滑间隔
-            // DF418: GNSS 平滑区间，指使用载波平滑伪距的时段长度。
-            unsigned char m_ui8GnssSmoothingInterval = 0U;
-
-            // DF394: 卫星掩码
-            unsigned long long m_ui64SatMask = 0U;
-
-            // DF395: 信号掩码
-            unsigned int m_ui32SignalMask = 0U;
-
-            // DF396: 单元掩码
-            unsigned long long m_ui64CellMask = 0U;
-
-            std::map< int, SSatelliteValue > m_mapSatValues;
-        };
-
+        // 指针类型
+        using PVOID = void*;       // 主要是用于CParam传输
+        using PCSTR = const char*; // C类型的字符串处理
         /**
          * @class   : SEphemeris
          * @author  : wuchuanfei@sixents.com
@@ -520,45 +365,64 @@ namespace sixents
             unsigned char m_ui8Reserved = 0U;
         };
 
+        /**
+         *  @class       SStandardTime
+         *  @brief       年月日时分秒的时间结构
+         *  @author      wuchuanfei@sixents.com
+         *  @note        秒精确到毫秒
+         */
         struct SStandardTime
         {
-            int m_year;
-            int m_month;
-            int m_day;
-            int m_hour;
-            int m_minute;
-            double m_second;
+            INT32 m_year;    // 年
+            INT32 m_month;   // 月
+            INT32 m_day;     // 日
+            INT32 m_hour;    // 时
+            INT32 m_minute;  // 分
+            DOUBLE m_second; // 秒，精确度：3位小数（毫秒级）
         };
 
+        /**
+         *  @class       SGNSSTime
+         *  @brief       周内秒的时间结构
+         *  @author      wuchuanfei@sixents.com
+         *  @note        秒精确到毫秒，目前仅支持GPS/BD/Galileo三种卫星系统
+         */
         struct SGNSSTime
         {
-            int m_week;
-            double m_secAndMsec;
-            int m_satType;
+            INT32 m_week;        // 周
+            DOUBLE m_secAndMsec; // 秒，精确度：3位小数（毫秒级）
+            INT32 m_timeType;    // GPS、BD、Galileo
         };
 
         // 大地坐标
         struct SBLH
         {
-            double m_lon;
-            double m_lat;
-            double m_height;
+            DOUBLE m_lon;    // 经度，精确度：11位小数
+            DOUBLE m_lat;    // 纬度，精确度：11位小数
+            DOUBLE m_height; // 高程，精确度：9位小数
         };
 
         // 空间直角坐标
         struct SXYZ
         {
-            double m_x;
-            double m_y;
-            double m_z;
+            DOUBLE m_x; // x轴，精确度：9位小数
+            DOUBLE m_y; // x轴，精确度：9位小数
+            DOUBLE m_z; // x轴，精确度：9位小数
         };
 
         // 站心坐标
         struct SENU
         {
-            double m_east;
-            double m_north;
-            double m_up;
+            DOUBLE m_east;  // 东，精确度：9位小数
+            DOUBLE m_north; // 北，精确度：9位小数
+            DOUBLE m_up;    // 天，精确度：9位小数
+        };
+
+        // 坐标系统结构定义
+        struct SCoordData
+        {
+            DOUBLE a; // 地球长半轴，精确度：1位小数
+            DOUBLE f; // 地球扁率，分母精确度：9位小数
         };
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

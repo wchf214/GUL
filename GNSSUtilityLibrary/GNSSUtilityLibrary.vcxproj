@@ -145,6 +145,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Angle\CGNSSAngle.h" />
+    <ClInclude Include="AppIFs\AppInterface.h" />
     <ClInclude Include="Coordinate\CGNSSCoord.h" />
     <ClInclude Include="DllMain\GNSSCommonDef.h" />
     <ClInclude Include="DllMain\GNSSDataStruct.h" />
@@ -154,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Angle\CGNSSAngle.cpp" />
+    <ClCompile Include="AppIFs\AppInterface.cpp" />
     <ClCompile Include="Coordinate\CGNSSCoord.cpp" />
     <ClCompile Include="DllMain\GNSSUtilityInterface.cpp" />
     <ClCompile Include="Ephemeris\CGNSSEphemeris.cpp" />

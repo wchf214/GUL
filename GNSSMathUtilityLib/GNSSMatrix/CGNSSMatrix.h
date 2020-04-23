@@ -1,11 +1,11 @@
-/**@file             ÎÄ¼şÃû
- *  @brief          ÏîÄ¿¼òÊö
- *  @details       ÏîÄ¿Ï¸½Ú
- *  @author       ×÷Õß
- *  @date          ÈÕÆÚ
- *  @version      °æ±¾
- *  @note          ×¢½â
- *  @copyright   °æÈ¨
+/**@file             æ–‡ä»¶å
+ *  @brief          é¡¹ç›®ç®€è¿°
+ *  @details       é¡¹ç›®ç»†èŠ‚
+ *  @author       ä½œè€…
+ *  @date          æ—¥æœŸ
+ *  @version      ç‰ˆæœ¬
+ *  @note          æ³¨è§£
+ *  @copyright   ç‰ˆæƒ
  */
 
 #ifndef _GNSS_MATRIX_H
@@ -17,7 +17,7 @@ namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
-        // ¾ØÕó½á¹¹
+        // çŸ©é˜µç»“æ„
         class CGNSSMatrix
         {
         public:
@@ -29,12 +29,12 @@ namespace sixents
             void SetMatrix(const SGNSSMatrix& matrix);
             SGNSSMatrix GetMatrix();
 
-            // ¼ÆËã·½·¨
-            int MatrixTransposition(SGNSSMatrix& matrix); // ×ªÖÃ
-            int MatrixInverse(SGNSSMatrix& matrix);       // ÇóÄæ
-            CGNSSMatrix operator+(CGNSSMatrix& matrix) const; // ¼Ó·¨
-            CGNSSMatrix operator-(CGNSSMatrix& matrix); // ¼õ·¨
-            CGNSSMatrix operator*(CGNSSMatrix& matrix); // ³Ë·¨
+            // è®¡ç®—æ–¹æ³•
+            int MatrixTransposition(SGNSSMatrix& matrix); // è½¬ç½®
+            int MatrixInverse(SGNSSMatrix& matrix);       // æ±‚é€†
+            CGNSSMatrix operator+(CGNSSMatrix& matrix) const; // åŠ æ³•
+            CGNSSMatrix operator-(CGNSSMatrix& matrix); // å‡æ³•
+            CGNSSMatrix operator*(CGNSSMatrix& matrix); // ä¹˜æ³•
 
         private:
             SGNSSMatrix m_matrix;

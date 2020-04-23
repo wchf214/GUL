@@ -4,12 +4,12 @@ namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
-        // 矩阵结构
+        // 鐭╅樀缁撴瀯
         struct SGNSSMatrix
         {
-            double** matrixNum;    // 二维数组用于存放矩阵数据
-            int row;               // 行数
-            int col;               // 列数
+            double** matrixNum;    // 浜岀淮鏁扮粍鐢ㄤ簬瀛樻斁鐭╅樀鏁版嵁
+            int row;               // 琛屾暟
+            int col;               // 鍒楁暟
         };
     }  // end namespace GNSSMathUtilityLib
 }  // end namespace sixents

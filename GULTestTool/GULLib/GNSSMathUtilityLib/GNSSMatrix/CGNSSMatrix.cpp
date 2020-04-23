@@ -1,4 +1,4 @@
-﻿#include "CGNSSMatrix.h"
+#include "CGNSSMatrix.h"
 
 #include <iostream>
 
@@ -66,38 +66,38 @@ namespace sixents
         CGNSSMatrix CGNSSMatrix::operator*(CGNSSMatrix& matrix) // 乘法
         {
             //分配被乘数
-            Eigen::MatrixXd mat1(this->GetMatrix().row, this->GetMatrix().col);
+            Eigen::MatrixXd mat1(m_matrix.row, m_matrix.col);
             //分配乘数
             Eigen::MatrixXd mat2(matrix.GetMatrix().row, matrix.GetMatrix().col);
             //分配结果
-            Eigen::MatrixXd matall(this->GetMatrix().row, matrix.GetMatrix().col);
-            if (this->GetMatrix().col != matrix.GetMatrix().row)
+            Eigen::MatrixXd matResult(m_matrix.row, matrix.GetMatrix().col);
+            if (m_matrix.col != matrix.GetMatrix().row)
             {
                 return matrix;
-            }
-
-            for (int i = 0; i < matrix.GetMatrix().row; i++)
-            {
-                for (int j = 0; j < matrix.GetMatrix().col; j++)
-                {
-                    mat1(i, j) = m_matrix.matrixNum[i][j];
-                }
             }
 
             for (int i = 0; i < m_matrix.row; i++)
             {
                 for (int j = 0; j < m_matrix.col; j++)
                 {
+                    mat1(i, j) = m_matrix.matrixNum[i][j];
+                }
+            }
+
+            for (int i = 0; i < matrix.GetMatrix().row; i++)
+            {
+                for (int j = 0; j < matrix.GetMatrix().col; j++)
+                {
                     mat2(i, j) = matrix.GetMatrix().matrixNum[i][j];
                 }
             }
 
-            matall = mat1 * mat2;
-            for (int i = 0; i < 3; i++)
+            matResult = mat1 * mat2;
+            for (int i = 0; i < m_matrix.row; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    std::cout << matall(i, j) << std::endl;
+                    std::cout << matResult(i, j) << std::endl;
                 }
             }
             return matrix;

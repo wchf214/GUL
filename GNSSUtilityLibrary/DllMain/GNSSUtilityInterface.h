@@ -1,16 +1,14 @@
 /**@file           CGNSSCoord
- *  @brief         ×ø±êÀà
- *  @details       ËùÓĞ×ø±êÏà¹ØµÄËã·¨
+ *  @brief         åæ ‡ç±»
+ *  @details       æ‰€æœ‰åæ ‡ç›¸å…³çš„ç®—æ³•
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
- *  @note          ÔİÎŞ
+ *  @note          æš‚æ— 
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 #ifndef _GNSS_UTILITY_INTERFACE_H_
 #define _GNSS_UTILITY_INTERFACE_H_
-
-#include <string>
 
 #include "GNSSDataStruct.h"
 
@@ -35,176 +33,500 @@ namespace sixents
 #ifdef __cplusplus
         extern "C" {
 #endif
-            // ¶ÔÍâ½Ó¿ÚÉùÃ÷
-            // Ê±¼äÏà¹Ø½Ó¿Ú
-            // Ê±¼ä½á¹¹
-            // ±ê×¼¸ñÊ½£ºÄê-ÔÂ-ÈÕ Ê±£º·Ö£ºÃë.ºÁÃë
-            // Ê¾Àı£º1111-11-11 11:11:11.111
+        // å¯¹å¤–æ¥å£å£°æ˜
+        // æ—¶é—´ç›¸å…³æ¥å£
+        // æ—¶é—´ç»“æ„
+        // æ ‡å‡†æ ¼å¼ï¼šå¹´-æœˆ-æ—¥ æ—¶ï¼šåˆ†ï¼šç§’.æ¯«ç§’
+        // ç¤ºä¾‹ï¼š1111-11-11 11:11:11.111
 
-            // ¸ñÊ½»¯ÖÜÄÚÃëÊ±¼ä ÒÔÄêÔÂÈÕÊ±·ÖÃë¸ñÊ½Êä³ö
-            // week: ÊäÈë²ÎÊı£¬ÖÜ
-            // sec: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // formatString: Êä³ö²ÎÊı£¬Ê±¼ä¸ñÊ½»¯ºó×Ö·û´®
-            // len: Êä³ö²ÎÊı£¬formatStringµÄ³¤¶È
-            DLL_API int STD_CALL FormatWeekSecTime(const int week, const double sec, const int satType, char* formatString, int& len);
+        /**
+         * @brief           æ ¼å¼åŒ–å‘¨å†…ç§’æ—¶é—´ ä»¥å¹´æœˆæ—¥æ—¶åˆ†ç§’æ ¼å¼è¾“å‡º
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       week: å‘¨
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      formatString: æ—¶é—´æ ¼å¼åŒ–åå­—ç¬¦ä¸²
+                            len: formatStringçš„é•¿åº¦
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL
+        FormatWeekSecTime(const int week, const double sec, const int timeType, char* formatString, int& len);
 
-            // ¸ñÊ½»¯±ê×¼Ê±¼ä
-            // year: ÊäÈë²ÎÊı£¬Äê
-            // month: ÊäÈë²ÎÊı£¬ÔÂ
-            // day: ÊäÈë²ÎÊı£¬ÈÕ
-            // hour: ÊäÈë²ÎÊı£¬Ê±
-            // minute: ÊäÈë²ÎÊı£¬·Ö
-            // second: ÊäÈë²ÎÊı£¬Ãë
-            // formatString: Êä³ö²ÎÊı£¬Ê±¼ä¸ñÊ½»¯ºó×Ö·û´®
-            // len: Êä³ö²ÎÊı£¬formatStringµÄ³¤¶È
-            DLL_API int STD_CALL FormatStandardTime(const int year, const int month, const int day,
-                const int hour, const int minute, const double second,
-                char* formatString, int& len);
+        /**
+         * @brief           æ ¼å¼åŒ–æ ‡å‡†æ—¶é—´ ä»¥å¹´æœˆæ—¥æ—¶åˆ†ç§’æ ¼å¼è¾“å‡º
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      formatString: æ—¶é—´æ ¼å¼åŒ–åå­—ç¬¦ä¸²
+                            len: formatStringçš„é•¿åº¦
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL FormatStandardTime(const int year,
+                                                const int month,
+                                                const int day,
+                                                const int hour,
+                                                const int minute,
+                                                const double second,
+                                                char* formatString,
+                                                int& len);
 
-            // GNSSÊ±¼äÀàĞÍÓëUTCÊ±¼ä»¥×ª
-            // GNSSÊ±¼ä×ªUTCÊ±¼ä
-            // week: ÊäÈë²ÎÊı£¬ÖÜ
-            // sec: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // year: Êä³ö²ÎÊı£¬Äê
-            // month: Êä³ö²ÎÊı£¬ÔÂ
-            // day: Êä³ö²ÎÊı£¬ÈÕ
-            // hour: Êä³ö²ÎÊı£¬Ê±
-            // minute: Êä³ö²ÎÊı£¬·Ö
-            // second: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL GNSSTimeToUTCTime(const int week, const double sec, const int satType,
-                int& year, int& month, int& day, int& hour, int& minute, double& second);
+        /**
+         * @brief           UTCæ—¶é—´è½¬Glonassæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       utcYear: å¹´
+                            utcMonth: æœˆ
+                            utcDay: æ—¥
+                            utcHour: æ—¶
+                            utcMinute: åˆ†
+                            utcSecond: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      gloYear: å¹´
+                            gloMonth: æœˆ
+                            gloDay: æ—¥
+                            gloHour: æ—¶
+                            gloMinute: åˆ†
+                            gloSecond: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.20æ–°å¢
+         */
+        DLL_API int STD_CALL UTCTimeToGlonassTime(const int utcYear,
+                                                  const int utcMonth,
+                                                  const int utcDay,
+                                                  const int utcHour,
+                                                  const int utcMinute,
+                                                  const double utcSecond,
+                                                  int& gloYear,
+                                                  int& gloMonth,
+                                                  int& gloDay,
+                                                  int& gloHour,
+                                                  int& gloMinute,
+                                                  double& gloSecond);
 
-            // GNSSÊ±¼ä×ªUTCÊ±¼ä£¬ÒÔÃëÎªµ¥Î» 2020.04.17ĞÂÔö
-            // week: ÊäÈë²ÎÊı£¬ÖÜ
-            // sec: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // sec: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL GNSSTimeToUTCSecTime(const int week, const double second, const int satType, double& sec);
+        /**
+         * @brief           Glonassæ—¶é—´è½¬UTCæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       gloYear: å¹´
+                            gloMonth: æœˆ
+                            gloDay: æ—¥
+                            gloHour: æ—¶
+                            gloMinute: åˆ†
+                            gloSecond: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      utcYear: å¹´
+                            utcMonth: æœˆ
+                            utcDay: æ—¥
+                            utcHour: æ—¶
+                            utcMinute: åˆ†
+                            utcSecond: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.20æ–°å¢
+         */
+        DLL_API int STD_CALL GlonassTimeToUTCTime(const int gloYear,
+                                                  const int gloMonth,
+                                                  const int gloDay,
+                                                  const int gloHour,
+                                                  const int gloMinute,
+                                                  const double gloSecond,
+                                                  int& utcYear,
+                                                  int& utcMonth,
+                                                  int& utcDay,
+                                                  int& utcHour,
+                                                  int& utcMinute,
+                                                  double& utcSecond);
 
-            // UTCÊ±¼ä×ªGNSSÊ±¼ä
-            // year: ÊäÈë²ÎÊı£¬Äê
-            // month: ÊäÈë²ÎÊı£¬ÔÂ
-            // day: ÊäÈë²ÎÊı£¬ÈÕ
-            // hour: ÊäÈë²ÎÊı£¬Ê±
-            // minute: ÊäÈë²ÎÊı£¬·Ö
-            // second: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // week: Êä³ö²ÎÊı£¬ÖÜ
-            // sec: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL UTCTimeToGNSSTime(const int year, const int month, const int day,
-                const int hour, const int minute, const double second, const int satType,
-                int& week, double& sec);
+        // GNSSæ—¶é—´ç±»å‹ä¸UTCæ—¶é—´äº’è½¬
+        /**
+         * @brief           GNSSæ—¶é—´è½¬UTCæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       week: å‘¨
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL GNSSTimeToUTCTime(const int week,
+                                               const double sec,
+                                               const int timeType,
+                                               int& year,
+                                               int& month,
+                                               int& day,
+                                               int& hour,
+                                               int& minute,
+                                               double& second);
 
-            // UTCÊ±¼ä×ªGNSSÊ±¼ä£¬ÒÔÃëÎªµ¥Î»
-            // year: ÊäÈë²ÎÊı£¬Äê
-            // month: ÊäÈë²ÎÊı£¬ÔÂ
-            // day: ÊäÈë²ÎÊı£¬ÈÕ
-            // hour: ÊäÈë²ÎÊı£¬Ê±
-            // minute: ÊäÈë²ÎÊı£¬·Ö
-            // second: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // sec: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year, const int month, const int day,
-                const int hour, const int minute, const double second, const int satType, double& sec);
+        /**
+         * @brief           GNSSæ—¶é—´è½¬UTCæ—¶é—´ï¼Œä»¥å°æ•°ç§’è¡¨ç¤ºè½¬æ¢åçš„UTCæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       week: å‘¨
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.17æ–°å¢
+         */
+        DLL_API int STD_CALL GNSSTimeToUTCSecTime(const int week, const double second, const int timeType, double& sec);
 
-            // BD¡¢Glonass¡¢GalileoÊ±¼äÀàĞÍÓëGPSÊ±¼ä»¥×ª 2020.04.17ĞÂÔö
-            DLL_API int STD_CALL GNSSTimeConvert(const int srcWeek, const double srcSec, const int srcSatType,
-                int& destWeek, double& destSec, const int destSatType);
+        /**
+         * @brief           UTCæ—¶é—´è½¬GNSSæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      week: å‘¨
+                            sec: ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL UTCTimeToGNSSTime(const int year,
+                                               const int month,
+                                               const int day,
+                                               const int hour,
+                                               const int minute,
+                                               const double second,
+                                               const int timeType,
+                                               int& week,
+                                               double& sec);
 
-            // ÖÜÄÚÃë×ªÃë  2020.04.17ĞÂÔö
-            // week: ÊäÈë²ÎÊı£¬ÖÜ
-            // sec: ÊäÈë²ÎÊı£¬Ãë
-            // satType: ÊäÈë²ÎÊı£¬ÎÀĞÇÀàĞÍ
-            // sec: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int satType, double& sec);
+        /**
+         * @brief           UTCæ—¶é—´è½¬GNSSæ—¶é—´ï¼Œä»¥å°æ•°ç§’è¡¨ç¤ºè½¬æ¢åçš„GNSSæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.17æ–°å¢
+         */
+        DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year,
+                                                  const int month,
+                                                  const int day,
+                                                  const int hour,
+                                                  const int minute,
+                                                  const double second,
+                                                  const int timeType,
+                                                  double& sec);
 
-            // GlonassÓëGPS»¥×ª  2020.04.20ĞÂÔö
-            DLL_API int STD_CALL UTCTimeToGlonassTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& gyear, int& gmonth, int& gday, int& ghour, int& gminute, double& gsec);
-            DLL_API int STD_CALL GlonassTimeToUTCTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& utcYear, int& utcMonth, int& utcDay, int& utcHour, int& utcMinute, double& utcSec);
-            DLL_API int STD_CALL GPSTimeToGlonassTime(const int week, const double second, int& gyear, int& gmonth, int& gday, int& ghour, int& gminute, double& gsec);
-            DLL_API int STD_CALL GlonassTimeToGPSTime(const int year, const int month, const int day, const int hour, const int minute, const double second, int& week, double& sec);
+        /**
+         * @brief           BDã€Glonassã€Galileoæ—¶é—´ç±»å‹ä¸GPSæ—¶é—´äº’è½¬
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       srcWeek: æºGNSSæ—¶é—´çš„å‘¨
+                            srcSec: æºGNSSæ—¶é—´çš„ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            srcTimeType: æºGNSSæ—¶é—´çš„æ—¶é—´ç±»å‹
+                            destTimeType: ç›®æ ‡GNSSæ—¶é—´çš„æ—¶é—´ç±»å‹
+         * @param[out]      destWeek: ç›®æ ‡GNSSæ—¶é—´çš„å‘¨
+                            destSec: ç›®æ ‡GNSSæ—¶é—´çš„ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.17æ–°å¢
+         */
+        DLL_API int STD_CALL GNSSTimeConvert(const int srcWeek,
+                                             const double srcSec,
+                                             const int srcTimeType,
+                                             int& destWeek,
+                                             double& destSec,
+                                             const int destTimeType);
 
-            // ×ø±êÏà¹Ø½Ó¿Ú
-            // ×ø±ê½á¹¹
-            // ¿Õ¼äÖ±½Ç×ø±ê¸ñÊ½Îªx,y,z
-            // Õ¾ĞÄ×ø±ê¸ñÊ½Îªeast,north,up
-            // ´óµØ×ø±ê¸ñÊ½Îªlat,lon,height
-            // ¿Õ¼äÖ±½Ç×ø±ê×ª´óµØ×ø±ê
-            // x,y,z: ÊäÈë²ÎÊı£¬¿Õ¼äÖ±½Ç×ø±ê
-            // lon,lat,height: Êä³ö²ÎÊı£¬´óµØ×ø±ê
-            DLL_API int STD_CALL XYZ2BLH(const double x, const double y, const double z,
-                double& lon, double& lat, double& height);
-            // ´óµØ×ø±ê×ª¿Õ¼äÖ±½Ç×ø±ê
-            // lon,lat,height: ÊäÈë²ÎÊı£¬¿Õ¼äÖ±½Ç×ø±ê
-            // x,y,z: Êä³ö²ÎÊı£¬´óµØ×ø±ê
-            DLL_API int STD_CALL BLH2XYZ(const double lon, const double lat, const double height,
-                double& x, double& y, double& z);
-            // ¿Õ¼äÖ±½Ç×ø±ê×ªÕ¾ĞÄ×ø±ê
-            // curX,curY,curZ: ÊäÈë²ÎÊı£¬µ±Ç°Õ¾µÄ¿Õ¼äÖ±½Ç×ø±ê
-            // refX,refY,refZ: ÊäÈë²ÎÊı£¬²Î¿¼Õ¾¿Õ¼äÖ±½Ç×ø±ê
-            // east,north,up: Êä³ö²ÎÊı£¬µ±Ç°Õ¾µÄÕ¾ĞÄ½Ç×ø±ê
-            DLL_API int STD_CALL XYZ2ENU(const double curX, const double curY, const double curZ,
-                const double refX, const double refY, const double refZ,
-                double& east, double& north, double& up);
-            // Õ¾ĞÄ×ø±ê×ª¿Õ¼äÖ±½Ç×ø±ê
-            // east,north,up: ÊäÈë²ÎÊı£¬µ±Ç°Õ¾µÄÕ¾ĞÄ½Ç×ø±ê
-            // refX,refY,refZ: ÊäÈë²ÎÊı£¬²Î¿¼Õ¾¿Õ¼äÖ±½Ç×ø±ê
-            // curX,curY,curZ: Êä³ö²ÎÊı£¬µ±Ç°Õ¾µÄ¿Õ¼äÖ±½Ç×ø±ê
-            DLL_API int STD_CALL ENU2XYZ(const double east, const double north, const double up,
-                const double refX, const double refY, const double refZ,
-                double& curX, double& curY, double& curZ);
+        /**
+         * @brief           å‘¨å†…ç§’è½¬ç§’
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       week: å‘¨
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            timeType: æ—¶é—´ç±»å‹
+         * @param[out]      sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.17æ–°å¢
+         */
+        DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int timeType, double& sec);
 
-            // ĞÇÀúÏà¹Ø½Ó¿Ú 2020.04.17ĞŞ¸Ä
-            // ¼ÆËãÖÓ²î
-            // ephObj: ÊäÈë²ÎÊı£¬ĞÇÀúÊı¾İ
-            // clockVal: ÊäÈë/Êä³ö²ÎÊı£¬¼ÆËã³öÀ´µÄÖÓ²îÖµ
-            DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec, const SGlonassEphemeris& ephObj, double& clockVal);
-            DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
-            // ¼ÆËãÎ»ÖÃ
-            // ephObj: ÊäÈë²ÎÊı£¬ĞÇÀúÊı¾İ
-            // x,y,z: Êä³ö²ÎÊı£¬¼ÆËã³öÀ´µÄÎ»ÖÃÖµ
-            DLL_API int STD_CALL CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
-            DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z);
+        /**
+         * @brief           GPSæ—¶é—´è½¬Glonassæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       week: å‘¨
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.20æ–°å¢
+         */
+        DLL_API int STD_CALL GPSTimeToGlonassTime(
+            const int week, const double second, int& year, int& month, int& day, int& hour, int& minute, double& sec);
 
-            // ½Ç¶ÈÏà¹Ø½Ó¿Ú
-            // ¸ñÊ½»¯½Ç¶È
-            // degree: ÊäÈë²ÎÊı£¬Ğ¡ÊıĞÎÊ½µÄ¶È
-            // formatType: ÊäÈë²ÎÊı£¬trueÊ±£¬¸ñÊ½»¯Îª¶È£¬falseÊ±¸ñÊ½»¯Îª¶È·ÖÃë;Ä¬ÈÏÎªtrue
-            // formatString: Êä³ö²ÎÊı£¬¸ñÊ½»¯ºóµÄ×Ö·û´®
-            DLL_API int STD_CALL FormatAngleByDegree(const double degree, char* formatString, const bool formatType = true);
-            // ¸ñÊ½»¯½Ç¶È
-            // degree: ÊäÈë²ÎÊı£¬½Ç
-            // minute: ÊäÈë²ÎÊı£¬·Ö
-            // sec: ÊäÈë²ÎÊı£¬Ãë
-            // formatType: ÊäÈë²ÎÊı£¬trueÊ±£¬¸ñÊ½»¯Îª¶È£¬falseÊ±¸ñÊ½»¯Îª¶È·ÖÃë;Ä¬ÈÏÎªtrue
-            // formatString: Êä³ö²ÎÊı£¬¸ñÊ½»¯ºóµÄ×Ö·û´®
-            DLL_API int STD_CALL FormatAngleByDMS(const int degree, const int minute, const double sec,
-                char* formatString, const bool formatType = true);
-            // ¶È×ª»¡¶È
-            // degree: ÊäÈë²ÎÊı£¬¶È
-            // radian: Êä³ö²ÎÊı£¬»¡¶È
-            DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
-            // degree: ÊäÈë²ÎÊı£¬¶È
-            // minute: ÊäÈë²ÎÊı£¬¶È
-            // sec: ÊäÈë²ÎÊı£¬¶È
-            // radian: Êä³ö²ÎÊı£¬»¡¶È
-            DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
-            // »¡¶È×ª¶È
-            // radian: ÊäÈë²ÎÊı£¬»¡¶È
-            // degree: Êä³ö²ÎÊı£¬¶È
-            DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
-            // radian: ÊäÈë²ÎÊı£¬»¡¶È
-            // degree: Êä³ö²ÎÊı£¬¶È
-            // minute: Êä³ö²ÎÊı£¬·Ö
-            // sec: Êä³ö²ÎÊı£¬Ãë
-            DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
+        /**
+         * @brief           Glonassæ—¶é—´è½¬GPSæ—¶é—´
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       year: å¹´
+                            month: æœˆ
+                            day: æ—¥
+                            hour: æ—¶
+                            minute: åˆ†
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      week: å‘¨
+                            second: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            2020.04.20æ–°å¢
+         */
+        DLL_API int STD_CALL GlonassTimeToGPSTime(const int year,
+                                                  const int month,
+                                                  const int day,
+                                                  const int hour,
+                                                  const int minute,
+                                                  const double second,
+                                                  int& week,
+                                                  double& sec);
+
+        // åæ ‡ç›¸å…³æ¥å£
+        // åæ ‡ç»“æ„
+        // ç©ºé—´ç›´è§’åæ ‡æ ¼å¼ä¸ºx,y,z
+        // ç«™å¿ƒåæ ‡æ ¼å¼ä¸ºeast,north,up
+        // å¤§åœ°åæ ‡æ ¼å¼ä¸ºlat,lon,height
+
+        /**
+         * @brief           ç©ºé—´ç›´è§’åæ ‡è½¬å¤§åœ°åæ ‡
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       x,y,z: ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      lon: ç»åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å11ä½
+                            lat: çº¬åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å11ä½
+                            height: é«˜ç¨‹ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL
+        XYZ2BLH(const double x, const double y, const double z, double& lon, double& lat, double& height);
+
+        /**
+         * @brief           å¤§åœ°åæ ‡è½¬ç©ºé—´ç›´è§’åæ ‡
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       lon: ç»åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å11ä½
+                            lat: çº¬åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å11ä½
+                            height: é«˜ç¨‹ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      x,y,z: ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL
+        BLH2XYZ(const double lon, const double lat, const double height, double& x, double& y, double& z);
+
+        /**
+         * @brief           ç©ºé—´ç›´è§’åæ ‡è½¬ç«™å¿ƒåæ ‡
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       curX,curY,curZ: å½“å‰ç«™çš„ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+                            refX,refY,refZ: å‚è€ƒç«™ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      east,north,up: å½“å‰ç«™çš„ç«™å¿ƒåæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL XYZ2ENU(const double curX,
+                                     const double curY,
+                                     const double curZ,
+                                     const double refX,
+                                     const double refY,
+                                     const double refZ,
+                                     double& east,
+                                     double& north,
+                                     double& up);
+
+        // ç«™å¿ƒåæ ‡è½¬ç©ºé—´ç›´è§’åæ ‡
+        /**
+         * @brief           ç©ºé—´ç›´è§’åæ ‡è½¬ç«™å¿ƒåæ ‡
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       east,north,up: å½“å‰ç«™çš„ç«™å¿ƒåæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+                            refX,refY,refZ: å‚è€ƒç«™ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      curX,curY,curZ: å½“å‰ç«™çš„ç©ºé—´ç›´è§’åæ ‡ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL ENU2XYZ(const double east,
+                                     const double north,
+                                     const double up,
+                                     const double refX,
+                                     const double refY,
+                                     const double refZ,
+                                     double& curX,
+                                     double& curY,
+                                     double& curZ);
+
+        // æ˜Ÿå†ç›¸å…³æ¥å£ 2020.04.17ä¿®æ”¹
+        // è®¡ç®—é’Ÿå·®
+        // ephObj: è¾“å…¥å‚æ•°ï¼Œæ˜Ÿå†æ•°æ®
+        // clockVal: è¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œè®¡ç®—å‡ºæ¥çš„é’Ÿå·®å€¼
+        // ç«™å¿ƒåæ ‡è½¬ç©ºé—´ç›´è§’åæ ‡
+        /**
+         * @brief           è®¡ç®—Glonassé’Ÿå·®
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       sec: æŒ‡å®šæ—¶é—´ï¼Œç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            ephObj: Glonassæ˜Ÿå†æ•°æ®
+         * @param[out]      clockVal: è®¡ç®—å‡ºæ¥çš„é’Ÿå·®å€¼ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec,
+                                                    const SGlonassEphemeris& ephObj,
+                                                    double& clockVal);
+
+        /**
+         * @brief           è®¡ç®—é’Ÿå·®
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       sec: æŒ‡å®šæ—¶é—´ï¼Œç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            ephObj: æ˜Ÿå†æ•°æ®
+         * @param[out]      clockVal: è®¡ç®—å‡ºæ¥çš„é’Ÿå·®å€¼ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+
+        /**
+         * @brief           è®¡ç®—Glonassä½ç½®
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       sec: æŒ‡å®šæ—¶é—´ï¼Œç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            ephObj: Glonassæ˜Ÿå†æ•°æ®
+         * @param[out]      x,y,z: è®¡ç®—å‡ºæ¥çš„ç©ºé—´ä½ç½®å€¼ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL
+        CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
+
+        /**
+         * @brief           è®¡ç®—ä½ç½®
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       sec: æŒ‡å®šæ—¶é—´ï¼Œç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            ephObj: æ˜Ÿå†æ•°æ®
+         * @param[out]      x,y,z: è®¡ç®—å‡ºæ¥çš„ç©ºé—´ä½ç½®å€¼ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z);
+
+        // è§’åº¦ç›¸å…³æ¥å£
+        /**
+         * @brief           å°†å°æ•°å½¢å¼çš„è§’åº¦è¿›è¡Œæ ¼å¼åŒ–
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       degree: å°æ•°å½¢å¼çš„åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+                            formatType: æ ¼å¼åŒ–ç±»å‹ï¼›trueæ—¶ï¼Œæ ¼å¼åŒ–ä¸ºåº¦ï¼Œfalseæ—¶æ ¼å¼åŒ–ä¸ºåº¦åˆ†ç§’;é»˜è®¤ä¸ºtrue
+         * @param[out]      formatString: æ ¼å¼åŒ–åçš„å­—ç¬¦ä¸²
+                            len: formatStringçš„é•¿åº¦
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL FormatAngleByDegree(const double degree,
+                                                 char* formatString,
+                                                 int& len,
+                                                 const bool formatType = true);
+
+        /**
+         * @brief           å°†åº¦åˆ†ç§’å½¢å¼çš„è§’åº¦æ ¼å¼åŒ–
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       degree: åº¦
+                            minute: åˆ†
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+                            formatType: æ ¼å¼åŒ–ç±»å‹ï¼›trueæ—¶ï¼Œæ ¼å¼åŒ–ä¸ºåº¦ï¼Œfalseæ—¶æ ¼å¼åŒ–ä¸ºåº¦åˆ†ç§’;é»˜è®¤ä¸ºtrue
+         * @param[out]      formatString: è¾“å‡ºå‚æ•°ï¼Œæ ¼å¼åŒ–åçš„å­—ç¬¦ä¸²
+                            len: formatStringçš„é•¿åº¦
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL FormatAngleByDMS(const int degree,
+                                              const int minute,
+                                              const double sec,
+                                              char* formatString,
+                                              int& len,
+                                              const bool formatType = true);
+
+        /**
+         * @brief           åº¦è½¬å¼§åº¦
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       degree: å°æ•°å½¢å¼çš„åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      radian: å¼§åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
+
+        /**
+         * @brief           åº¦è½¬å¼§åº¦
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       degree: åº¦
+                            minute: åˆ†
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @param[out]      radian: å¼§åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
+
+        /**
+         * @brief           å¼§åº¦è½¬åº¦
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       radian: å¼§åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      degree: å°æ•°å½¢å¼çš„åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
+
+        /**
+         * @brief           å¼§åº¦è½¬åº¦
+         * @author          wuchuanfei@sixents.com
+         * @param[in]       radian: å¼§åº¦ï¼Œç²¾ç¡®åˆ°å°æ•°ç‚¹å9ä½
+         * @param[out]      degree: åº¦
+                            minute: åˆ†
+                            sec: ç§’ï¼Œç²¾ç¡®åˆ°æ¯«ç§’
+         * @exception       N/A
+         * @return          å‡½æ•°æ‰§è¡Œæ˜¯å¦æˆåŠŸ
+         * @note            N/A
+         */
+        DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
 
 #ifdef __cplusplus
         } // end extern "C"
 #endif
-    }  // end namespace GNSSUtilityLib
-}  // end namespace sixents
+    } // end namespace GNSSUtilityLib
+} // end namespace sixents
 
 #endif

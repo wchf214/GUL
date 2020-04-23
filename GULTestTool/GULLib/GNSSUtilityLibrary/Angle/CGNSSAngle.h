@@ -12,6 +12,8 @@
 #define _GNSS_ANGLE_H
 #include <string>
 
+#include "../DllMain/GNSSDataStruct.h"
+
 namespace sixents
 {
     namespace GNSSUtilityLib
@@ -22,38 +24,38 @@ namespace sixents
             // if angleType is true, angleVal is degree value
             // else angleVal is radian value
             // default angleType is true
-            explicit CGNSSAngle(const double angleVal, const bool angleType = true);
+            explicit CGNSSAngle(const DOUBLE angleVal, const BOOL_T angleType = true);
             CGNSSAngle(const CGNSSAngle& angle);
-            CGNSSAngle(const int degree, const int minute, const double second);
+            CGNSSAngle(const INT32 degree, const INT32 minute, const DOUBLE second);
             ~CGNSSAngle();
 
-            void SetDeg(const double degreeVal);
-            double GetDeg();
+            void SetDeg(const DOUBLE degreeVal);
+            DOUBLE GetDeg();
 
-            void SetRad(const double radVal);
-            double GetRad();
+            void SetRad(const DOUBLE radVal);
+            DOUBLE GetRad();
 
-            int GetLength(const bool formatType);
+            INT32 GetLength(const BOOL_T formatType);
             // format angle to string
             // if formatType is true, angleString:dd.ssssss°
             // else angleString:dd°mm′ss.sss″
-            int ToDegString(char* angleString, int& len, const bool formatType);
+            INT32 ToDegString(CHAR* angleString, INT32& len, const BOOL_T formatType);
 
             // degree to radian
             // GUL_UC_026
-            int DegToRad(double degree, double& radian);
+            INT32 DegToRad(DOUBLE degree, DOUBLE& radian);
             // radian to degree
             // GUL_UC_027
-            int RadToDeg(double radian, double& degree);
+            INT32 RadToDeg(DOUBLE radian, DOUBLE& degree);
             // transfrom between two degree form
-            int DegToDMS(double Degree, int& degree, int& minute, double& second);
-            int DMSToDeg(const int degree, const int minute, const double second, double& Degree);
+            INT32 DegToDMS(DOUBLE Degree, INT32& degree, INT32& minute, DOUBLE& second);
+            INT32 DMSToDeg(const INT32 degree, const INT32 minute, const DOUBLE second, DOUBLE& Degree);
         private:
-            int m_degree;
-            int m_minute;
-            double m_second;
-            double m_decimalDegree;     // degree of decimal form
-            double m_radian;            // radian
+            INT32 m_degree;
+            INT32 m_minute;
+            DOUBLE m_second;
+            DOUBLE m_decimalDegree;     // degree of decimal form
+            DOUBLE m_radian;            // radian
             std::string m_formatString;
         };
     } // end namespace GNSSUtilityLib

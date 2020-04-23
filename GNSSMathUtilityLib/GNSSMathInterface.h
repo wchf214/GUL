@@ -26,41 +26,41 @@ namespace sixents
 #ifdef __cplusplus
         extern "C" {
 #endif
-            // ¾ØÕóÏà¹Ø½Ó¿Ú
-            // ¾ØÕó¼Ó·¨
-            // destMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬¼ÈÊÇ±»¼ÓÊı£¬ÓÖÊÇ½á¹û
-            // srcMatrix ÊäÈë²ÎÊı£¬¼ÓÊı
+            // çŸ©é˜µç›¸å…³æ¥å£
+            // çŸ©é˜µåŠ æ³•
+            // destMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œæ—¢æ˜¯è¢«åŠ æ•°ï¼Œåˆæ˜¯ç»“æœ
+            // srcMatrix è¾“å…¥å‚æ•°ï¼ŒåŠ æ•°
             DLL_API int STD_CALL MatrixAdd(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 
-            // ¾ØÕó¼õ·¨
-            // destMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬¼ÈÊÇ±»¼õÊı£¬ÓÖÊÇ½á¹û
-            // srcMatrix ÊäÈë²ÎÊı£¬¼õÊı
+            // çŸ©é˜µå‡æ³•
+            // destMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œæ—¢æ˜¯è¢«å‡æ•°ï¼Œåˆæ˜¯ç»“æœ
+            // srcMatrix è¾“å…¥å‚æ•°ï¼Œå‡æ•°
             DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 
-            // ¾ØÕó³Ë·¨
-            // destMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬¼ÈÊÇ±»³ËÊı£¬ÓÖÊÇ½á¹û
-            // srcMatrix ÊäÈë²ÎÊı£¬³ËÊı
+            // çŸ©é˜µä¹˜æ³•
+            // destMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œæ—¢æ˜¯è¢«ä¹˜æ•°ï¼Œåˆæ˜¯ç»“æœ
+            // srcMatrix è¾“å…¥å‚æ•°ï¼Œä¹˜æ•°
             DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 
-            // ¾ØÕó×ªÖÃ
-            // desMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬´ı×ªÖÃ¾ØÕó£¬Í¬Ê±Ò²ÊÇ½á¹û
+            // çŸ©é˜µè½¬ç½®
+            // desMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œå¾…è½¬ç½®çŸ©é˜µï¼ŒåŒæ—¶ä¹Ÿæ˜¯ç»“æœ
             DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix);
 
-            // ¾ØÕóÇóÄæ
-            // desMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬´ıÇóÄæ¾ØÕó£¬Í¬Ê±Ò²ÊÇ½á¹û
+            // çŸ©é˜µæ±‚é€†
+            // desMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œå¾…æ±‚é€†çŸ©é˜µï¼ŒåŒæ—¶ä¹Ÿæ˜¯ç»“æœ
             DLL_API int STD_CALL MatrixInverse(SGNSSMatrix& matrix);
 
-            // ¾ØÕóÔö¼ÓĞĞÁĞ
-            // Ôö¼ÓµÄĞĞÁĞ£¬¸øÄ¬ÈÏÖµ1£¬ÒÔºóÔÙ¸ù¾İĞèÇó½øĞĞÓÅ»¯¡£
-            // desMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬´ıÔö¼ÓĞĞÁĞµÄ¾ØÕó£¬Í¬Ê±Ò²ÊÇ½á¹û
-            // row: ÊäÈë²ÎÊı£¬Ôö¼ÓµÄĞĞÊı
-            // col: ÊäÈë²ÎÊı£¬Ôö¼ÓµÄÁĞÊı
+            // çŸ©é˜µå¢åŠ è¡Œåˆ—
+            // å¢åŠ çš„è¡Œåˆ—ï¼Œç»™é»˜è®¤å€¼1ï¼Œä»¥åå†æ ¹æ®éœ€æ±‚è¿›è¡Œä¼˜åŒ–ã€‚
+            // desMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œå¾…å¢åŠ è¡Œåˆ—çš„çŸ©é˜µï¼ŒåŒæ—¶ä¹Ÿæ˜¯ç»“æœ
+            // row: è¾“å…¥å‚æ•°ï¼Œå¢åŠ çš„è¡Œæ•°
+            // col: è¾“å…¥å‚æ•°ï¼Œå¢åŠ çš„åˆ—æ•°
             DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col);
 
-            // ¾ØÕó¼õÉÙĞĞÁĞ
-            // desMatrix£ºÊäÈë/Êä³ö²ÎÊı£¬´ı¼õÉÙĞĞÁĞµÄ¾ØÕó£¬Í¬Ê±Ò²ÊÇ½á¹û
-            // row: ÊäÈë²ÎÊı£¬¼õÉÙµÄĞĞÊı
-            // col: ÊäÈë²ÎÊı£¬¼õÉÙµÄÁĞÊı
+            // çŸ©é˜µå‡å°‘è¡Œåˆ—
+            // desMatrixï¼šè¾“å…¥/è¾“å‡ºå‚æ•°ï¼Œå¾…å‡å°‘è¡Œåˆ—çš„çŸ©é˜µï¼ŒåŒæ—¶ä¹Ÿæ˜¯ç»“æœ
+            // row: è¾“å…¥å‚æ•°ï¼Œå‡å°‘çš„è¡Œæ•°
+            // col: è¾“å…¥å‚æ•°ï¼Œå‡å°‘çš„åˆ—æ•°
             DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col);
 
 #ifdef __cplusplus

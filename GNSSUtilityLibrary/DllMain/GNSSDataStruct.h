@@ -1,409 +1,254 @@
 /**@file           CGNSSCoord
- *  @brief         ×ø±êÀà
- *  @details       ËùÓÐ×ø±êÏà¹ØµÄËã·¨
+ *  @brief         åæ ‡ç±»
+ *  @details       æ‰€æœ‰åæ ‡ç›¸å…³çš„ç®—æ³•
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
- *  @note          ÔÝÎÞ
+ *  @note          æš‚æ— 
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 #ifndef _GNSS_DATA_STRUCT_H
 #define _GNSS_DATA_STRUCT_H
 
-#include <map>
-
 namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        /**
-         * @class   : SSignalValue
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : ÐÅºÅÊý¾Ý½á¹¹Ìå
-         * @note    : ±£´æÒ»¿ÅÎÀÐÇÖÐÒ»¸öÐÅºÅµÄÊý¾Ý
-         */
-        struct SSignalValue
-        {
-            //  MSM 1-7 satellite data part
-            // Signal Data
-            // DF400: GNSS ÐÅºÅ¾«È·Î±¾à¹Û²âÖµ
-            double m_dbFinePseudoranges = 0.0;
+        // boolç±»åž‹
+        using BOOL_T = bool; // æ³¨æ„æ­¤ç±»åž‹ä¸èƒ½ç”¨vector<BOOL>
 
-            // DF401: GNSS ÐÅºÅ¾«È·ÏàÎ»¾àÀëÊý¾Ý
-            double m_dbFinePhaserange = 0.0;
+        // æœ‰ç¬¦å·ç±»åž‹å®šä¹‰
+        using INT8 = signed char; // 8ä½æ•´åž‹ ç”¨æ¥ä»£æ›¿char
+        using INT16 = short;      // 16ä½æ•´åž‹ ç”¨æ¥ä»£æ›¿short
+        using INT32 = int;        // 32ä½æ•´åž‹
+        using INT64 = long long;  // 64ä½æ•´åž‹
 
-            // DF402: GNSS ÏàÎ»¾àÀëËø¶¨Ê±¼ä±êÖ¾£¬Ìá¹©½ÓÊÕ»úÁ¬ÐøËø¶¨ÎÀÐÇÐÅºÅµÄÊ±¼ä³¤¶È¡£
-            unsigned char m_ui8LockTimeIndicator = 0U;
+        // æ— ç¬¦å·ç±»åž‹å®šä¹‰
+        using CHAR = char;                 // 8ä½ç¬¦å· char
+        using BYTE = unsigned char;        // 8ä½æ— ç¬¦å·æ•´åž‹ unsigned char å’Œ byteç±»åž‹
+        using UINT8 = unsigned char;       // 8ä½æ— ç¬¦å·æ•´åž‹ unsigned char å’Œ byteç±»åž‹
+        using WORD = unsigned short;       // åŒå­—èŠ‚
+        using UINT16 = unsigned short;     // åŒå­—èŠ‚ åŒ(WORD)
+        using UINT32 = unsigned int;       // 32ä½æ— ç¬¦å·æ•´åž‹
+        using UINT64 = unsigned long long; // 64ä½æ— ç¬¦å·æ•´åž‹
 
-            // DF403: GNSS ÐÅºÅCNR£¬Ìá¹©ÎÀÐÇÐÅºÅµÄÔØÔë±È£¬µ¥Î»dB-Hz¡£DF403=0 ±íÊ¾ÊýÖµÎ´¼ÆËã»ò²»¿ÉÓÃ¡£
-            double m_dbSignalCnr = 0.0;
+        // æµ®ç‚¹ç±»åž‹æ•°æ®å®šä¹‰
+        using FLOAT = float;   // 32ä½æµ®ç‚¹æ•°
+        using DOUBLE = double; // 64ä½æµ®ç‚¹æ•°
 
-            // DF404: GNSS ÐÅºÅ¾«È·ÏàÎ»¾àÀë±ä»¯ÂÊ
-            // FP means FinePhaserange
-            double m_dbFPRates = 0.0;
-
-            // DF405: ¾ßÓÐÀ©Õ¹·Ö±æÂÊµÄGNSS ÐÅºÅ¾«È·Î±¾àÖµ
-            // ER means ExtendedResolution
-            double m_dbFinePseudorangesWithER = 0.0;
-
-            // DF406: ¾ßÓÐÀ©Õ¹·Ö±æÂÊµÄGNSS ÐÅºÅ¾«È·ÏàÎ»¾àÀë
-            // ER means ExtendedResolution
-            double m_dbFinePhaserangeWithER = 0.0;
-
-            // DF407: ¾ßÓÐÀ©Õ¹·¶Î§ºÍ·Ö±æÂÊµÄGNSS ÏàÎ»¾àÀëÊ±¼äËø¶¨±êÖ¾
-            // PLTI means PhaserangeLockTimeIndicator
-            // ERAR means WithExtendedRangeAndResolution
-            unsigned short m_ui16PLTIWithERAR = 0U;
-
-            // DF408: ¾ßÓÐÀ©Õ¹·Ö±æÂÊµÄGNSS ÐÅºÅÐÅÔë±È
-            // WER means WithExtendedResolution
-            double m_dbSignalCnrsWER = 0.0;
-
-            // DF420: °ëÖÜÄ£ºý¶ÈÖ¸±ê£¬0=Ã»ÓÐ°ëÖÜÄ£ºý¶È£»1=°ëÖÜÄ£ºý¶È¡£
-            // HCAI means HalfCycleAmbiguityIndicator
-            unsigned char m_ui8HCAI = 0U;
-
-            // DF010 : GPS L1 Âë±êÖ¾
-            // DF010 : GPS L1 Code Indicator
-            // DF039 : GLONASS L1 Âë±êÖ¾
-            // DF030 : GLONASS L1 Code Indicator
-            // DF016 : GPS L2 Âë±êÖ¾
-            // DF016 : GPS L2 Code Indicator
-            // DF046 : GLONASS L2 Âë±êÖ¾
-            // DF046 : GLONASS L2 Code Indicator
-            unsigned char m_ui8CodeMark = 0U;
-
-            // ¶ÔÓÚ±ê×¼¾«¶ÈµçÎÄ£¨MSM1~MSM3£©£¬ÓÐ£º
-            // Pseudorange(i) = c / 1000 ¡Á(Nms + Rough_range + Fine_Pseudorange(i))
-            // PhaseRange(i) = c / 1000 ¡Á(Nms + Rough_range + Fine_PhaseRange(i))
-            // PhaseRangeRate(i) = Rough_PhaseRangeRate + Fine_PhaseRangeRate(i)
-            // ¶ÔÓÚ¸ß¾«¶ÈµçÎÄ£¨MSM4~MSM7£©£¬ÓÐ£º
-            // Pseudorange(i) = c / 1000 ¡Á(Nms + Rough_range + Fine_Pseudorange(i))
-            // PhaseRange(i) = c / 1000 ¡Á(Nms + Rough_range + Fine_PhaseRange(i))
-            // PhaseRangeRate(i) = Rough_PhaseRangeRate + Fine_PhaseRangeRate(i)
-            // GNSS ¼ÆËãºóÐÅºÅ¾«È·Î±¾à
-            double m_dbPseudoranges = 0.0;
-
-            // GNSS ¼ÆËãºóÐÅºÅ¾«È·ÏàÎ»¾àÀë
-            double m_dbPhaserange = 0.0;
-
-            // GNSS ¼ÆËãºóÐÅºÅ¾«È·ÏàÎ»¾àÀë±ä»¯ÂÊ
-            double m_dbPhaseRangeRate = 0.0;
-        };
-
-        /**
-         * @class   : SSatelliteValue
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : ÎÀÐÇÊý¾Ý½á¹¹Ìå£¨°üº¬ÐÅºÅÊý¾Ý£©
-         * @note    : ±£´æ¹Û²âÖµÃ¿¿ÅÎÀÐÇµÄÊý¾Ý
-         */
-        struct SSatelliteValue
-        {
-            // Satellite Data
-            // DF397: GNSS ÎÀÐÇ¸ÅÂÔ¾àÀëµÄÕûºÁÃëÊý£¬ÓÃÓÚ»Ö¸´Ä³¿ÅÎÀÐÇµÄÍêÕû¹Û²âÖµ¡£
-            unsigned char m_ui8Milliseconds = 0U;
-
-            // À©Õ¹ÎÀÐÇÐÅÏ¢
-            unsigned char m_ui8ExtendedSatInfo = 0U;
-
-            // DF398: GNSS ÎÀÐÇ¸ÅÂÔ¾àÀëµÄºÁÃëÓàÊý£¬¿ÉÒÔ1/1024ms£¨Ô¼300m£©µÄ¾«¶È»Ö¸´ÍêÕûµÄGNSS¸ÅÂÔ¾àÀë
-            double m_dbModulo1Millisecond = 0.0;
-
-            // DF399: GNSS ÎÀÐÇ¸ÅÂÔÏàÎ»¾àÀë±ä»¯ÂÊ
-            int m_i32RoughPhaseRangeRates = 0U;
-
-            // DF040: GLONASS ÎÀÐÇµÄÆµÂÊÍ¨µÀºÅ¡£Í¨¹ý DF038 ºÍ DF040£¬ÓÃ»§ÎÞÐèÀúÊé¾Í¿ÉÖªµÀÎÀÐÇµÄÆµÂÊ¡£
-            // ×¢Òâ±àÂëÊ±Õâ¸öÖµÐèÒª´Ó1020È¡Öµ£¨1087À©Õ¹ÐÅÏ¢DF419£© Glonass×¨ÓÃ
-            // ×¢ÒâGlonass±àÂëÊ±±ØÐë¸³Öµ, ·ñÔò±àÂëÊ§°Ü
-            unsigned char m_ui8SatFrequencyChannelNumber = 255;
-
-            std::map< int, SSignalValue > m_mapSignalValues;
-        };
-
-        /**
-         * @class   : SEpochSatObs
-         * @author  : zhuquanlin@sixents.com
-         * @brief   : ¹Û²âÖµÊý¾Ý½á¹¹Ìå
-         * @note    : ±£´æ¹Û²âÖµËùÓÐÊý¾Ý
-         */
-        struct SEpochSatObs
-        {
-            // MSM 1-7  head part
-            // DF002: µçÎÄÀàÐÍºÅ,ÓÃÓÚÇø·Ö²î·ÖµçÎÄ¡£
-            unsigned short m_ui16MsgType = 0U;
-
-            // DF003: ²Î¿¼Õ¾ ID ÓÉ·þÎñÌá¹©ÕßÈ·¶¨¡£
-            unsigned int m_ui32GmNtiRefStationID = 0U;
-            // DF416: GLONASS ÎÀÐÇµ¼º½µçÎÄºÍÐÅºÅµÄÐÇÆÚÊý
-            unsigned char m_ui8DayOfWeek = 0U;
-
-            // GNSS ÀúÔªÊ±¿Ì£ºGPS DF004
-            // GNSS ÀúÔªÊ±¿Ì£ºGalileo DF248
-            // GNSS ÀúÔªÊ±¿Ì£ºGlonass DF034
-            // GNSS ÀúÔªÊ±¿Ì£ºSBAS DF004
-            // GNSS ÀúÔªÊ±¿Ì£ºQZSS DF428
-            // GNSS ÀúÔªÊ±¿Ì£ºBeiDou DF427
-            unsigned int m_ui32GnssEpochTime = 0U;
-
-            // DF005: Í¬²½GNSSµçÎÄ±êÖ¾
-            // DF393: MSM ºóÐøµçÎÄÇé¿ö£º1 = »¹ÓÐÏà¶Ô¸ø¶¨Ê±¿ÌÓë²Î¿¼Õ¾ID µÄ¸ü¶àµçÎÄ£»0 = ±¾ÌõµçÎÄÊ±¸ø¶¨Ê±¿ÌÓë²Î¿¼Õ¾ID
-            // µÄ×îºóÒ»Ìõ¡£
-            unsigned char m_ui8MultiMsgBit = 0U;
-
-            // DF409: ±íÊ¾²âÕ¾Êý¾ÝÆÚ¾íºÅ£¨Issue Of Data
-            // Station£©£¬Îª±£Áô×Ö¶Î£¬ÓÃÓÚ½«MSMÓë½ñºóµÄ²âÕ¾ËµÃ÷£¨½ÓÊÕ»ú¡¢ÌìÏßËµÃ÷µÈ£©ÁªÏµÆðÀ´¡£DF409 = 0
-            // ±íÊ¾Î´Ê¹ÓÃ±¾Êý¾Ý×Ö¶Î¡£
-            unsigned char m_ui8IODS = 0U;
-
-            // DF001: Ô¤ÁôÊý¾Ý£¬±£Áô7Î»
-            signed char m_i8Reserved = 0U;
-
-            // DF411: Ê±ÖÓÐ£×¼±êÖ¾£¬±íÊ¾Ê±ÖÓÐ£×¼µÄÇé¿ö¡£
-            //  0 = Î´Ê¹ÓÃÊ±ÖÓÐ£×¼£¬´ËÊ±£¬½ÓÊÕ»úÖÓ²î±ØÐë±£³ÖÐ¡ÓÚ¡À1ms£¨Ô¼¡À300km£©£»
-            //  1 = Ê¹ÓÃÁËÊ±ÖÓÐ£×¼£¬´ËÊ±£¬½ÓÊÕ»úÖÓ²î±ØÐë±£³ÖÐ¡ÓÚ¡À1 Î¢Ãë£¨Ô¼¡À300m£©£»
-            //  2 = Î´ÖªµÄÊ±ÖÓÐ£×¼×´Ì¬£»
-            //  3 = ±£Áô¡£
-            unsigned char m_ui8ClockSteeringIndicator = 0U;
-
-            // DF412: À©Õ¹Ê±ÖÓ±êÖ¾£¬±íÊ¾Ê±ÖÓÐ£×¼µÄÇé¿ö¡£
-            //  0 = Ê¹ÓÃÄÚ²¿Ê±ÖÓ£»
-            //  1 = Ê¹ÓÃÍâ²¿Ê±ÖÓ£¬×´Ì¬Îª¡°Ëø¶¨¡±£»
-            //  2 = Ê¹ÓÃÍâ²¿Ê±ÖÓ£¬×´Ì¬Îª¡°Î´Ëø¶¨¡±£¬±íÊ¾Íâ²¿Ê±ÖÓÊ§Ð§£¬´«ÊäµÄÊý¾Ý¿ÉÄÜ²»¿É¿¿£»
-            //  3 = Ê¹ÓÃÊ±ÖÓ×´Ì¬Î´Öª¡£
-            unsigned char m_ui8ExternalClockIndicator = 0U;
-
-            // DF007: GPS ÎÞÃÖÉ¢Æ½»¬±êÖ¾
-            // DF036: GLONASS ÎÞÃÖÉ¢Æ½»¬±êÖ¾
-            // DF417: GNSS Æ½»¬ÀàÐÍ±êÖ¾£¬1=Ê¹ÓÃ·ÇÎÞÃÖÉ¢Æ½»¬£»0=ÆäËûÆ½»¬ÀàÐÍ¡£
-            unsigned char m_ui8GnssSmoothingIndicator = 0U;
-
-            // DF008: GPS Æ½»¬¼ä¸ô
-            // DF037: GLONASS Æ½»¬¼ä¸ô
-            // DF418: GNSS Æ½»¬Çø¼ä£¬Ö¸Ê¹ÓÃÔØ²¨Æ½»¬Î±¾àµÄÊ±¶Î³¤¶È¡£
-            unsigned char m_ui8GnssSmoothingInterval = 0U;
-
-            // DF394: ÎÀÐÇÑÚÂë
-            unsigned long long m_ui64SatMask = 0U;
-
-            // DF395: ÐÅºÅÑÚÂë
-            unsigned int m_ui32SignalMask = 0U;
-
-            // DF396: µ¥ÔªÑÚÂë
-            unsigned long long m_ui64CellMask = 0U;
-
-            std::map< int, SSatelliteValue > m_mapSatValues;
-        };
-
+        // æŒ‡é’ˆç±»åž‹
+        using PVOID = void*;       // ä¸»è¦æ˜¯ç”¨äºŽCParamä¼ è¾“
+        using PCSTR = const char*; // Cç±»åž‹çš„å­—ç¬¦ä¸²å¤„ç†
         /**
          * @class   : SEphemeris
          * @author  : wuchuanfei@sixents.com
-         * @brief   : ÐÇÀúÊý¾Ý½á¹¹Ìå
-         * @note    : ±£´æÐÇÀúËùÓÐÊý¾Ý
+         * @brief   : æ˜ŸåŽ†æ•°æ®ç»“æž„ä½“
+         * @note    : ä¿å­˜æ˜ŸåŽ†æ‰€æœ‰æ•°æ®
          */
         struct SEphemeris
         {
-            // DF002: µçÎÄÀàÐÍºÅ,ÓÃÓÚÇø·Ö²î·ÖµçÎÄ¡£
+            // DF002: ç”µæ–‡ç±»åž‹å·,ç”¨äºŽåŒºåˆ†å·®åˆ†ç”µæ–‡ã€‚
             unsigned short m_ui16MsgType = 0U;
 
-            // DF009: GPSÎÀÐÇºÅ
-            // DF252: GalileoÎÀÐÇºÅ
-            // DF429: QZSSÎÀÐÇ ID
-            // DF488: BDS ÎÀÐÇºÅ
+            // DF009: GPSå«æ˜Ÿå·
+            // DF252: Galileoå«æ˜Ÿå·
+            // DF429: QZSSå«æ˜Ÿ ID
+            // DF488: BDS å«æ˜Ÿå·
             unsigned char m_ui8SatId = 0U;
 
-            // DF076: GPSÖÜÊý,ÆðËãÓÚ1980 Äê1 ÔÂ5 ÈÕ×ÓÒ¹£¬Ã¿1024 ÖÜÒ»¸öÑ­»·¡£
-            // DF289: GalileoÖÜÊý£¬Ã¿4096ÖÜ£¨Ô¼78Äê£©Ò»¸öÑ­»·¡£GSTÔÚOS-SIS-ICD-1.1ÖÐ¶¨Òå£¬¿ªÊ¼ÓÚ 1999 Äê 8 ÔÂ 22 ÈÕÐÇÆÚÈÕ
-            // 00:00UT£¨8 ÔÂ 21 ÈÕºÍ 8 ÔÂ 22 ÈÕÖ®¼äµÄÎçÒ¹£©¡£
-            // DF452: QZSSÐÇÆÚÊý£¬Ñ­»·ÖÜÆÚÎª1024 ÖÜ¡£ÆðÊ¼ÓÚ1980 Äê1 ÔÂ5 ºÅÍíÉÏµÄÎçÒ¹ / 1 ÔÂ6 ºÅµÄÔçÉÏ¡£
+            // DF076: GPSå‘¨æ•°,èµ·ç®—äºŽ1980 å¹´1 æœˆ5 æ—¥å­å¤œï¼Œæ¯1024 å‘¨ä¸€ä¸ªå¾ªçŽ¯ã€‚
+            // DF289: Galileoå‘¨æ•°ï¼Œæ¯4096å‘¨ï¼ˆçº¦78å¹´ï¼‰ä¸€ä¸ªå¾ªçŽ¯ã€‚GSTåœ¨OS-SIS-ICD-1.1ä¸­å®šä¹‰ï¼Œå¼€å§‹äºŽ 1999 å¹´ 8 æœˆ 22 æ—¥æ˜ŸæœŸæ—¥
+            // 00:00UTï¼ˆ8 æœˆ 21 æ—¥å’Œ 8 æœˆ 22 æ—¥ä¹‹é—´çš„åˆå¤œï¼‰ã€‚
+            // DF452: QZSSæ˜ŸæœŸæ•°ï¼Œå¾ªçŽ¯å‘¨æœŸä¸º1024 å‘¨ã€‚èµ·å§‹äºŽ1980 å¹´1 æœˆ5 å·æ™šä¸Šçš„åˆå¤œ / 1 æœˆ6 å·çš„æ—©ä¸Šã€‚
             // DF489: Roll-over every 8192 weeks starting from 00:00:00 UTC on Jan. 1,2006 of BDT.
             unsigned char m_ui16WeekNum = 0U;
 
-            // DF077: GPSÎÀÐÇµÄÓÃ»§µÈÐ§¾àÀë¾«¶È£¬µ¥Î»m
-            // DF453: QZSSÐÇÀúµÄ¾«¶È£¬ÎÞµ¥Î»¡£
-            // DF490: BDSÎÀÐÇµÄÓÃ»§¾àÀë¾«¶È£¨URA£©Ö¸Êý£¬ÎÞµ¥Î»£¬
+            // DF077: GPSå«æ˜Ÿçš„ç”¨æˆ·ç­‰æ•ˆè·ç¦»ç²¾åº¦ï¼Œå•ä½m
+            // DF453: QZSSæ˜ŸåŽ†çš„ç²¾åº¦ï¼Œæ— å•ä½ã€‚
+            // DF490: BDSå«æ˜Ÿçš„ç”¨æˆ·è·ç¦»ç²¾åº¦ï¼ˆURAï¼‰æŒ‡æ•°ï¼Œæ— å•ä½ï¼Œ
             unsigned char m_ui8URA = 0U;
 
-            // DF078: GPS²â¾àÂë±êÖ¾,±íÊ¾Ëù¹Û²âµÄGPS L2 ²â¾àÂëÀàÐÍ¡£00=±£Áô£»01=P Âë£»10=C/A Âë£»11 = L2C Âë¡£
-            // DF451: QZSSÎÀÐÇL2²â¾àÂëÀàÐÍ
+            // DF078: GPSæµ‹è·ç æ ‡å¿—,è¡¨ç¤ºæ‰€è§‚æµ‹çš„GPS L2 æµ‹è·ç ç±»åž‹ã€‚00=ä¿ç•™ï¼›01=P ç ï¼›10=C/A ç ï¼›11 = L2C ç ã€‚
+            // DF451: QZSSå«æ˜ŸL2æµ‹è·ç ç±»åž‹
             unsigned char m_ui8CodeOnL2 = 0U;
 
-            // DF079: GPSÎÀÐÇ¹ìµÀÇã½Ç±ä»¯ÂÊ
-            // DF292: GalileoÎÀÐÇ¹ìµÀÇã½Ç±ä»¯ÂÊ
-            // DF449: QZSSÎÀÐÇ¹ìµÀÇã½Ç±ä»¯ÂÊ
-            // DF491: BDS ÎÀÐÇ¹ìµÀÇã½Ç±ä»¯ÂÊ
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð/s) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg/s)
-            // µ¥Î»£ºdeg/s
+            // DF079: GPSå«æ˜Ÿè½¨é“å€¾è§’å˜åŒ–çŽ‡
+            // DF292: Galileoå«æ˜Ÿè½¨é“å€¾è§’å˜åŒ–çŽ‡
+            // DF449: QZSSå«æ˜Ÿè½¨é“å€¾è§’å˜åŒ–çŽ‡
+            // DF491: BDS å«æ˜Ÿè½¨é“å€¾è§’å˜åŒ–çŽ‡
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€/s) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg/s)
+            // å•ä½ï¼šdeg/s
             double m_dbIdot = 0.0;
 
-            // DF071: GPSÀ´×Ô¹ã²¥ÐÇÀú£¬±íÊ¾ÎÀÐÇÐÇÀúÊý¾ÝÆÚºÅ
-            // DF434£º QZSS ÎÀÐÇÐÇÀúÆÚ¾íºÅ£¬ÎÞµ¥Î»¡£
+            // DF071: GPSæ¥è‡ªå¹¿æ’­æ˜ŸåŽ†ï¼Œè¡¨ç¤ºå«æ˜Ÿæ˜ŸåŽ†æ•°æ®æœŸå·
+            // DF434ï¼š QZSS å«æ˜Ÿæ˜ŸåŽ†æœŸå·å·ï¼Œæ— å•ä½ã€‚
             unsigned char m_ui8Iode = 0U;
 
-            // DF081: GPSÎÀÐÇÖÓ²Î¿¼Ê±¿Ì£¬µ¥Î»s¡£
-            // DF293: GalileoÎÀÐÇÖÓ²Î¿¼Ê±¼ä¡£
-            // DF430: QZZSÎÀÐÇÖÓ²ÎÊý²Î¿¼Ê±¿Ì
-            // DF493: BDS ÎÀÐÇÖÓÊý¾Ý²Î¿¼Ê±¿Ì£¬µ¥Î»s¡£
+            // DF081: GPSå«æ˜Ÿé’Ÿå‚è€ƒæ—¶åˆ»ï¼Œå•ä½sã€‚
+            // DF293: Galileoå«æ˜Ÿé’Ÿå‚è€ƒæ—¶é—´ã€‚
+            // DF430: QZZSå«æ˜Ÿé’Ÿå‚æ•°å‚è€ƒæ—¶åˆ»
+            // DF493: BDS å«æ˜Ÿé’Ÿæ•°æ®å‚è€ƒæ—¶åˆ»ï¼Œå•ä½sã€‚
             unsigned int m_ui32Toc = 0U;
 
-            // DF082: GPSÎÀÐÇÖÓÖÓÆ¯¸ÄÕý²ÎÊý£¬µ¥Î»s/s2¡£
-            // DF294: GalileoÎÀÐÇÖÓÆ¯¸ÄÕý²ÎÊý£¬µ¥Î» s/s 2 ¡£
-            // DF431: QZSSÎÀÐÇÖÓÖÓÆ¯¸ÄÕý²ÎÊý£¬µ¥Î» s/s 2 ¡£
-            // DF494: BDSÎÀÐÇÖÓÖÓÆ¯¸ÄÕý²ÎÊý£¬µ¥Î» s/s 2 ¡£
+            // DF082: GPSå«æ˜Ÿé’Ÿé’Ÿæ¼‚æ”¹æ­£å‚æ•°ï¼Œå•ä½s/s2ã€‚
+            // DF294: Galileoå«æ˜Ÿé’Ÿæ¼‚æ”¹æ­£å‚æ•°ï¼Œå•ä½ s/s 2 ã€‚
+            // DF431: QZSSå«æ˜Ÿé’Ÿé’Ÿæ¼‚æ”¹æ­£å‚æ•°ï¼Œå•ä½ s/s 2 ã€‚
+            // DF494: BDSå«æ˜Ÿé’Ÿé’Ÿæ¼‚æ”¹æ­£å‚æ•°ï¼Œå•ä½ s/s 2 ã€‚
             double m_dbAf2 = 0.0;
 
-            // DF083: GPSÎÀÐÇÖÓÖÓËÙ¸ÄÕý²ÎÊý£¬µ¥Î»s/s¡£
-            // DF295: GalileoÎÀÐÇÖÓËÙ¸ÄÕý²ÎÊý£¬µ¥Î» s/s¡£
-            // DF432: QZSSÎÀÐÇÖÓÖÓËÙ¸ÄÕý²ÎÊý£¬µ¥Î» s/s¡£
-            // DF495: BDSÎÀÐÇÖÓÖÓËÙ¸ÄÕý²ÎÊý£¬µ¥Î» s/s¡£
+            // DF083: GPSå«æ˜Ÿé’Ÿé’Ÿé€Ÿæ”¹æ­£å‚æ•°ï¼Œå•ä½s/sã€‚
+            // DF295: Galileoå«æ˜Ÿé’Ÿé€Ÿæ”¹æ­£å‚æ•°ï¼Œå•ä½ s/sã€‚
+            // DF432: QZSSå«æ˜Ÿé’Ÿé’Ÿé€Ÿæ”¹æ­£å‚æ•°ï¼Œå•ä½ s/sã€‚
+            // DF495: BDSå«æ˜Ÿé’Ÿé’Ÿé€Ÿæ”¹æ­£å‚æ•°ï¼Œå•ä½ s/sã€‚
             double m_dbAf1 = 0.0;
 
-            // DF084: GPSÎÀÐÇÖÓÖÓ²î¸ÄÕý²ÎÊý£¬µ¥Î»s¡£
-            // DF296: GalileoÎÀÐÇÖÓ²î¸ÄÕý²ÎÊý£¬µ¥Î» s¡£
-            // DF433: QZSSÎÀÐÇÖÓÖÓ²î¸ÄÕý²ÎÊý£¬µ¥Î» s¡£
-            // DF496: BDSÎÀÐÇÖÓÖÓËÙ¸ÄÕý²ÎÊý£¬µ¥Î» s/s¡£
+            // DF084: GPSå«æ˜Ÿé’Ÿé’Ÿå·®æ”¹æ­£å‚æ•°ï¼Œå•ä½sã€‚
+            // DF296: Galileoå«æ˜Ÿé’Ÿå·®æ”¹æ­£å‚æ•°ï¼Œå•ä½ sã€‚
+            // DF433: QZSSå«æ˜Ÿé’Ÿé’Ÿå·®æ”¹æ­£å‚æ•°ï¼Œå•ä½ sã€‚
+            // DF496: BDSå«æ˜Ÿé’Ÿé’Ÿé€Ÿæ”¹æ­£å‚æ•°ï¼Œå•ä½ s/sã€‚
             double m_dbAf0 = 0.0;
 
-            // DF085: ±íÊ¾ÎÀÐÇÖÓ²ÎÊýÆÚ¾íºÅ£¬µÍ8 Î»ÓëIODE ÏàÍ¬¡£
-            // DF456:  QZSS ÎÀÐÇÖÓ²ÎÊýÆÚ¾íºÅ£¬Í¬Ò»×éÊý¾ÝÖÐ DF456 µÄµÍ 8 Î»Óë QZSSIODE(DF434)ÏàÍ¬¡£Óë GPS IODC ²»Í¬µÄÊÇ£¬QZSS
-            // IODC µÄ×î¸ß 2 Î»ÊÇ SV Ê±ÖÓ²ÎÊýµÄ¼ÆÊýÆ÷£¬Ã¿ 15min ±ä¸üÒ»´Î¡£µ¥Î»£ºÎÞµ¥Î»
+            // DF085: è¡¨ç¤ºå«æ˜Ÿé’Ÿå‚æ•°æœŸå·å·ï¼Œä½Ž8 ä½ä¸ŽIODE ç›¸åŒã€‚
+            // DF456:  QZSS å«æ˜Ÿé’Ÿå‚æ•°æœŸå·å·ï¼ŒåŒä¸€ç»„æ•°æ®ä¸­ DF456 çš„ä½Ž 8 ä½ä¸Ž QZSSIODE(DF434)ç›¸åŒã€‚ä¸Ž GPS IODC ä¸åŒçš„æ˜¯ï¼ŒQZSS
+            // IODC çš„æœ€é«˜ 2 ä½æ˜¯ SV æ—¶é’Ÿå‚æ•°çš„è®¡æ•°å™¨ï¼Œæ¯ 15min å˜æ›´ä¸€æ¬¡ã€‚å•ä½ï¼šæ— å•ä½
             unsigned char m_ui16Iodc = 0U;
 
-            // DF086: GPSÎÀÐÇ¹ìµÀ°ë¾¶ÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»m¡£
-            // DF297: GalileoÎÀÐÇ¹ìµÀ°ë¾¶ÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
-            // DF435: QZSSÎÀÐÇ¹ìµÀ°ë¾¶ÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
-            // DF498: BDSÎÀÐÇ¹ìµÀ°ë¾¶ÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
+            // DF086: GPSå«æ˜Ÿè½¨é“åŠå¾„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½mã€‚
+            // DF297: Galileoå«æ˜Ÿè½¨é“åŠå¾„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
+            // DF435: QZSSå«æ˜Ÿè½¨é“åŠå¾„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
+            // DF498: BDSå«æ˜Ÿè½¨é“åŠå¾„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
             double m_dbCrs = 0.0;
 
-            // DF087: GPSÎÀÐÇÆ½¾ùÔË¶¯ËÙÂÊÓë¼ÆËãÖµÖ®²î
-            // DF298: GalileoÎÀÐÇÆ½¾ùÔË¶¯ËÙÂÊÓë¼ÆËãÖµÖ®²î
-            // DF436: QZSSÎÀÐÇÆ½¾ùÔË¶¯ËÙÂÊÓë¼ÆËãÖµÖ®²î
-            // DF499: BDSÎÀÐÇÆ½¾ùÔË¶¯ËÙÂÊÓë¼ÆËãÖµÖ®²î
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð/s) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg/s)
-            // µ¥Î»£ºdeg/s
+            // DF087: GPSå«æ˜Ÿå¹³å‡è¿åŠ¨é€ŸçŽ‡ä¸Žè®¡ç®—å€¼ä¹‹å·®
+            // DF298: Galileoå«æ˜Ÿå¹³å‡è¿åŠ¨é€ŸçŽ‡ä¸Žè®¡ç®—å€¼ä¹‹å·®
+            // DF436: QZSSå«æ˜Ÿå¹³å‡è¿åŠ¨é€ŸçŽ‡ä¸Žè®¡ç®—å€¼ä¹‹å·®
+            // DF499: BDSå«æ˜Ÿå¹³å‡è¿åŠ¨é€ŸçŽ‡ä¸Žè®¡ç®—å€¼ä¹‹å·®
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€/s) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg/s)
+            // å•ä½ï¼šdeg/s
             double m_dbDeltaN = 0.0;
 
-            // DF088: GPSÎÀÐÇ²Î¿¼Ê±¼äµÄÆ½½üµã½Ç£¬µ¥Î»¦Ð¡£
-            // DF299: GalileoÎÀÐÇ²Î¿¼Ê±¼äµÄÆ½½üµã½Ç£¬µ¥Î» ¦Ð¡£
-            // DF437: QZSSÎÀÐÇ²Î¿¼Ê±¼äµÄÆ½½üµã½Ç£¬µ¥Î» ¦Ð¡£
-            // DF500: BDSÎÀÐÇ²Î¿¼Ê±¼äµÄÆ½½üµã½Ç£¬µ¥Î» ¦Ð¡£
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg)
-            // µ¥Î»£ºdeg
+            // DF088: GPSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„å¹³è¿‘ç‚¹è§’ï¼Œå•ä½Ï€ã€‚
+            // DF299: Galileoå«æ˜Ÿå‚è€ƒæ—¶é—´çš„å¹³è¿‘ç‚¹è§’ï¼Œå•ä½ Ï€ã€‚
+            // DF437: QZSSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„å¹³è¿‘ç‚¹è§’ï¼Œå•ä½ Ï€ã€‚
+            // DF500: BDSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„å¹³è¿‘ç‚¹è§’ï¼Œå•ä½ Ï€ã€‚
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg)
+            // å•ä½ï¼šdeg
             double m_dbM0 = 0.0;
 
-            // DF089: GPSÎÀÐÇÎ³¶È·ù½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»rad¡£
-            // DF300: GalileoÎÀÐÇÎ³¶È·ù½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF438: QZSSÎÀÐÇÎ³¶È·ù½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF501: BDSÎÀÐÇÎ³¶È·ù½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
+            // DF089: GPSå«æ˜Ÿçº¬åº¦å¹…è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½radã€‚
+            // DF300: Galileoå«æ˜Ÿçº¬åº¦å¹…è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF438: QZSSå«æ˜Ÿçº¬åº¦å¹…è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF501: BDSå«æ˜Ÿçº¬åº¦å¹…è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
             double m_dbCuc = 0.0;
 
-            // DF090: GPSÎÀÐÇ¹ìµÀÆ«ÐÄÂÊ£¬ÎÞµ¥Î»¡£
-            // DF301: GalileoÎÀÐÇ¹ìµÀÆ«ÐÄÂÊ£¬ÎÞµ¥Î»¡£
-            // DF439: QZSSÎÀÐÇ¹ìµÀÆ«ÐÄÂÊ£¬ÎÞµ¥Î»¡£
-            // DF502: BDSÎÀÐÇ¹ìµÀÆ«ÐÄÂÊ£¬ÎÞµ¥Î»¡£
+            // DF090: GPSå«æ˜Ÿè½¨é“åå¿ƒçŽ‡ï¼Œæ— å•ä½ã€‚
+            // DF301: Galileoå«æ˜Ÿè½¨é“åå¿ƒçŽ‡ï¼Œæ— å•ä½ã€‚
+            // DF439: QZSSå«æ˜Ÿè½¨é“åå¿ƒçŽ‡ï¼Œæ— å•ä½ã€‚
+            // DF502: BDSå«æ˜Ÿè½¨é“åå¿ƒçŽ‡ï¼Œæ— å•ä½ã€‚
             double m_dbEccentricity = 0.0;
 
-            // DF091: GPSÎÀÐÇÎ³¶È·ù½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»rad¡£
-            // DF302: GalileoÎÀÐÇÎ³¶È·ù½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF440: QZSSÎÀÐÇÎ³¶È·ù½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF503: BDSÎÀÐÇÎ³¶È·ù½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
+            // DF091: GPSå«æ˜Ÿçº¬åº¦å¹…è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½radã€‚
+            // DF302: Galileoå«æ˜Ÿçº¬åº¦å¹…è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF440: QZSSå«æ˜Ÿçº¬åº¦å¹…è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF503: BDSå«æ˜Ÿçº¬åº¦å¹…è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
             double m_dbCus = 0.0;
 
-            // DF092: GPSÎÀÐÇ¹ìµÀ³¤°ëÖáµÄÆ½·½¸ù¡£
-            // DF303: GalileoÎÀÐÇ¹ìµÀ³¤°ëÖáµÄÆ½·½¸ù ¡£
-            // DF441: QZSSÎÀÐÇ¹ìµÀ³¤°ëÖáÓë 42,164,200m Ö®²îµÄÆ½·½¸ù¡£
-            // DF504: BDSÎÀÐÇ¹ìµÀ³¤°ëÖáÓë 42,164,200m Ö®²îµÄÆ½·½¸ù¡£
-            // ²Î¿¼RTCM STANDARD 10403.3Êý¾Ýµ¥Î»:m1/2 ÐèÒª×ª»»³É³£ÓÃÄ£Ê½µ¥Î»:m ×ª»»·½Ê½ÊÇvalue * value
+            // DF092: GPSå«æ˜Ÿè½¨é“é•¿åŠè½´çš„å¹³æ–¹æ ¹ã€‚
+            // DF303: Galileoå«æ˜Ÿè½¨é“é•¿åŠè½´çš„å¹³æ–¹æ ¹ ã€‚
+            // DF441: QZSSå«æ˜Ÿè½¨é“é•¿åŠè½´ä¸Ž 42,164,200m ä¹‹å·®çš„å¹³æ–¹æ ¹ã€‚
+            // DF504: BDSå«æ˜Ÿè½¨é“é•¿åŠè½´ä¸Ž 42,164,200m ä¹‹å·®çš„å¹³æ–¹æ ¹ã€‚
+            // å‚è€ƒRTCM STANDARD 10403.3æ•°æ®å•ä½:m1/2 éœ€è¦è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼å•ä½:m è½¬æ¢æ–¹å¼æ˜¯value * value
             double m_dbAHalf = 0.0;
 
-            // DF093: GPSÎÀÐÇÐÇÀú²Î¿¼Ê±¼ä£¬µ¥Î»s¡£
-            // DF304: GalileoÎÀÐÇÐÇÀú²Î¿¼Ê±¼ä¡£
-            // DF442: QZSSÎÀÐÇÐÇÀú²Î¿¼Ê±¼ä£¬µ¥Î» s¡£
-            // DF505: BDSÎÀÐÇÐÇÀú²Î¿¼Ê±¼ä£¬µ¥Î» s¡£
+            // DF093: GPSå«æ˜Ÿæ˜ŸåŽ†å‚è€ƒæ—¶é—´ï¼Œå•ä½sã€‚
+            // DF304: Galileoå«æ˜Ÿæ˜ŸåŽ†å‚è€ƒæ—¶é—´ã€‚
+            // DF442: QZSSå«æ˜Ÿæ˜ŸåŽ†å‚è€ƒæ—¶é—´ï¼Œå•ä½ sã€‚
+            // DF505: BDSå«æ˜Ÿæ˜ŸåŽ†å‚è€ƒæ—¶é—´ï¼Œå•ä½ sã€‚
             unsigned int m_ui32Toe = 0U;
 
-            // DF094: GPSÎÀÐÇ¹ìµÀÇã½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»rad¡£
-            // DF305: GalileoÎÀÐÇ¹ìµÀÇã½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF443: QZSSÎÀÐÇ¹ìµÀÇã½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF506: BDSÎÀÐÇ¹ìµÀÇã½ÇµÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
+            // DF094: GPSå«æ˜Ÿè½¨é“å€¾è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½radã€‚
+            // DF305: Galileoå«æ˜Ÿè½¨é“å€¾è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF443: QZSSå«æ˜Ÿè½¨é“å€¾è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF506: BDSå«æ˜Ÿè½¨é“å€¾è§’çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
             double m_dbCic = 0.0;
 
-            // DF095: GPSÎÀÐÇ°´²Î¿¼Ê±¼ä¼ÆËãµÄÉý½»µã³à¾­
-            // DF306: GalileoÎÀÐÇ°´²Î¿¼Ê±¼ä¼ÆËãµÄÉý½»µã³à¾­
-            // DF444: QZSSÎÀÐÇ°´²Î¿¼Ê±¼ä¼ÆËãµÄÉý½»µã³à¾­
-            // DF507: BDSÎÀÐÇ°´²Î¿¼Ê±¼ä¼ÆËãµÄÉý½»µã³à¾­
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg)
-            // µ¥Î»£ºdeg
+            // DF095: GPSå«æ˜ŸæŒ‰å‚è€ƒæ—¶é—´è®¡ç®—çš„å‡äº¤ç‚¹èµ¤ç»
+            // DF306: Galileoå«æ˜ŸæŒ‰å‚è€ƒæ—¶é—´è®¡ç®—çš„å‡äº¤ç‚¹èµ¤ç»
+            // DF444: QZSSå«æ˜ŸæŒ‰å‚è€ƒæ—¶é—´è®¡ç®—çš„å‡äº¤ç‚¹èµ¤ç»
+            // DF507: BDSå«æ˜ŸæŒ‰å‚è€ƒæ—¶é—´è®¡ç®—çš„å‡äº¤ç‚¹èµ¤ç»
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg)
+            // å•ä½ï¼šdeg
             double m_dbOmega0 = 0.0;
 
-            // DF096: GPSÎÀÐÇ¹ìµÀÇã½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»rad¡£
-            // DF307: GalileoÎÀÐÇ¹ìµÀÇã½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF445: QZSSÎÀÐÇ¹ìµÀÇã½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
-            // DF508: BDSÎÀÐÇ¹ìµÀÇã½ÇµÄÕýÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» rad¡£
+            // DF096: GPSå«æ˜Ÿè½¨é“å€¾è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½radã€‚
+            // DF307: Galileoå«æ˜Ÿè½¨é“å€¾è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF445: QZSSå«æ˜Ÿè½¨é“å€¾è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
+            // DF508: BDSå«æ˜Ÿè½¨é“å€¾è§’çš„æ­£å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ radã€‚
             double m_dbCis = 0.0;
 
-            // DF097: GPSÎÀÐÇ²Î¿¼Ê±¼äµÄ¹ìµÀÇã½Ç
-            // DF308: GalileoÎÀÐÇ²Î¿¼Ê±¼äµÄ¹ìµÀÇã½Ç
-            // DF446: QZSSÎÀÐÇ²Î¿¼Ê±¼äµÄ¹ìµÀÇã½Ç
-            // DF509: BDSÎÀÐÇ²Î¿¼Ê±¼äµÄ¹ìµÀÇã½Ç
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg)
-            // µ¥Î»£ºdeg
+            // DF097: GPSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„è½¨é“å€¾è§’
+            // DF308: Galileoå«æ˜Ÿå‚è€ƒæ—¶é—´çš„è½¨é“å€¾è§’
+            // DF446: QZSSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„è½¨é“å€¾è§’
+            // DF509: BDSå«æ˜Ÿå‚è€ƒæ—¶é—´çš„è½¨é“å€¾è§’
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg)
+            // å•ä½ï¼šdeg
             double m_dbI0 = 0.0;
 
-            // DF098: GPSÎÀÐÇ¹ìµÀ°ë¾¶µÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î»m¡£
-            // DF309: GalileoÎÀÐÇ¹ìµÀ°ë¾¶µÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
-            // DF447: QZSSÎÀÐÇ¹ìµÀ°ë¾¶µÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
-            // DF510: BDSÎÀÐÇ¹ìµÀ°ë¾¶µÄÓàÏÒµ÷ºÍ¸ÄÕýÏîµÄÕñ·ù£¬µ¥Î» m¡£
+            // DF098: GPSå«æ˜Ÿè½¨é“åŠå¾„çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½mã€‚
+            // DF309: Galileoå«æ˜Ÿè½¨é“åŠå¾„çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
+            // DF447: QZSSå«æ˜Ÿè½¨é“åŠå¾„çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
+            // DF510: BDSå«æ˜Ÿè½¨é“åŠå¾„çš„ä½™å¼¦è°ƒå’Œæ”¹æ­£é¡¹çš„æŒ¯å¹…ï¼Œå•ä½ mã€‚
             double m_dbCrc = 0.0;
 
-            // DF099: GPSÎÀÐÇ½üµØµã·ù½Ç
-            // DF310: GalileoÎÀÐÇ½üµØµã·ù½Ç
-            // DF448: QZSSÎÀÐÇ½üµØµã·ù½Ç
-            // DF511: BDSÎÀÐÇ½üµØµã·ù½Ç
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg)
-            // µ¥Î»£ºdeg
+            // DF099: GPSå«æ˜Ÿè¿‘åœ°ç‚¹å¹…è§’
+            // DF310: Galileoå«æ˜Ÿè¿‘åœ°ç‚¹å¹…è§’
+            // DF448: QZSSå«æ˜Ÿè¿‘åœ°ç‚¹å¹…è§’
+            // DF511: BDSå«æ˜Ÿè¿‘åœ°ç‚¹å¹…è§’
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg)
+            // å•ä½ï¼šdeg
             double m_dbArgumentOfPerigee = 0.0;
 
-            // DF100: GPSÎÀÐÇÉý½»µã³à¾­±ä»¯ÂÊ
-            // DF311: GalileoÎÀÐÇÉý½»µã³à¾­±ä»¯ÂÊ
-            // DF449: QZSSÎÀÐÇÉý½»µã³à¾­±ä»¯ÂÊ
-            // DF512: BDSÎÀÐÇÉý½»µã³à¾­±ä»¯ÂÊ
-            // ²Î¿¼RTCM STANDARD 10403.3½âÂëºóµÄÊý¾Ý(µ¥Î»:¦Ð/s) ÒÑ¾­×ª»»³É³£ÓÃÄ£Ê½(µ¥Î»:deg/s)
-            // µ¥Î»£ºdeg/s
+            // DF100: GPSå«æ˜Ÿå‡äº¤ç‚¹èµ¤ç»å˜åŒ–çŽ‡
+            // DF311: Galileoå«æ˜Ÿå‡äº¤ç‚¹èµ¤ç»å˜åŒ–çŽ‡
+            // DF449: QZSSå«æ˜Ÿå‡äº¤ç‚¹èµ¤ç»å˜åŒ–çŽ‡
+            // DF512: BDSå«æ˜Ÿå‡äº¤ç‚¹èµ¤ç»å˜åŒ–çŽ‡
+            // å‚è€ƒRTCM STANDARD 10403.3è§£ç åŽçš„æ•°æ®(å•ä½:Ï€/s) å·²ç»è½¬æ¢æˆå¸¸ç”¨æ¨¡å¼(å•ä½:deg/s)
+            // å•ä½ï¼šdeg/s
             double m_dbOmegaDot = 0.0;
 
-            // DF450:  QZSS ÎÀÐÇ¹ìµÀÇã½Ç±ä»¯ÂÊ£¬µ¥Î» ¦Ð/s
+            // DF450:  QZSS å«æ˜Ÿè½¨é“å€¾è§’å˜åŒ–çŽ‡ï¼Œå•ä½ Ï€/s
             double m_dbIODot = 0.0;
 
-            // DF101: ±íÊ¾ÎÀÐÇL1 ºÍL2 ÐÅºÅÆµÂÊµÄÈºÑÓ³Ù²î£¬µ¥Î»s¡£
-            // DF455:  LCQZSS ºÍ L1 C/A ÂëÈºÑÓ³Ù£¬µ¥Î» s¡£LCQZSS ÊÇ QZSS L1 C/A ºÍL2C ÐÅºÅÎÞµçÀë²ãÏßÐÔ×éºÏÐÅºÅ¡£
+            // DF101: è¡¨ç¤ºå«æ˜ŸL1 å’ŒL2 ä¿¡å·é¢‘çŽ‡çš„ç¾¤å»¶è¿Ÿå·®ï¼Œå•ä½sã€‚
+            // DF455:  LCQZSS å’Œ L1 C/A ç ç¾¤å»¶è¿Ÿï¼Œå•ä½ sã€‚LCQZSS æ˜¯ QZSS L1 C/A å’ŒL2C ä¿¡å·æ— ç”µç¦»å±‚çº¿æ€§ç»„åˆä¿¡å·ã€‚
             double m_dbTgd = 0.0;
 
-            // DF102: GPS0ÎÀÐÇ½¡¿µ×´Ì¬£¬0=ËùÓÐµ¼º½Êý¾ÝÕý³££»1=Ä³Ð©»òËùÓÐµ¼º½Êý¾Ý²»Õý³£¡£
-            // DF454: QZSSÎÀÐÇ½¡¿µ×´Ì¬£¬DF454 Ã¿¸ö±ÈÌØÎ»´ú±íÒ»¸öÎÀÐÇÐÅºÅ£¬Æä×´Ì¬±íÊ¾¶ÔÓ¦ÐÅºÅµÄ¿ÉÓÃÐÔ£¬×î¸ßÎ»(MSB)£º0 =
-            // ËùÓÐµ¼º½Êý¾ÝÕý³££¬1 = ²¿·Ö»òÕßËùÓÐµ¼º½Êý¾ÝÓÐÎÊÌâ¡£
-            // DF515: ±íÊ¾BDSÎÀÐÇ½¡¿µÐÅÏ¢£¬0=ËùÓÐµ¼º½Êý¾ÝÕý³££»1=Ä³Ð©»òËùÓÐµ¼º½Êý¾Ý²»Õý³£¡£
+            // DF102: GPS0å«æ˜Ÿå¥åº·çŠ¶æ€ï¼Œ0=æ‰€æœ‰å¯¼èˆªæ•°æ®æ­£å¸¸ï¼›1=æŸäº›æˆ–æ‰€æœ‰å¯¼èˆªæ•°æ®ä¸æ­£å¸¸ã€‚
+            // DF454: QZSSå«æ˜Ÿå¥åº·çŠ¶æ€ï¼ŒDF454 æ¯ä¸ªæ¯”ç‰¹ä½ä»£è¡¨ä¸€ä¸ªå«æ˜Ÿä¿¡å·ï¼Œå…¶çŠ¶æ€è¡¨ç¤ºå¯¹åº”ä¿¡å·çš„å¯ç”¨æ€§ï¼Œæœ€é«˜ä½(MSB)ï¼š0 =
+            // æ‰€æœ‰å¯¼èˆªæ•°æ®æ­£å¸¸ï¼Œ1 = éƒ¨åˆ†æˆ–è€…æ‰€æœ‰å¯¼èˆªæ•°æ®æœ‰é—®é¢˜ã€‚
+            // DF515: è¡¨ç¤ºBDSå«æ˜Ÿå¥åº·ä¿¡æ¯ï¼Œ0=æ‰€æœ‰å¯¼èˆªæ•°æ®æ­£å¸¸ï¼›1=æŸäº›æˆ–æ‰€æœ‰å¯¼èˆªæ•°æ®ä¸æ­£å¸¸ã€‚
             unsigned char m_ui8SvHealth = 0U;
 
-            // DF103: È¡×Ôµ¼º½µçÎÄ×ÓÖ¡1£¬µÚ4 ×Ö£¬µÚ1 Î»£¬º¬ÒåÈçÏÂ£º0 = L2 P Âëµ¼º½µçÎÄ¿ÉÓÃ£»1 = L2 P Âëµ¼º½µçÎÄ²»¿ÉÓÃ¡£
+            // DF103: å–è‡ªå¯¼èˆªç”µæ–‡å­å¸§1ï¼Œç¬¬4 å­—ï¼Œç¬¬1 ä½ï¼Œå«ä¹‰å¦‚ä¸‹ï¼š0 = L2 P ç å¯¼èˆªç”µæ–‡å¯ç”¨ï¼›1 = L2 P ç å¯¼èˆªç”µæ–‡ä¸å¯ç”¨ã€‚
             unsigned char m_ui8L2PDataFlag = 0U;
 
-            // DF137: ´ú±íµ¼º½µçÎÄ×ÓÖ¡2 µÚ10 ×ÖµÄµÚ17 Î»¡£0 = ÇúÏßÄâºÏ¼ä¸ôÎª4 Ð¡Ê±£»1 = ÇúÏßÄâºÏ¼ä¸ô´óÓÚ4 Ð¡Ê±¡£
-            // DF457: ±íÊ¾Êý¾ÝÄâºÏ¼ä¸ô¡£DF457=0 ±íÊ¾ÄâºÏ¼ä¸ôÎª 2h£¬DF457=1 ±íÊ¾ÄâºÏ¼ä¸ô´óÓÚ 2h
+            // DF137: ä»£è¡¨å¯¼èˆªç”µæ–‡å­å¸§2 ç¬¬10 å­—çš„ç¬¬17 ä½ã€‚0 = æ›²çº¿æ‹Ÿåˆé—´éš”ä¸º4 å°æ—¶ï¼›1 = æ›²çº¿æ‹Ÿåˆé—´éš”å¤§äºŽ4 å°æ—¶ã€‚
+            // DF457: è¡¨ç¤ºæ•°æ®æ‹Ÿåˆé—´éš”ã€‚DF457=0 è¡¨ç¤ºæ‹Ÿåˆé—´éš”ä¸º 2hï¼ŒDF457=1 è¡¨ç¤ºæ‹Ÿåˆé—´éš”å¤§äºŽ 2h
             unsigned char m_ui8FitInterval = 0U;
 
             // DF286 Galileo SISA Index (E1,E5b)
             unsigned char m_ui8SISAIndex = 0U;
-            // DF290: Galileoµ¼º½Êý¾ÝµÄÆÚ¾íºÅ£¬ÎÞµ¥Î»¡£
+            // DF290: Galileoå¯¼èˆªæ•°æ®çš„æœŸå·å·ï¼Œæ— å•ä½ã€‚
             unsigned char m_ui16IODnav = 0U;
-            // DF291: GalileoÎÀÐÇµÄ SIS ¾«¶È£¬ÔÚ Galileo OS-SIS-ICD-1.1 ÖÐ¶¨ÒåÁË¸Ã±£Áô×Ö¶Î£¬µ«Î´¶¨ÒåÊý¾ÝÄÚÈÝ¡£
+            // DF291: Galileoå«æ˜Ÿçš„ SIS ç²¾åº¦ï¼Œåœ¨ Galileo OS-SIS-ICD-1.1 ä¸­å®šä¹‰äº†è¯¥ä¿ç•™å­—æ®µï¼Œä½†æœªå®šä¹‰æ•°æ®å†…å®¹ã€‚
             unsigned char m_ui8SvSisa = 0U;
-            // DF312: GalileoÎÀÐÇ E1/E5a ²¥·¢ÈºÑÓ³Ù£¬µ¥Î» s¡£
+            // DF312: Galileoå«æ˜Ÿ E1/E5a æ’­å‘ç¾¤å»¶è¿Ÿï¼Œå•ä½ sã€‚
             double m_dbBgdE1E5a = 0.0;
-            // DF313: Galileo ÎÀÐÇ E5b/E1 ²¥·¢ÈºÑÓ³Ù£¬µ¥Î» s¡£
+            // DF313: Galileo å«æ˜Ÿ E5b/E1 æ’­å‘ç¾¤å»¶è¿Ÿï¼Œå•ä½ sã€‚
             double m_dbBgdE5bE1 = 0.0;
-            // DF314: GalileoÎÀÐÇ E5a ÐÅºÅ½¡¿µ×´¿ö£º0 = ÐÅºÅ½¡¿µ£»1 = ÐÅºÅ²»¿ÉÓÃ£»2 = ÐÅºÅ´¦ÓÚ²âÊÔÖÐ¡£
+            // DF314: Galileoå«æ˜Ÿ E5a ä¿¡å·å¥åº·çŠ¶å†µï¼š0 = ä¿¡å·å¥åº·ï¼›1 = ä¿¡å·ä¸å¯ç”¨ï¼›2 = ä¿¡å·å¤„äºŽæµ‹è¯•ä¸­ã€‚
             unsigned char m_ui8OSHS = 0U;
-            // DF315: GalileoÎÀÐÇ E5a ÉÏµ¼º½Êý¾ÝµÄÓÐÐ§ÐÔ×´Ì¬£¬ÓÃÓÚ¸æËßÓÃ»§ÎÀÐÇÊý¾ÝµÄÐÔÄÜË®Æ½£¨ÀýÈç£¬ÎÀÐÇ²»¿ÉÓÃ£©¡£
+            // DF315: Galileoå«æ˜Ÿ E5a ä¸Šå¯¼èˆªæ•°æ®çš„æœ‰æ•ˆæ€§çŠ¶æ€ï¼Œç”¨äºŽå‘Šè¯‰ç”¨æˆ·å«æ˜Ÿæ•°æ®çš„æ€§èƒ½æ°´å¹³ï¼ˆä¾‹å¦‚ï¼Œå«æ˜Ÿä¸å¯ç”¨ï¼‰ã€‚
             unsigned char m_ui8OSDVS = 0U;
             // DF316: The E5b Signal Health Status Bit Values are:
             // 0 - Signal OK
@@ -418,13 +263,13 @@ namespace sixents
             // 288 Galileo E1-B  Data Validity Status
             unsigned char m_ui8E1bDataValidityStatus = 0U;
 
-            // DF492: BDSÎÀÐÇÐÇÀúÊý¾ÝÁäÆÚ
+            // DF492: BDSå«æ˜Ÿæ˜ŸåŽ†æ•°æ®é¾„æœŸ
             unsigned char m_ui8AgeOfDataEphemeris = 0U;
-            // DF497: BDS ÎÀÐÇÖÓÊ±ÖÓÊý¾ÝÁäÆÚ£¬ÎÞµ¥Î»¡£
+            // DF497: BDS å«æ˜Ÿé’Ÿæ—¶é’Ÿæ•°æ®é¾„æœŸï¼Œæ— å•ä½ã€‚
             unsigned char m_ui8AgeOfDataClock = 0U;
-            // DF513: BDSÎÀÐÇB1I ÐÇÉÏÉè±¸Ê±ÑÓ²î£¬µ¥Î»ns¡£
+            // DF513: BDSå«æ˜ŸB1I æ˜Ÿä¸Šè®¾å¤‡æ—¶å»¶å·®ï¼Œå•ä½nsã€‚
             double m_dbTgd1 = 0.0;
-            // DF514:BDSÎÀÐÇB2I ÐÇÉÏÉè±¸Ê±ÑÓ²î£¬µ¥Î»ns¡£
+            // DF514:BDSå«æ˜ŸB2I æ˜Ÿä¸Šè®¾å¤‡æ—¶å»¶å·®ï¼Œå•ä½nsã€‚
             double m_dbTgd2 = 0.0;
             // Reserved
             unsigned char m_ui8Reserved = 0U;
@@ -433,132 +278,151 @@ namespace sixents
         /**
          * @class   : SGlonassEphemeris
          * @author  : wuchuanfei@sixents.com
-         * @brief   : GlonassÐÇÀú½á¹¹Ìå
-         * @note    : ±£´æGlonassÐÇÀúËùÓÐ
+         * @brief   : Glonassæ˜ŸåŽ†ç»“æž„ä½“
+         * @note    : ä¿å­˜Glonassæ˜ŸåŽ†æ‰€æœ‰
          */
         struct SGlonassEphemeris
         {
             // Contents of GLONASS Satellite Ephemeris Data, Message Type 1020
-            // DF002: µçÎÄÀàÐÍºÅ,ÓÃÓÚÇø·Ö²î·ÖµçÎÄ¡£
+            // DF002: ç”µæ–‡ç±»åž‹å·,ç”¨äºŽåŒºåˆ†å·®åˆ†ç”µæ–‡ã€‚
             unsigned char m_ui16MsgType = 0U;
-            // DF038: GLONASS µÄÎÀÐÇÐÇÎ»ºÅ¡£
+            // DF038: GLONASS çš„å«æ˜Ÿæ˜Ÿä½å·ã€‚
             unsigned char m_ui8SatId = 0U;
-            // DF040: GLONASS ÎÀÐÇµÄÆµÂÊÍ¨µÀºÅ¡£Í¨¹ý DF038 ºÍ DF040£¬ÓÃ»§ÎÞÐèÀúÊé¾Í¿ÉÖªµÀÎÀÐÇµÄÆµÂÊ¡£
+            // DF040: GLONASS å«æ˜Ÿçš„é¢‘çŽ‡é€šé“å·ã€‚é€šè¿‡ DF038 å’Œ DF040ï¼Œç”¨æˆ·æ— éœ€åŽ†ä¹¦å°±å¯çŸ¥é“å«æ˜Ÿçš„é¢‘çŽ‡ã€‚
             unsigned char m_ui8SatFrequencyChannelNumber = 0U;
-            // DF104: GLONASS ÀúÊé½¡¿µ×´¿ö
+            // DF104: GLONASS åŽ†ä¹¦å¥åº·çŠ¶å†µ
             unsigned char m_ui8AlmanacHealth = 0U;
-            // DF105: ÀúÊé½¡¿µ×´¿ö¿ÉÓÃÐÔ±êÖ¾
+            // DF105: åŽ†ä¹¦å¥åº·çŠ¶å†µå¯ç”¨æ€§æ ‡å¿—
             // AHAI means AlmanacHealthAvailabilityIndicator
             unsigned char m_ui8AHAI = 0U;
-            // DF106: GLONASS P1 ×Ö
+            // DF106: GLONASS P1 å­—
             unsigned char m_ui8P1 = 0U;
-            // DF107:µ±Ìì GLONASS×ÓÖ¡µÄÆðµãÎªÁãµãµÄÊ±¼ä¡£(bits 11 - 7 : 0 - 23 bits 6 - 1 : 0 - 59 bit 0 : 0 - 1)
+            // DF107:å½“å¤© GLONASSå­å¸§çš„èµ·ç‚¹ä¸ºé›¶ç‚¹çš„æ—¶é—´ã€‚(bits 11 - 7 : 0 - 23 bits 6 - 1 : 0 - 59 bit 0 : 0 - 1)
             unsigned char m_ui16Tk = 0U;
-            // DF108: ÐÇÀú½¡¿µ×´¿ö±êÖ¾¡£
+            // DF108: æ˜ŸåŽ†å¥åº·çŠ¶å†µæ ‡å¿—ã€‚
             unsigned char m_ui8MsbOfBn = 0U;
-            // DF109 : P2 Âë¿ÉÓÃÐÔ¡£
+            // DF109 : P2 ç å¯ç”¨æ€§ã€‚
             unsigned char m_ui8P2 = 0U;
-            // DF110: GLONASS µ¼º½Êý¾ÝµÄ²Î¿¼Ê±¼ä¡£(µ¥Î»:15min)
+            // DF110: GLONASS å¯¼èˆªæ•°æ®çš„å‚è€ƒæ—¶é—´ã€‚(å•ä½:15min)
             unsigned char m_ui16Tb = 0U;
-            // DF111: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ X ·ÖÁ¿
+            // DF111: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ X åˆ†é‡
             double m_dbXnTbFirstDerivative = 0.0;
-            // DF112: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ X ·ÖÁ¿
+            // DF112: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ X åˆ†é‡
             double m_dbXnTb = 0.0;
-            // DF113: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ X ·ÖÁ¿
+            // DF113: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ X åˆ†é‡
             double m_dbXnTbSecondDerivative = 0.0;
-            // DF114: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Y ·ÖÁ¿
+            // DF114: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Y åˆ†é‡
             double m_dbYnTbFirstDerivative = 0.0;
-            // DF115: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Y ·ÖÁ¿
+            // DF115: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Y åˆ†é‡
             double m_dbYnTb = 0.0;
-            // DF116: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Y ·ÖÁ¿
+            // DF116: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Y åˆ†é‡
             double m_dbYnTbSecondDerivative = 0.0;
-            // DF117: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Z ·ÖÁ¿
+            // DF117: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Z åˆ†é‡
             double m_dbZnTbFirstDerivative = 0.0;
-            // DF118: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Z ·ÖÁ¿
+            // DF118: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Z åˆ†é‡
             double m_dbZnTb = 0.0;
-            // DF119: ÓÃÓÚ×é³É PZ-90 ×ø±êÏµÏÂ GLONASS ÎÀÐÇËÙ¶ÈÊ¸Á¿µÄ Z ·ÖÁ¿
+            // DF119: ç”¨äºŽç»„æˆ PZ-90 åæ ‡ç³»ä¸‹ GLONASS å«æ˜Ÿé€Ÿåº¦çŸ¢é‡çš„ Z åˆ†é‡
             double m_dbZnTbSecondDerivative = 0.0;
-            // DF120: ±íÊ¾ P3 Âë¿ÉÓÃÐÔ¡£
+            // DF120: è¡¨ç¤º P3 ç å¯ç”¨æ€§ã€‚
             unsigned char m_ui8P3 = 0U;
-            // DF121: ÊÇÔ¤¼ÆµÄ GLONASS ÎÀÐÇÔØ²¨ÆµÂÊµ¼Êý£¨Ïà¶ÔÓÚÃûÒåÖµ£©¡£
+            // DF121: æ˜¯é¢„è®¡çš„ GLONASS å«æ˜Ÿè½½æ³¢é¢‘çŽ‡å¯¼æ•°ï¼ˆç›¸å¯¹äºŽåä¹‰å€¼ï¼‰ã€‚
             double m_dbGammaTb = 0.0;
-            // DF122: GLONASS M ÎÀÐÇµÄ P Âë±êÖ¾¡£
+            // DF122: GLONASS M å«æ˜Ÿçš„ P ç æ ‡å¿—ã€‚
             unsigned char m_ui8GmP = 0U;
-            // DF123: GLONASS µ¼º½µçÎÄ×ÓÖ¡µÄµÚÈý¸ö×Ö·û´®ÖÐÌáÈ¡³ö l n ×Ö¡£
+            // DF123: GLONASS å¯¼èˆªç”µæ–‡å­å¸§çš„ç¬¬ä¸‰ä¸ªå­—ç¬¦ä¸²ä¸­æå–å‡º l n å­—ã€‚
             unsigned char m_ui8GmLn3 = 0U;
-            // DF124: Ïà¶Ô GLONASS ÏµÍ³Ê±¼äµÄÎÀÐÇÊ±¼ä¸ÄÕý¡£
+            // DF124: ç›¸å¯¹ GLONASS ç³»ç»Ÿæ—¶é—´çš„å«æ˜Ÿæ—¶é—´æ”¹æ­£ã€‚
             double m_dbTnTb = 0.0;
-            // DF125: GLONASS L2 ×Ó´øÓë L1 ×Ó´øÖÐ´«Êäµ¼º½ RF ÐÅºÅÖ®¼äµÄÊ±¼ä²î¡£
+            // DF125: GLONASS L2 å­å¸¦ä¸Ž L1 å­å¸¦ä¸­ä¼ è¾“å¯¼èˆª RF ä¿¡å·ä¹‹é—´çš„æ—¶é—´å·®ã€‚
             double m_dbGmDeltaTn = 0.0;
-            // DF126: GLONASS µ¼º½Êý¾ÝµÄÁäÆÚ¡£
+            // DF126: GLONASS å¯¼èˆªæ•°æ®çš„é¾„æœŸã€‚
             unsigned char m_ui8En = 0U;
-            // DF127: GLONASS M ÎÀÐÇµÄ P4 Âë±êÖ¾¡£
+            // DF127: GLONASS M å«æ˜Ÿçš„ P4 ç æ ‡å¿—ã€‚
             unsigned char m_ui8GmP4 = 0U;
-            // DF128: Tb Ê±¿Ì GLONASS-M ÎÀÐÇ URA ¹À¼ÆÖµ
+            // DF128: Tb æ—¶åˆ» GLONASS-M å«æ˜Ÿ URA ä¼°è®¡å€¼
             unsigned char m_ui8GmFt = 0U;
-            // DF129: ÒÔËÄÄêÎª¼ä¸ôµÄ£¬´ÓÈòÄêµÄÒ»ÔÂÒ»ÈÕ¿ªÊ¼µÄ GLONASS ÈÕÀúÌìÊý¡£Èç¹û DF129 ²»ÎªÁã£¬ÔòÆäÖµÊÇÓë²ÎÊý t b
-            // ÏàÓ¦ÈÕÀúÌìÊýµÄ¼ÆËãÖµ¡£
+            // DF129: ä»¥å››å¹´ä¸ºé—´éš”çš„ï¼Œä»Žé—°å¹´çš„ä¸€æœˆä¸€æ—¥å¼€å§‹çš„ GLONASS æ—¥åŽ†å¤©æ•°ã€‚å¦‚æžœ DF129 ä¸ä¸ºé›¶ï¼Œåˆ™å…¶å€¼æ˜¯ä¸Žå‚æ•° t b
+            // ç›¸åº”æ—¥åŽ†å¤©æ•°çš„è®¡ç®—å€¼ã€‚
             unsigned char m_ui16GmNt = 0U;
-            // DF130:  GLONASS ÎÀÐÇÀàÐÍ¡£01 = GLONASS - M ÎÀÐÇ£¬ËùÓÐ GLONASS - M Êý¾Ý×Ö¶Î¾ùÓÐÐ§£»00 = ·Ç GLONASS - M
-            // ÎÀÐÇ£¬ËùÓÐ GLONASS - M Êý¾Ý×Ö¶ÎÎÞÐ§¡£
+            // DF130:  GLONASS å«æ˜Ÿç±»åž‹ã€‚01 = GLONASS - M å«æ˜Ÿï¼Œæ‰€æœ‰ GLONASS - M æ•°æ®å­—æ®µå‡æœ‰æ•ˆï¼›00 = éž GLONASS - M
+            // å«æ˜Ÿï¼Œæ‰€æœ‰ GLONASS - M æ•°æ®å­—æ®µæ— æ•ˆã€‚
             unsigned char m_ui8GmM = 0U;
-            // DF131: ±íÊ¾µçÎÄÖÐÊÇ·ñ°üº¬´Ó×ÓÖ¡µÚÎå×Ö·û´®ÌáÈ¡³öµÄ GLONASS ÐÇÀúµçÎÄµÄÆäÓà²ÎÊý£¨Èç
-            // DF132~DF136£©¡£ÕâÐ©²ÎÊý²»ÊôÓÚÔ¤¶¨ÒåµÄÐÇÀúÊý¾Ý£¬µ«ÓÐÖúÓÚ¶¨Î»ÓëÊÚÊ±¡£1 = µçÎÄÖÐ°üº¬¸½¼ÓÊý¾Ý£»0 = DF132~DF136
-            // ÎÞÐ§£¬È¡ÖµËæ»ú¡£ AOAD means AvailabilityOfAdditionalData
+            // DF131: è¡¨ç¤ºç”µæ–‡ä¸­æ˜¯å¦åŒ…å«ä»Žå­å¸§ç¬¬äº”å­—ç¬¦ä¸²æå–å‡ºçš„ GLONASS æ˜ŸåŽ†ç”µæ–‡çš„å…¶ä½™å‚æ•°ï¼ˆå¦‚
+            // DF132~DF136ï¼‰ã€‚è¿™äº›å‚æ•°ä¸å±žäºŽé¢„å®šä¹‰çš„æ˜ŸåŽ†æ•°æ®ï¼Œä½†æœ‰åŠ©äºŽå®šä½ä¸ŽæŽˆæ—¶ã€‚1 = ç”µæ–‡ä¸­åŒ…å«é™„åŠ æ•°æ®ï¼›0 = DF132~DF136
+            // æ— æ•ˆï¼Œå–å€¼éšæœºã€‚ AOAD means AvailabilityOfAdditionalData
             unsigned char m_ui8AOAD = 0U;
-            // DF132: ±íÊ¾ÒÔËÄÄêÎªÖÜÆÚµÄ£¬²ÎÊý ¦Ó C ËùÊ¹ÓÃ GLONASS ÈÕÀúÌìÊý¡£
+            // DF132: è¡¨ç¤ºä»¥å››å¹´ä¸ºå‘¨æœŸçš„ï¼Œå‚æ•° Ï„ C æ‰€ä½¿ç”¨ GLONASS æ—¥åŽ†å¤©æ•°ã€‚
             unsigned char m_ui16NA = 0U;
-            // DF133: ±íÊ¾ÒÔ N A ÈÕÆðÊ¼Ê±¿ÌÎª²Î¿¼µÄ GLONASS ÏµÍ³Ê±Óë UTC£¨SU£©Ö®²î¡£
+            // DF133: è¡¨ç¤ºä»¥ N A æ—¥èµ·å§‹æ—¶åˆ»ä¸ºå‚è€ƒçš„ GLONASS ç³»ç»Ÿæ—¶ä¸Ž UTCï¼ˆSUï¼‰ä¹‹å·®ã€‚
             double m_dbTc = 0.0;
-            // DF134: ±íÊ¾´Ó 1996 Äê¿ªÊ¼µÄ£¬ÒÔ 4 ÄêÎªÖÜÆÚµÄÖÜÆÚÊý¡£
+            // DF134: è¡¨ç¤ºä»Ž 1996 å¹´å¼€å§‹çš„ï¼Œä»¥ 4 å¹´ä¸ºå‘¨æœŸçš„å‘¨æœŸæ•°ã€‚
             unsigned char m_ui8GmN4 = 0U;
-            // DF135: ±íÊ¾´Ó×ÓÖ¡ÖÐµÚ 5 ¸ö×Ö·û´®ÖÐÌáÈ¡³öµÄ GLONASS-M l n ×Ö¡£
+            // DF135: è¡¨ç¤ºä»Žå­å¸§ä¸­ç¬¬ 5 ä¸ªå­—ç¬¦ä¸²ä¸­æå–å‡ºçš„ GLONASS-M l n å­—ã€‚
             double m_dbGmTGps = 0.0;
-            // DF136: ±íÊ¾´Ó×ÓÖ¡ÖÐµÚ 5 ¸ö×Ö·û´®ÖÐÌáÈ¡³öµÄ GLONASS-M l n ×Ö¡£
+            // DF136: è¡¨ç¤ºä»Žå­å¸§ä¸­ç¬¬ 5 ä¸ªå­—ç¬¦ä¸²ä¸­æå–å‡ºçš„ GLONASS-M l n å­—ã€‚
             unsigned char m_ui8GmLn5 = 0U;
             // Reserved
             unsigned char m_ui8Reserved = 0U;
         };
 
+        /**
+         *  @class       SStandardTime
+         *  @brief       å¹´æœˆæ—¥æ—¶åˆ†ç§’çš„æ—¶é—´ç»“æž„
+         *  @author      wuchuanfei@sixents.com
+         *  @note        ç§’ç²¾ç¡®åˆ°æ¯«ç§’
+         */
         struct SStandardTime
         {
-            int m_year;
-            int m_month;
-            int m_day;
-            int m_hour;
-            int m_minute;
-            double m_second;
+            INT32 m_year;    // å¹´
+            INT32 m_month;   // æœˆ
+            INT32 m_day;     // æ—¥
+            INT32 m_hour;    // æ—¶
+            INT32 m_minute;  // åˆ†
+            DOUBLE m_second; // ç§’ï¼Œç²¾ç¡®åº¦ï¼š3ä½å°æ•°ï¼ˆæ¯«ç§’çº§ï¼‰
         };
 
+        /**
+         *  @class       SGNSSTime
+         *  @brief       å‘¨å†…ç§’çš„æ—¶é—´ç»“æž„
+         *  @author      wuchuanfei@sixents.com
+         *  @note        ç§’ç²¾ç¡®åˆ°æ¯«ç§’ï¼Œç›®å‰ä»…æ”¯æŒGPS/BD/Galileoä¸‰ç§å«æ˜Ÿç³»ç»Ÿ
+         */
         struct SGNSSTime
         {
-            int m_week;
-            double m_secAndMsec;
-            int m_satType;
+            INT32 m_week;        // å‘¨
+            DOUBLE m_secAndMsec; // ç§’ï¼Œç²¾ç¡®åº¦ï¼š3ä½å°æ•°ï¼ˆæ¯«ç§’çº§ï¼‰
+            INT32 m_timeType;    // GPSã€BDã€Galileo
         };
 
-        // ´óµØ×ø±ê
+        // å¤§åœ°åæ ‡
         struct SBLH
         {
-            double m_lon;
-            double m_lat;
-            double m_height;
+            DOUBLE m_lon;    // ç»åº¦ï¼Œç²¾ç¡®åº¦ï¼š11ä½å°æ•°
+            DOUBLE m_lat;    // çº¬åº¦ï¼Œç²¾ç¡®åº¦ï¼š11ä½å°æ•°
+            DOUBLE m_height; // é«˜ç¨‹ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
         };
 
-        // ¿Õ¼äÖ±½Ç×ø±ê
+        // ç©ºé—´ç›´è§’åæ ‡
         struct SXYZ
         {
-            double m_x;
-            double m_y;
-            double m_z;
+            DOUBLE m_x; // xè½´ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
+            DOUBLE m_y; // xè½´ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
+            DOUBLE m_z; // xè½´ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
         };
 
-        // Õ¾ÐÄ×ø±ê
+        // ç«™å¿ƒåæ ‡
         struct SENU
         {
-            double m_east;
-            double m_north;
-            double m_up;
+            DOUBLE m_east;  // ä¸œï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
+            DOUBLE m_north; // åŒ—ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
+            DOUBLE m_up;    // å¤©ï¼Œç²¾ç¡®åº¦ï¼š9ä½å°æ•°
+        };
+
+        // åæ ‡ç³»ç»Ÿç»“æž„å®šä¹‰
+        struct SCoordData
+        {
+            DOUBLE a; // åœ°çƒé•¿åŠè½´ï¼Œç²¾ç¡®åº¦ï¼š1ä½å°æ•°
+            DOUBLE f; // åœ°çƒæ‰çŽ‡ï¼Œåˆ†æ¯ç²¾ç¡®åº¦ï¼š9ä½å°æ•°
         };
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

@@ -503,6 +503,7 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
         break;
     case 4:    // BD时间
         rtkTime = bdt2time(week, sec);
+        rtkTime = bdt2gpst(rtkTime);
         break;
     default:
         break;

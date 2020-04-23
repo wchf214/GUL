@@ -43,6 +43,12 @@
     <Filter Include="源文件\GNSSEph">
       <UniqueIdentifier>{ab4888f8-3f83-4e49-8622-fc66f55500c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\AppIFs">
+      <UniqueIdentifier>{be57cc5f-ddab-4f1c-80b3-f5688ce5f977}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\AppIFs">
+      <UniqueIdentifier>{75140704-fee9-4089-8469-9572abfd26af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DllMain\GNSSCommonDef.h">
@@ -66,6 +72,9 @@
     <ClInclude Include="Ephemeris\CGNSSEphemeris.h">
       <Filter>头文件\GNSSEph</Filter>
     </ClInclude>
+    <ClInclude Include="AppIFs\AppInterface.h">
+      <Filter>头文件\AppIFs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain\GNSSUtilityInterface.cpp">
@@ -82,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="Ephemeris\CGNSSEphemeris.cpp">
       <Filter>源文件\GNSSEph</Filter>
+    </ClCompile>
+    <ClCompile Include="AppIFs\AppInterface.cpp">
+      <Filter>源文件\AppIFs</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

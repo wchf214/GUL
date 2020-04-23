@@ -30,8 +30,8 @@ namespace sixents
             m_CoordData.insert(std::make_pair(4, cgcs2000));
         }
 
-        int CGNSSCoord::XYZ2BLH(const double x, const double y, const double z,
-            double& lon, double& lat, double& height, int i)
+        INT32 CGNSSCoord::XYZ2BLH(const double x, const double y, const double z,
+            double& lon, double& lat, double& height, INT32 i)
         {
             /*      do
                   {
@@ -49,8 +49,8 @@ namespace sixents
                   } while (false);*/
             return 1;
         }
-        int CGNSSCoord::BLH2XYZ(const double lon, const double lat, const double height,
-            double& x, double& y, double& z, int i)
+        INT32 CGNSSCoord::BLH2XYZ(const double lon, const double lat, const double height,
+            double& x, double& y, double& z, INT32 i)
         {
             do
             {
@@ -65,7 +65,7 @@ namespace sixents
         }
 
         // transform between XYZ and ENU
-        int CGNSSCoord::XYZ2ENU(const double origin_X, const double origin_Y, const double origin_Z,
+        INT32 CGNSSCoord::XYZ2ENU(const double origin_X, const double origin_Y, const double origin_Z,
             const double target_B, const double target_L, const double target_H,
             double& target_East, double& target_North, double& target_Up)
         {
@@ -79,7 +79,7 @@ namespace sixents
                 tmpXYZ.m_x = target_X - origin_X;
                 tmpXYZ.m_y = target_Y - origin_Y;
                 tmpXYZ.m_z = target_Z - origin_Z;
-                double m = 3.1415926 / 180;
+                double m = PI / 180;
                 target_East = -sin(target_L*m)*tmpXYZ.m_x + cos(target_L*m)*tmpXYZ.m_y;
                 target_North = -sin(target_B*m)*cos(target_L*m)*tmpXYZ.m_x - sin(target_B*m)*sin(target_L*m)*tmpXYZ.m_y
                     + cos(target_B*m)*tmpXYZ.m_z;
@@ -88,7 +88,7 @@ namespace sixents
             } while (false);
             return 1;
         }
-        int CGNSSCoord::ENU2XYZ(const double origin_B, const double origin_L, const double origin_H,
+        INT32 CGNSSCoord::ENU2XYZ(const double origin_B, const double origin_L, const double origin_H,
             const double target_East, const double target_North, double target_Up,
             double& target_X, double& target_Y, double& target_Z)
         {

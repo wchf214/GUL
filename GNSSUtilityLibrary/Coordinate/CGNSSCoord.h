@@ -1,18 +1,18 @@
 /**@file           CGNSSCoord
- *  @brief         ◊¯±Í¿‡
- *  @details       À˘”–◊¯±Íœ‡πÿµƒÀ„∑®
+ *  @brief         ÂùêÊ†áÁ±ª
+ *  @details       ÊâÄÊúâÂùêÊ†áÁõ∏ÂÖ≥ÁöÑÁÆóÊ≥ï
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
- *  @note          ‘›Œﬁ
+ *  @note          ÊöÇÊó†
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
 #ifndef _GNSS_COORDINATE_H
 #define _GNSS_COORDINATE_H
-
-#include "../DllMain/GNSSDataStruct.h"
+#include <map>
 #include "../DllMain/GNSSCommonDef.h"
+#include "../DllMain/GNSSDataStruct.h"
 namespace sixents
 {
     namespace GNSSUtilityLib
@@ -23,7 +23,7 @@ namespace sixents
             // coordType is 1, xyz set to m_spaceCoord, and change value set to m_geoCoord
             // coordType is 2, xyz set to m_geoCoord, and change value set to m_spaceCoord
             // coordType is 3, xyz set to m_stationCoord
-            CGNSSCoord(const double x, const double y, const double z, const int coordType);
+            CGNSSCoord(const DOUBLE x, const DOUBLE y, const DOUBLE z, const INT32 coordType);
             CGNSSCoord(const CGNSSCoord& coord);
             ~CGNSSCoord();
 
@@ -37,28 +37,40 @@ namespace sixents
 
             void SetENU(const SENU& coord);
             SENU GetENU();
-            // transfrom between XYZ and BLH, ¥¶¿Ìƒ⁄≤ø≥…‘±±‰¡ø
-            int XYZ2BLH(const double x, const double y, const double z,
-                double& lon, double& lat, double& height, int i);
-            int BLH2XYZ(const double lon, const double lat, const double height,
-                double& x, double& y, double& z, int i);
+            // transfrom between XYZ and BLH, Â§ÑÁêÜÂÜÖÈÉ®ÊàêÂëòÂèòÈáè
+            INT32
+            XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lon, DOUBLE& lat, DOUBLE& height, INT32 i);
+            INT32
+            BLH2XYZ(const DOUBLE lon, const DOUBLE lat, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z, INT32 i);
             // transform between XYZ and ENU
-            int XYZ2ENU(const double origin_X, const double origin_Y, const double origin_Z,
-                const double target_B, const double target_L, const double target_H,
-                double& target_East, double& target_North, double& target_Up);
+            INT32 XYZ2ENU(const DOUBLE origin_X,
+                          const DOUBLE origin_Y,
+                          const DOUBLE origin_Z,
+                          const DOUBLE target_B,
+                          const DOUBLE target_L,
+                          const DOUBLE target_H,
+                          DOUBLE& target_East,
+                          DOUBLE& target_North,
+                          DOUBLE& target_Up);
 
-            int ENU2XYZ(const double origin_B, const double origin_L, const double origin_H,
-                const double target_East, const double target_North, double target_Up,
-                double& target_X, double& target_Y, double& target_Z);
+            INT32 ENU2XYZ(const DOUBLE origin_B,
+                          const DOUBLE origin_L,
+                          const double origin_H,
+                          const DOUBLE target_East,
+                          const DOUBLE target_North,
+                          DOUBLE target_Up,
+                          DOUBLE& target_X,
+                          DOUBLE& target_Y,
+                          DOUBLE& target_Z);
 
-            void xyz2enu(const double *pos, double *E);
+            void xyz2enu(const DOUBLE* pos, DOUBLE* E);
 
         private:
             SXYZ m_spaceCoord;
             SBLH m_geoCoord;
             SENU m_stationCoord;
 
-            std::map<int, SCoordData> m_CoordData;
+            std::map<INT32, SCoordData> m_CoordData;
         };
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

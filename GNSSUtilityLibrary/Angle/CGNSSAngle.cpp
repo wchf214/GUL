@@ -6,6 +6,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
+#include "../DllMain/GNSSCommonDef.h"
+#include "../DllMain/GNSSDataStruct.h"
+
 namespace sixents
 {
     namespace GNSSUtilityLib
@@ -24,7 +28,7 @@ namespace sixents
             }
         }
 
-        CGNSSAngle::CGNSSAngle(const int degree, const int minute, const double second)
+        CGNSSAngle::CGNSSAngle(const INT32 degree, const INT32 minute, const double second)
         {
             m_degree = degree;
             m_minute = minute;
@@ -34,32 +38,32 @@ namespace sixents
         CGNSSAngle::~CGNSSAngle()
         {
         }
-        int CGNSSAngle::GetLength(const bool formatType)
+        INT32 CGNSSAngle::GetLength(const bool formatType)
         {
             if (formatType == true)
             {
                 std::stringstream ss;
                 ss << std::setprecision(15) << m_decimalDegree;
                 std::string str = ss.str();  // 3.14159265358979
-                str += "¡ã";
+                str += "Â°";
                 std::cout << str << std::endl;
-                int curLen = strlen(str.c_str()) + 1;
+                INT32 curLen = strlen(str.c_str()) + 1;
                 return curLen;
             }
             else
             {
                 std::string str = std::to_string(m_degree);
-                str += "¡ã";
+                str += "Â°";
                 str = std::to_string(m_minute);
-                str += "¡ä";
+                // str += "â€²";
                 str = std::to_string(m_second);
-                str += "¡å";
-                int curLen = strlen(str.c_str()) + 1;
+                // str += "â€³";
+                INT32 curLen = strlen(str.c_str()) + 1;
                 return curLen;
             }
         }
 
-        int CGNSSAngle::ToDegString(char* angleString, int& len, const bool formatType)
+        INT32 CGNSSAngle::ToDegString(char* angleString, INT32& len, const bool formatType)
         {
             /*  if (nullptr == angleString || m_formatString.length() != len)
               {
@@ -70,9 +74,9 @@ namespace sixents
                 std::stringstream ss;
                 ss << std::setprecision(15) << m_decimalDegree;
                 std::string str = ss.str();  // 3.14159265358979
-                str += "¡ã";
+                str += "Â°";
                 std::cout << str << std::endl;
-                int curLen = strlen(str.c_str()) + 1;
+                INT32 curLen = strlen(str.c_str()) + 1;
                 if (curLen != len)
                 {
                     return curLen;
@@ -82,38 +86,38 @@ namespace sixents
             else
             {
                 std::string result = "";
-                result += std::to_string(m_degree) + "¡ã";
-                result += std::to_string(m_minute) + "¡ä";
-                result += std::to_string(m_second) + "¡å";
+                result += std::to_string(m_degree) + "";
+                result += std::to_string(m_minute) + "";
+                result += std::to_string(m_second) + "";
 
                 strcpy_s(angleString, strlen(angleString) + 1, result.c_str());
             }
             return 1;
         }
 
-        int CGNSSAngle::DegToRad(double degree, double& radian)
+        INT32 CGNSSAngle::DegToRad(double degree, double& radian)
         {
             do
             {
-                radian = (degree * 3.1415926) / 180;
+                radian = (degree * PI) / 180;
             } while (false);
             return 1;
         }
 
-        int CGNSSAngle::RadToDeg(double radian, double& degree)
+        INT32 CGNSSAngle::RadToDeg(double radian, double& degree)
         {
             do
             {
-                degree = radian * 180 / 3.1415926;
+                degree = radian * 180 / PI;
             } while (false);
             return 1;
         }
 
-        int CGNSSAngle::DegToDMS(double Degree, int& degree, int& minute, double& second)
+        INT32 CGNSSAngle::DegToDMS(double Degree, INT32& degree, INT32& minute, double& second)
         {
             do
             {
-                int sign = 0;
+                INT32 sign = 0;
                 if (Degree >= 0)
                 {
                     sign = 1;
@@ -124,20 +128,20 @@ namespace sixents
                 }
                 Degree = fabs(Degree);
                 degree = floor(Degree);
-                double degreetomin = (Degree - degree)*60.0;
+                double degreetomin = (Degree - degree)*NUM_SIXTY;
                 minute = floor(degreetomin);
-                double mintosec = (degreetomin - minute)*60.0;
+                double mintosec = (degreetomin - minute)*NUM_SIXTY;
                 second = floor(mintosec);
                 degree *= sign;
             } while (false);
             return 1;
         }
-        int CGNSSAngle::DMSToDeg(const int degree, const int minute, const double second, double& Degree)
+        INT32 CGNSSAngle::DMSToDeg(const INT32 degree, const INT32 minute, const double second, double& Degree)
         {
             do
             {
                 double sign = degree < 0.0 ? -1.0 : 1.0;
-                Degree = sign * (fabs(degree) + minute / 60.0 + second / 3600.0);
+                Degree = sign * (fabs(degree) + minute / NUM_SIXTY + second / DEG_TO_SEC);
             } while (false);
             return 1;
         }

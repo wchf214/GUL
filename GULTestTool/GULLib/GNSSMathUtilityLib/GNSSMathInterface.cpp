@@ -1,4 +1,3 @@
-﻿#define DLL_EXPORT
 #include "GNSSMathInterface.h"
 
 #include "GNSSMatrix/CGNSSMatrix.h"

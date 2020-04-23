@@ -28,7 +28,7 @@ namespace sixents
             return m_matrix;
         }
 
-        CGNSSMatrix CGNSSMatrix::operator+(CGNSSMatrix& matrix)  const // ¼Ó·¨
+        CGNSSMatrix CGNSSMatrix::operator+(CGNSSMatrix& matrix)  const // åŠ æ³•
         {
             CGNSSMatrix mat;
             if (matrix.GetMatrix().row != m_matrix.row || matrix.GetMatrix().col != m_matrix.col)
@@ -45,7 +45,7 @@ namespace sixents
             return matrix;
         }
 
-        CGNSSMatrix CGNSSMatrix::operator-(CGNSSMatrix& matrix)  // ¼õ·¨
+        CGNSSMatrix CGNSSMatrix::operator-(CGNSSMatrix& matrix)  // å‡æ³•
         {
             CGNSSMatrix mat;
 
@@ -63,41 +63,41 @@ namespace sixents
             return matrix;
         }
 
-        CGNSSMatrix CGNSSMatrix::operator*(CGNSSMatrix& matrix) // ³Ë·¨
+        CGNSSMatrix CGNSSMatrix::operator*(CGNSSMatrix& matrix) // ä¹˜æ³•
         {
-            //·ÖÅä±»³ËÊı
-            Eigen::MatrixXd mat1(this->GetMatrix().row, this->GetMatrix().col);
-            //·ÖÅä³ËÊı
+            //åˆ†é…è¢«ä¹˜æ•°
+            Eigen::MatrixXd mat1(m_matrix.row, m_matrix.col);
+            //åˆ†é…ä¹˜æ•°
             Eigen::MatrixXd mat2(matrix.GetMatrix().row, matrix.GetMatrix().col);
-            //·ÖÅä½á¹û
-            Eigen::MatrixXd matall(this->GetMatrix().row, matrix.GetMatrix().col);
-            if (this->GetMatrix().col != matrix.GetMatrix().row)
+            //åˆ†é…ç»“æœ
+            Eigen::MatrixXd matResult(m_matrix.row, matrix.GetMatrix().col);
+            if (m_matrix.col != matrix.GetMatrix().row)
             {
                 return matrix;
-            }
-
-            for (int i = 0; i < matrix.GetMatrix().row; i++)
-            {
-                for (int j = 0; j < matrix.GetMatrix().col; j++)
-                {
-                    mat1(i, j) = m_matrix.matrixNum[i][j];
-                }
             }
 
             for (int i = 0; i < m_matrix.row; i++)
             {
                 for (int j = 0; j < m_matrix.col; j++)
                 {
+                    mat1(i, j) = m_matrix.matrixNum[i][j];
+                }
+            }
+
+            for (int i = 0; i < matrix.GetMatrix().row; i++)
+            {
+                for (int j = 0; j < matrix.GetMatrix().col; j++)
+                {
                     mat2(i, j) = matrix.GetMatrix().matrixNum[i][j];
                 }
             }
 
-            matall = mat1 * mat2;
-            for (int i = 0; i < 3; i++)
+            matResult = mat1 * mat2;
+            for (int i = 0; i < m_matrix.row; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    std::cout << matall(i, j) << std::endl;
+                    std::cout << matResult(i, j) << std::endl;
                 }
             }
             return matrix;
