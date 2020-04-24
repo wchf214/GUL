@@ -13,6 +13,7 @@
 #include <map>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
+#include "../DllMain/GNSSCommonDef.h"
 namespace sixents
 {
     namespace GNSSUtilityLib
@@ -43,33 +44,20 @@ namespace sixents
             INT32
             BLH2XYZ(const DOUBLE lon, const DOUBLE lat, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z, INT32 i);
             // transform between XYZ and ENU
-            INT32 XYZ2ENU(const DOUBLE origin_X,
-                          const DOUBLE origin_Y,
-                          const DOUBLE origin_Z,
-                          const DOUBLE target_B,
-                          const DOUBLE target_L,
-                          const DOUBLE target_H,
-                          DOUBLE& target_East,
-                          DOUBLE& target_North,
-                          DOUBLE& target_Up);
+            int XYZ2ENU(const DOUBLE origin_B, const DOUBLE origin_L, const DOUBLE origin_H,
+                const DOUBLE target_X, const DOUBLE target_Y, const DOUBLE target_Z,
+                DOUBLE& target_East, DOUBLE& target_North, DOUBLE& target_Up);
 
-            INT32 ENU2XYZ(const DOUBLE origin_B,
-                          const DOUBLE origin_L,
-                          const double origin_H,
-                          const DOUBLE target_East,
-                          const DOUBLE target_North,
-                          DOUBLE target_Up,
-                          DOUBLE& target_X,
-                          DOUBLE& target_Y,
-                          DOUBLE& target_Z);
+            int ENU2XYZ(const DOUBLE Cur_East, const DOUBLE Cur_North, const DOUBLE Cur_Up,
+                                    const DOUBLE ref_X, const DOUBLE ref_Y, const DOUBLE ref_Z,
+                DOUBLE& Cur_X, DOUBLE& Cur_Y, DOUBLE& Cur_Z);
 
-            void xyz2enu(const DOUBLE* pos, DOUBLE* E);
-
+            void xyz2enu(const DOUBLE *pos, DOUBLE *E);
+            double CalcB(DOUBLE X, DOUBLE Y, DOUBLE Z);
         private:
             SXYZ m_spaceCoord;
             SBLH m_geoCoord;
             SENU m_stationCoord;
-
             std::map<INT32, SCoordData> m_CoordData;
         };
     } // end namespace GNSSUtilityLib

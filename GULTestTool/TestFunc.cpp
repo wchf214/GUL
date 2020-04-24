@@ -67,9 +67,16 @@ namespace sixents {
                                                   double& x, double& y, double& z);
         DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj,
                                            double& x, double& y, double& z);
-        DLL_API int STD_CALL FormatAngleByDegree(const double degree, char* formatString, const bool formatType);
-        DLL_API int STD_CALL FormatAngleByDMS(const int degree, const int minute, const double sec,
-                                              char* formatString, const bool formatType);
+        DLL_API int STD_CALL FormatAngleByDegree(const double degree,
+                                                 char* formatString,
+                                                 int& len,
+                                                 const bool formatType);
+        DLL_API int STD_CALL FormatAngleByDMS(const int degree,
+                                              const int minute,
+                                              const double sec,
+                                              char* formatString,
+                                              int& len,
+                                              const bool formatType);
         DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
         DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
         DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
@@ -369,8 +376,8 @@ void CTestFunc::InitFuncMap()
     mFuncs[20] = &CTestFunc::CalcEphSatClock; // 计算卫星钟差（非GLONASS）
     mFuncs[21] = &CTestFunc::CalcEphSatPos; // 计算卫星位置（非GLONASS）
     mFuncs[22] = &CTestFunc::CalcGlonassEphSatPos; // 计算卫星位置（GLONASS）
-    mFuncs[23] = &CTestFunc::XYZ2BLH; // 大地坐标转换为空间直角坐标
-    mFuncs[24] = &CTestFunc::BLH2XYZ; // 空间直角坐标转换为大地坐标
+    mFuncs[23] = &CTestFunc::BLH2XYZ; // 大地坐标转换为空间直角坐标
+    mFuncs[24] = &CTestFunc::XYZ2BLH; // 空间直角坐标转换为大地坐标
     mFuncs[25] = &CTestFunc::XYZ2ENU; // 空间直角坐标转换为站心坐标
     mFuncs[26] = &CTestFunc::ENU2XYZ; // 站心坐标转换为空间直角坐标
     mFuncs[27] = &CTestFunc::Deg2Rad; // 度转换为弧度
@@ -1353,7 +1360,8 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
     QString rtkRet("null");
     // 执行GUL接口
     char* gulChRet = nullptr;
-    sixents::GNSSUtilityLib::FormatAngleByDegree(deg, gulChRet);
+    int len = 0;
+    sixents::GNSSUtilityLib::FormatAngleByDegree(deg, gulChRet, len);
     QString gulRet = gulChRet;
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -1379,7 +1387,8 @@ bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
     QString rtkRet("null");
     // 执行GUL接口
     char* gulChRet = nullptr;
-    sixents::GNSSUtilityLib::FormatAngleByDMS(degree, minute, sec, gulChRet, false);
+    int len = 0;
+    sixents::GNSSUtilityLib::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
     QString gulRet = gulChRet;
     // 组装结果
     result = rtkRet + ";" + gulRet;

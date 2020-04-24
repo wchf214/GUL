@@ -1,4 +1,4 @@
-/**@file           CGNSSCoord
+﻿/**@file           CGNSSCoord
  *  @brief         坐标类
  *  @details       所有坐标相关的算法
  *  @author        wuchuanfei@sixens.com
@@ -10,6 +10,7 @@
 
 #ifndef _GNSS_COMMON_DEF_H
 #define _GNSS_COMMON_DEF_H
+#include <string>
 #include "GNSSDataStruct.h"
 
 namespace sixents
@@ -17,10 +18,11 @@ namespace sixents
     namespace GNSSUtilityLib
     {
         // 枚举值定义
-        // 卫星类型定义
-        enum SAT_SYS_TYPE
+        // 时间类型定义
+        enum TIME_TYPE
         {
-            GPS = 1, // GPS
+            UTC = 1, // UTC
+            GPS,     // GPS
             GLONASS, // 格洛纳斯
             GALILEO, // 伽利略
             BDS      // 北斗
@@ -55,6 +57,12 @@ namespace sixents
         // static const int RETURN_INVALID_PARAMETER = -8;    // 无效参数
 
         // 常量定义
+        // For Time
+        const std::string DAY_INTERVAL = "-";      /* 日期间隔符 */
+        const std::string TIME_INTERVAL = ":";     /* 时间间隔符 */
+        const std::string WEEK_SEC_INTERVAL = ","; /* 周内秒间隔符 */
+
+        const static SStandardTime EPOCHT0 = {1970, 1, 1, 0, 0, 0};
         const static DOUBLE GPST0[] = {1980, 1, 6, 0, 0, 0}; /* gps time reference */
         const static DOUBLE GST0[] = {1999, 8, 22, 0, 0, 0}; /* galileo system time reference */
         const static DOUBLE BDT0[] = {2006, 1, 1, 0, 0, 0};  /* beidou time reference */
@@ -66,7 +74,7 @@ namespace sixents
         const static DOUBLE SIN_5 = -0.0871557427476582; /* sin(-5.0 deg) */
         const static DOUBLE COS_5 = 0.9961946980917456;  /* cos(-5.0 deg) */
         const INT32 DEG_TO_SEC = 3600;                   /* 角度转秒 */
-        /* leap seconds (y,m,d,h,m,s,utc-gpst) */
+        /* leap seconds (y,month,d,h,min,s,utc-gpst) */
         const static DOUBLE GPS_LEAPSEC_INFO[65][7] = {{2017, 1, 1, 0, 0, 0, -18},
                                                        {2015, 7, 1, 0, 0, 0, -17},
                                                        {2012, 7, 1, 0, 0, 0, -16},
@@ -85,14 +93,14 @@ namespace sixents
                                                        {1983, 7, 1, 0, 0, 0, -3},
                                                        {1982, 7, 1, 0, 0, 0, -2},
                                                        {1981, 7, 1, 0, 0, 0, -1},
-                                                       {0}};
+                                                       {1980, 1, 6, 0, 0, 0, 0}};
 
         /* leap seconds (y,m,d,h,m,s,utc-gpst) */
         const static DOUBLE BDS_LEAPSEC_INFO[65][7] = {{2017, 1, 1, 0, 0, 0, -4},
                                                        {2015, 7, 1, 0, 0, 0, -3},
                                                        {2012, 7, 1, 0, 0, 0, -2},
                                                        {2009, 1, 1, 0, 0, 0, -1},
-                                                       {0}};
+                                                       {2006, 1, 1, 0, 0, 0, 0}};
 
         const static DOUBLE J2_GLO = 1.0826257E-3; /* 2nd zonal harmonic of geopot   ref [2] */
         const static INT32 MAX_ITER_KEPLER = 30;   /* max number of iteration of Kelpler */
@@ -111,9 +119,9 @@ namespace sixents
         const static DOUBLE DOUBLE_ZONE_LITTLE = -1E9;
         const static DOUBLE DOUBLE_ZONE_BIG = 1E9;
 
-        const INT32 EPOCH_TO_GPST0 = 315964800;
-        const INT32 EPOCH_TO_GALT0 = 935280000;
-        const INT32 EPOCH_TO_BDT0 = 1136073600;
+        const UINT64 EPOCH_TO_GPST0 = 315964800;
+        const UINT64 EPOCH_TO_GALT0 = 935280000;
+        const UINT64 EPOCH_TO_BDT0 = 1136073600;
 
         const INT32 WEEK_SEC = 604800;
         const INT32 DAY_SEC = 86400;
@@ -131,7 +139,15 @@ namespace sixents
         const INT32 NUM_SIX = 6;
         const INT32 NUM_SIXTY = 60;
         const INT32 FIFTEEN_MIN_TO_SEC = 15;
-    } // end namespace GNSSUtilityLib
+
+        const double LAT_ACCURACY = 1.0e-08;            //计算大地纬度B时的精度
+        const double EARTH_OBLATEO = 1 / 298.257222101; //扁率
+
+        const double EARTH_LONG_RADIUS = 6378137;                                                //长半径
+        const double EARTH_SHORT_RADIUS = EARTH_LONG_RADIUS - EARTH_OBLATEO * EARTH_LONG_RADIUS; //短半径
+        const double E2 = (EARTH_LONG_RADIUS * EARTH_LONG_RADIUS - EARTH_SHORT_RADIUS * EARTH_SHORT_RADIUS)
+                          / (EARTH_LONG_RADIUS * EARTH_LONG_RADIUS); // e为第一偏心率
+    }                                                                // end namespace GNSSUtilityLib
 } // end namespace sixents
 
 #endif

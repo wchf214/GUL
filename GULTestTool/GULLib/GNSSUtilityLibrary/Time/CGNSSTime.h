@@ -1,4 +1,4 @@
-/**@file           CGNSSTime
+﻿/**@file           CGNSSTime
  *  @brief         时间类
  *  @details       所有时间相关的算法
  *  @author        wuchuanfei@sixens.com
@@ -12,6 +12,7 @@
 #define _GNSS_TIME_H
 
 #include <string>
+#include <ctime>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
 
@@ -19,102 +20,96 @@ namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        /**
-         *  @class       CGNSSTime
-         *  @brief       GNSS时间类
-         *  @author      wuchuanfei@sixents.com
-         *  @note        N/A
-         */
         class CGNSSTime
         {
         public:
-            explicit CGNSSTime(const std::string timeString, const SAT_SYS_TYPE satType = GPS);
-            CGNSSTime(const INT32 week, const DOUBLE sec, const INT32 satType = GPS);
+            explicit CGNSSTime(const std::string timeString, const TIME_TYPE satType = GPS);
+            CGNSSTime(const int week, const double sec, const int satType = GPS);
             CGNSSTime(const SGNSSTime& time);
-            CGNSSTime(const INT32 year, const INT32 month, const INT32 day, const INT32 hour, const INT32 minute, const DOUBLE sec);
-            CGNSSTime(const INT32 year, const INT32 month, const INT32 day, const INT32 hour, const INT32 minute, const DOUBLE sec, const SAT_SYS_TYPE satType);
-            CGNSSTime(const SStandardTime& time, const SAT_SYS_TYPE satType = GPS);
+            CGNSSTime(const int year, const int month, const int day, const int hour, const int minute, const double sec);
+            CGNSSTime(const int year, const int month, const int day, const int hour, const int minute, const double sec, const TIME_TYPE satType);
+            CGNSSTime(const SStandardTime& time, const TIME_TYPE satType = GPS);
             CGNSSTime(const CGNSSTime& time);
             ~CGNSSTime();
 
             // format time and output string
-            INT32 StandardTimeToString(SStandardTime standardTime, CHAR* timeString, INT32& len);  // yyyy-MM-dd HH:mm:ss.sss
-            // INT32 GNSSToString(char* timeString, INT32& len); // ***w,**.*****s
-            INT32 StandardTimeToGNSSTime(const SStandardTime& standardTime, SGNSSTime& gnssTime, const INT32 satType);
+            int StandardTimeToString(SStandardTime standardTime, char* timeString, int& len);  // yyyy-MM-dd HH:mm:ss.sss
+            // int GNSSToString(char* timeString, int& len); // ***w,**.*****s
+            int StandardTimeToGNSSTime(const SStandardTime& standardTime, SGNSSTime& gnssTime, const int satType);
             // transform standard time to GNSS time;
 
-            INT32 GNSSTimeConvert(const SGNSSTime& srcGNSSTime, const INT32 srcSatType, SGNSSTime& tarGNSSTime, const INT32 tarSatType);
-            INT32 GNSSTimeToStandardTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const INT32 satType);
-            INT32 GNSSTimeToUTCTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const INT32 satType);
+            int GNSSTimeConvert(const SGNSSTime& srcGNSSTime, const int srcSatType, SGNSSTime& tarGNSSTime, const int tarSatType);
+            int GNSSTimeToStandardTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const int satType);
+            int GNSSTimeToUTCTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const int satType);
 
             // overload operation
             CGNSSTime operator=(const CGNSSTime& time) const;
             bool operator==(const CGNSSTime& time) const;
-            DOUBLE operator-(const CGNSSTime& time) const;
+            double operator-(const CGNSSTime& time) const;
             CGNSSTime operator+(const CGNSSTime& time) const;
-            CGNSSTime operator-(const DOUBLE& time) const;
-            INT32 operator>(const CGNSSTime& rTime) const;
-            INT32 operator>=(const CGNSSTime& rTime) const;
+            CGNSSTime operator-(const double& time) const;
+            int operator>(const CGNSSTime& rTime) const;
+            int operator>=(const CGNSSTime& rTime) const;
 
             SGNSSTime GetGNSSTime();
             SStandardTime GetStandardTime();
 
+            long WeekToSec(int week, double Sec, double& outPutWeek);
         public:
             SStandardTime m_standardTime;
             SGNSSTime m_gnssTime;
             std::string m_formatString;
-            SAT_SYS_TYPE m_curSatType;
+            TIME_TYPE m_curSatType;
 
-            INT32 Sec2EpochDataTime(UINT64 sec, INT32& year, INT32& month, INT32& day, INT32& hour, INT32& minute, DOUBLE& second);
-            DOUBLE EpochDataTime2Sec(const DOUBLE* m_epochTime);
+            int Time2Epoch(int year, int month, int day, int hour, int min, int sec, time_t& time);
 
-            DOUBLE EpochDataTime2Sec(INT32 year, INT32 month, INT32 day, INT32 hour, INT32 minute, DOUBLE second);
+            int SatTime2Epoch(const double* epochTime);
 
             //GUL_UC_001
-            INT32 GPST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
+            int GPST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_002
             //这个函数不需要了
             //GUL_UC_003
-            INT32 GST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
+            int GST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_004
-            INT32 BDT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
+            int BDT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime);
             //GUL_UC_005
-            INT32 GPST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
+            int GPST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_006
-            INT32 GLOT2UTC(SStandardTime GNSSTime, SStandardTime& utcTime);
+            int GLOT2UTC(SStandardTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_007
-            INT32 GST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
+            int GST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
             //GUL_UC_008
-            INT32 BDT2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
+            int BDT2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime);
 
             //GUL_UC_09
-            INT32 UTC2GPST(SStandardTime utcTime, SGNSSTime& GNSSTime);
+            int UTC2GPST(SStandardTime utcTime, SGNSSTime& GNSSTime);
             //GUL_UC_010
-            INT32 UTC2GLOT(SStandardTime utcTime, SStandardTime& GNSSTime);
+            int UTC2GLOT(SStandardTime utcTime, SStandardTime& GNSSTime);
             //GUL_UC_011
-            INT32 UTC2GST(SStandardTime utcTime, SGNSSTime& GNSSTime);
+            int UTC2GST(SStandardTime utcTime, SGNSSTime& GNSSTime);
             //GUL_UC_012
-            INT32 UTC2BDT(SStandardTime utcTime, SGNSSTime& GNSSTime);
+            int UTC2BDT(SStandardTime utcTime, SGNSSTime& GNSSTime);
 
             //GUL_UC_013
-            INT32 BDT2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime);
+            int BDT2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime);
             //GUL_UC_014
-            INT32 GLOT2GPST(SStandardTime srcGNSSTime, SGNSSTime& GPSTime);
+            int GLOT2GPST(SStandardTime srcGNSSTime, SGNSSTime& GPSTime);
             //GUL_UC_015
-            INT32 GST2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime);
+            int GST2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime);
 
             //GUL_UC_016
-            INT32 GPST2BDT(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime);
+            int GPST2BDT(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime);
             //GUL_UC_017
-            INT32 GPST2GLOT(SGNSSTime GPSTime, SStandardTime& tarGNSSTime);
+            int GPST2GLOT(SGNSSTime GPSTime, SStandardTime& tarGNSSTime);
             //GUL_UC_018
-            INT32 GPST2GST(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime);
+            int GPST2GST(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime);
 
-            BOOL_T TimeConvert(const DOUBLE srcTime, const INT32 srcSatType, DOUBLE& destTime, const INT32 destSatType);
-            INT32 WeekSecToSec(SGNSSTime srcTime, UINT64& tarSec);
-            INT32 SecToWeekSec(DOUBLE srcSec, INT32 satType, SGNSSTime& tarTime);
-            INT32 StandTimeToSec(SStandardTime srcTime, UINT64& tarSec);
-            INT32 SecToStandTime(DOUBLE srcSec, SStandardTime& tarTime);
+            bool TimeConvert(const double srcTime, const int srcSatType, double& destTime, const int destSatType);
+            int WeekSecToSec(SGNSSTime srcTime, time_t& tarSec);
+            int SecToWeekSec(time_t srcSec, int satType, SGNSSTime& tarTime);
+            int StandTimeToSec(SStandardTime srcTime, time_t& tarSec);
+            int SecToStandTime(time_t srcSec, SStandardTime& tarTime);
         };
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

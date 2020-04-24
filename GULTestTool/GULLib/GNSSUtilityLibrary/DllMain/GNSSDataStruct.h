@@ -57,10 +57,10 @@ namespace sixents
             unsigned char m_ui8SatId = 0U;
 
             // DF076: GPS周数,起算于1980 年1 月5 日子夜，每1024 周一个循环。
-            // DF289: Galileo周数，每4096周（约78年）一个循环。GST在OS-SIS-ICD-1.1中定义，开始于 1999 年 8 月 22 日星期日
-            // 00:00UT（8 月 21 日和 8 月 22 日之间的午夜）。
-            // DF452: QZSS星期数，循环周期为1024 周。起始于1980 年1 月5 号晚上的午夜 / 1 月6 号的早上。
-            // DF489: Roll-over every 8192 weeks starting from 00:00:00 UTC on Jan. 1,2006 of BDT.
+            // DF289: Galileo周数，每4096周（约78年）一个循环。GST在OS-SIS-ICD-1.1中定义，开始于 1999 年 8 月 22
+            // 日星期日 00:00UT（8 月 21 日和 8 月 22 日之间的午夜）。 DF452: QZSS星期数，循环周期为1024 周。起始于1980
+            // 年1 月5 号晚上的午夜 / 1 月6 号的早上。 DF489: Roll-over every 8192 weeks starting from 00:00:00 UTC on
+            // Jan. 1,2006 of BDT.
             unsigned char m_ui16WeekNum = 0U;
 
             // DF077: GPS卫星的用户等效距离精度，单位m
@@ -109,8 +109,8 @@ namespace sixents
             double m_dbAf0 = 0.0;
 
             // DF085: 表示卫星钟参数期卷号，低8 位与IODE 相同。
-            // DF456:  QZSS 卫星钟参数期卷号，同一组数据中 DF456 的低 8 位与 QZSSIODE(DF434)相同。与 GPS IODC 不同的是，QZSS
-            // IODC 的最高 2 位是 SV 时钟参数的计数器，每 15min 变更一次。单位：无单位
+            // DF456:  QZSS 卫星钟参数期卷号，同一组数据中 DF456 的低 8 位与 QZSSIODE(DF434)相同。与 GPS IODC
+            // 不同的是，QZSS IODC 的最高 2 位是 SV 时钟参数的计数器，每 15min 变更一次。单位：无单位
             unsigned char m_ui16Iodc = 0U;
 
             // DF086: GPS卫星轨道半径正弦调和改正项的振幅，单位m。
@@ -348,8 +348,8 @@ namespace sixents
             // 卫星，所有 GLONASS - M 数据字段无效。
             unsigned char m_ui8GmM = 0U;
             // DF131: 表示电文中是否包含从子帧第五字符串提取出的 GLONASS 星历电文的其余参数（如
-            // DF132~DF136）。这些参数不属于预定义的星历数据，但有助于定位与授时。1 = 电文中包含附加数据；0 = DF132~DF136
-            // 无效，取值随机。 AOAD means AvailabilityOfAdditionalData
+            // DF132~DF136）。这些参数不属于预定义的星历数据，但有助于定位与授时。1 = 电文中包含附加数据；0 =
+            // DF132~DF136 无效，取值随机。 AOAD means AvailabilityOfAdditionalData
             unsigned char m_ui8AOAD = 0U;
             // DF132: 表示以四年为周期的，参数 τ C 所使用 GLONASS 日历天数。
             unsigned char m_ui16NA = 0U;
@@ -373,12 +373,13 @@ namespace sixents
          */
         struct SStandardTime
         {
-            INT32 m_year;    // 年
-            INT32 m_month;   // 月
-            INT32 m_day;     // 日
-            INT32 m_hour;    // 时
-            INT32 m_minute;  // 分
-            DOUBLE m_second; // 秒，精确度：3位小数（毫秒级）
+            INT32 m_year;     // 年
+            INT32 m_month;    // 月
+            INT32 m_day;      // 日
+            INT32 m_hour;     // 时
+            INT32 m_minute;   // 分
+            DOUBLE m_second;  // 秒，精确度：3位小数（毫秒级）
+            INT32 m_timeType; // GPS、BD、Galileo
         };
 
         /**

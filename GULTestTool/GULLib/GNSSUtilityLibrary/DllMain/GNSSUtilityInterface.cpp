@@ -13,10 +13,6 @@
 #include "GNSSUtilityInterface.h"
 #include "../AppIFs/AppInterface.h"
 
-// 包含需要的内部头文件
-#include "../Angle/CGNSSAngle.h"
-#include "../Time/CGNSSTime.h"
-
 namespace sixents
 {
     namespace GNSSUtilityLib

@@ -13,7 +13,7 @@
 #include "../Coordinate/CGNSSCoord.h"
 #include "../DllMain/GNSSCommonDef.h"
 #include "../Ephemeris/CGNSSEphemeris.h"
-#include "../Time/CGNSSTime.h"
+#include "../Time/IGNSSTime.h"
 
 namespace sixents
 {
@@ -23,14 +23,14 @@ namespace sixents
         int CAppInterface::FormatWeekSecTime(
             const int week, const double sec, const int timeType, char* formatString, int& len)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(week, sec);
                 SGNSSTime sGnssTime = GNSSTime.GetGNSSTime();
                 SStandardTime sStandardTime;
                 GNSSTime.GNSSTimeToStandardTime(sGnssTime, sStandardTime, timeType);
                 GNSSTime.StandardTimeToString(sStandardTime, formatString, len);
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -44,12 +44,12 @@ namespace sixents
                                               char* formatString,
                                               int& len)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(year, month, day, hour, minute, second);
                 SStandardTime sStandardTime = GNSSTime.GetStandardTime();
                 GNSSTime.StandardTimeToString(sStandardTime, formatString, len);
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -64,7 +64,7 @@ namespace sixents
                                              int& minute,
                                              double& second)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(week, sec);
                 SGNSSTime sGnssTime = GNSSTime.GetGNSSTime();
@@ -76,7 +76,7 @@ namespace sixents
                 hour = sStandardTimeTime.m_hour;
                 minute = sStandardTimeTime.m_minute;
                 second = sStandardTimeTime.m_second;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -94,7 +94,7 @@ namespace sixents
                                                 int& utcMinute,
                                                 double& utcSecond)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(gloYear, gloMonth, gloDay, gloHour, gloMinute, gloSecond);
                 SStandardTime srcGNSSTime = GNSSTime.GetStandardTime();
@@ -106,7 +106,7 @@ namespace sixents
                 utcHour = tarGNSSTime.m_hour;
                 utcMinute = tarGNSSTime.m_minute;
                 utcSecond = tarGNSSTime.m_second;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -121,7 +121,7 @@ namespace sixents
                                              int& week,
                                              double& sec)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(year, month, day, hour, minute, second);
                 SStandardTime sStandardTime = GNSSTime.GetStandardTime();
@@ -129,7 +129,7 @@ namespace sixents
                 GNSSTime.StandardTimeToGNSSTime(sStandardTime, sGnssTime, timeType);
                 week = sGnssTime.m_week;
                 sec = sGnssTime.m_secAndMsec;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -164,7 +164,7 @@ namespace sixents
                                                 int& gloMinute,
                                                 double& gloSecond)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(utcYear, utcMonth, utcDay, utcHour, utcMinute, utcSecond);
                 SStandardTime srcGNSSTime = GNSSTime.GetStandardTime();
@@ -176,7 +176,7 @@ namespace sixents
                 gloHour = tarGNSSTime.m_hour;
                 gloMinute = tarGNSSTime.m_minute;
                 gloSecond = tarGNSSTime.m_second;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -188,7 +188,7 @@ namespace sixents
                                            double& destSec,
                                            const int destTimeType)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(srcWeek, srcSec, srcTimeType);
                 SGNSSTime srcGNSSTime = GNSSTime.GetGNSSTime();
@@ -196,7 +196,7 @@ namespace sixents
                 GNSSTime.GNSSTimeConvert(srcGNSSTime, srcTimeType, tarGNSSTime, destTimeType);
                 destWeek = tarGNSSTime.m_week;
                 destSec = tarGNSSTime.m_secAndMsec;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -210,7 +210,7 @@ namespace sixents
                                                 int& week,
                                                 double& sec)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(year, month, day, hour, minute, second);
                 SStandardTime srcGNSSTime = GNSSTime.GetStandardTime();
@@ -220,7 +220,7 @@ namespace sixents
                 GNSSTime.UTC2GPST(utcGnssTime, GPSTime);
                 week = GPSTime.m_week;
                 sec = GPSTime.m_secAndMsec;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 
@@ -228,7 +228,7 @@ namespace sixents
         int CAppInterface::GPSTimeToGlonassTime(
             const int week, const double second, int& year, int& month, int& day, int& hour, int& minute, double& sec)
         {
-            do
+            /*do
             {
                 CGNSSTime GNSSTime(week, second);
                 SGNSSTime srcGNSSTime = GNSSTime.GetGNSSTime();
@@ -242,7 +242,7 @@ namespace sixents
                 hour = gloTime.m_hour;
                 minute = gloTime.m_minute;
                 sec = gloTime.m_second;
-            } while (false);
+            } while (false);*/
             return RETURN_SUCCESS;
         }
 

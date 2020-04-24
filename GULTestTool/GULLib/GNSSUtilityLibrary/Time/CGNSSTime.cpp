@@ -1,26 +1,22 @@
-#include "CGNSSTime.h"
+﻿#include "CGNSSTime.h"
 #include <iostream>
 
 namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        CGNSSTime::CGNSSTime(const std::string timeString, const SAT_SYS_TYPE satType)
-        {}
+        CGNSSTime::CGNSSTime(const std::string timeString, const TIME_TYPE satType)
+        {
+        }
 
-        CGNSSTime::CGNSSTime(const INT32 week, const double sec, const INT32 satType)
+        CGNSSTime::CGNSSTime(const int week, const double sec, const int satType)
         {
             m_gnssTime.m_week = week;
             m_gnssTime.m_secAndMsec = sec;
             m_gnssTime.m_timeType = satType;
         }
 
-        CGNSSTime::CGNSSTime(const INT32 year,
-                             const INT32 month,
-                             const INT32 day,
-                             const INT32 hour,
-                             const INT32 minute,
-                             const double sec)
+        CGNSSTime::CGNSSTime(const int year, const int month, const int day, const int hour, const int minute, const double sec)
         {
             m_standardTime.m_year = year;
             m_standardTime.m_month = month;
@@ -40,83 +36,40 @@ namespace sixents
             return m_standardTime;
         }
 
-        INT32 CGNSSTime::Sec2EpochDataTime(
-            UINT64 sec, INT32& year, INT32& month, INT32& day, INT32& hour, INT32& minute, double& second)
+        int CGNSSTime::Time2Epoch(int m_year, int m_month, int m_day, int m_hour, int m_min, int m_sec, time_t& m_time)
         {
             do
             {
-                const INT32 mday[] = {/* # of days in a month */
-                                      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30,
-                                      31, 30, 31, 31, 30, 31, 30, 31, 31, 29, 31, 30, 31, 30, 31, 31,
-                                      30, 31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-                DOUBLE milliSecond = sec - floor(sec);
-                INT32 tempDays = 0;
-                INT32 tempSec = 0;
-                INT32 tempMon = 0;
-                INT32 days = 0;
+                const int doy[] = { 1,32,60,91,121,152,182,213,244,274,305,335 };
+                int days, sec, year = (int)m_year, mon = (int)m_month, day = (int)m_day;
+                if (year < 1970 || 2099 < year || mon < 1 || 12 < mon)
+                    return m_time;
                 /* leap year if year%4==0 in 1901-2099 */
-                tempDays = static_cast<INT32>(sec / 86400);
-                tempSec = static_cast<INT32>(sec - tempDays * 86400);
-                for (days = tempDays % 1461, tempMon = 0; tempMon < 48; tempMon++)
-                {
-                    if (days >= mday[tempMon])
-                        days -= mday[tempMon];
-                    else
-                        break;
-                }
-                year = 1970 + tempDays / 1461 * 4 + tempMon / 12;
-                month = tempMon % 12 + 1;
-                day = days + 1;
-                hour = tempSec / 3600;
-                minute = tempSec % 3600 / 60;
-                second = tempSec % 60 + milliSecond;
+                days = (year - 1970) * 365 + (year - 1969) / 4 + doy[mon - 1] + day - 2 + (year % 4 == 0 && mon >= 3 ? 1 : 0);
+                sec = (int)floor(m_sec);
+                m_time = (time_t)days * DAY_SEC + (int)m_hour * 3600 + (int)m_min * 60 + sec;
             } while (false);
             return 1;
         }
 
-        DOUBLE CGNSSTime::EpochDataTime2Sec(const DOUBLE* m_epochTime)
+        int CGNSSTime::SatTime2Epoch(const double* m_epochTime)
         {
-            DOUBLE Sec = 0;
-            const INT32 doy[] = {1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
-            INT32 days = 0;
-            INT32 sec = 0;
-            INT32 year = static_cast<INT32>(m_epochTime[0]);
-            INT32 mon = static_cast<INT32>(m_epochTime[1]);
-            INT32 day = static_cast<INT32>(m_epochTime[2]);
-
-            if (year < 1970 || 2099 < year || mon < 1 || 12 < mon)
-                return 0;
-            /* leap year if year%4==0 in 1901-2099 */
-            days =
-                (year - 1970) * 365 + (year - 1969) / 4 + doy[mon - 1] + day - 2 + (year % 4 == 0 && mon >= 3 ? 1 : 0);
-            sec = static_cast<INT32>(m_epochTime[5]);
-            Sec = static_cast<INT32>(days * DAY_SEC) + static_cast<INT32>(m_epochTime[3] * 3600)
-                  + static_cast<INT32>(m_epochTime[4] * NUM_SIXTY) + sec;
-            return Sec;
+            do
+            {
+                const int doy[] = { 1,32,60,91,121,152,182,213,244,274,305,335 };
+                time_t time = { 0 };
+                int days, sec, year = (int)m_epochTime[0], mon = (int)m_epochTime[1], day = (int)m_epochTime[2];
+                if (year < 1970 || 2099 < year || mon < 1 || 12 < mon)
+                    return time;
+                /* leap year if year%4==0 in 1901-2099 */
+                days = (year - 1970) * 365 + (year - 1969) / 4 + doy[mon - 1] + day - 2 + (year % 4 == 0 && mon >= 3 ? 1 : 0);
+                sec = (int)floor(m_epochTime[5]);
+                time = (time_t)days * DAY_SEC + (int)m_epochTime[3] * 3600 + (int)m_epochTime[4] * 60 + sec;
+            } while (false);
+            return 1;
         }
 
-        double CGNSSTime::EpochDataTime2Sec(INT32 year, INT32 month, INT32 day, INT32 hour, INT32 minute, double second)
-        {
-            DOUBLE Sec = 0;
-            const INT32 doy[] = {1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
-            INT32 days = 0;
-            INT32 sec = 0;
-            INT32 tempYear = static_cast<INT32>(year);
-            INT32 tempMon = static_cast<INT32>(month);
-            INT32 tempDay = static_cast<INT32>(day);
-
-            if (tempYear < 1970 || 2099 < tempYear || tempMon < 1 || 12 < tempMon)
-                return 0;
-            /* leap year if year%4==0 in 1901-2099 */
-            days = (tempYear - 1970) * 365 + (tempYear - 1969) / 4 + doy[tempMon - 1] + day - 2
-                   + (tempYear % 4 == 0 && tempMon >= 3 ? 1 : 0);
-            sec = static_cast<INT32>(second);
-            Sec = static_cast<INT32>(days * DAY_SEC) + static_cast<INT32>(hour * 3600)
-                  + static_cast<INT32>(minute * NUM_SIXTY) + sec;
-            return Sec;
-        }
-
-        INT32 CGNSSTime::StandardTimeToString(SStandardTime standardTime, char* timeString, INT32& len)
+        int CGNSSTime::StandardTimeToString(SStandardTime standardTime, char* timeString, int& len)
         {
             do
             {
@@ -129,7 +82,7 @@ namespace sixents
                 std::string second = std::to_string(standardTime.m_second);
                 std::string outputTime = year + month + day + hour + minute + second;
 
-                INT32 dataBufLen = strlen(outputTime.c_str()) + 1;
+                int dataBufLen = strlen(outputTime.c_str()) + 1;
                 if (timeString == nullptr || len == 0 || len != dataBufLen)
                 {
                     len = dataBufLen;
@@ -140,8 +93,7 @@ namespace sixents
             return 1;
         }
 
-        INT32
-        CGNSSTime::GNSSTimeToStandardTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const INT32 satType)
+        int CGNSSTime::GNSSTimeToStandardTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const int satType)
         {
             do
             {
@@ -166,7 +118,7 @@ namespace sixents
             return 1;
         }
 
-        INT32 CGNSSTime::GNSSTimeToUTCTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const INT32 satType)
+        int CGNSSTime::GNSSTimeToUTCTime(const SGNSSTime& gnssTime, SStandardTime& standardTime, const int satType)
         {
             do
             {
@@ -191,8 +143,7 @@ namespace sixents
             return 1;
         }
 
-        INT32
-        CGNSSTime::StandardTimeToGNSSTime(const SStandardTime& standardTime, SGNSSTime& gnssTime, const INT32 satType)
+        int CGNSSTime::StandardTimeToGNSSTime(const SStandardTime& standardTime, SGNSSTime& gnssTime, const int satType)
         {
             do
             {
@@ -217,10 +168,7 @@ namespace sixents
             return 1;
         }
 
-        INT32 CGNSSTime::GNSSTimeConvert(const SGNSSTime& srcGNSSTime,
-                                         const INT32 srcSatType,
-                                         SGNSSTime& tarGNSSTime,
-                                         const INT32 tarSatType)
+        int CGNSSTime::GNSSTimeConvert(const SGNSSTime& srcGNSSTime, const int srcSatType, SGNSSTime& tarGNSSTime, const int tarSatType)
         {
             do
             {
@@ -238,7 +186,7 @@ namespace sixents
                 }
                 else if (srcSatType == GPS && tarSatType == GALILEO)
                 {
-                    GPST2GST(srcGNSSTime, tarGNSSTime);
+                    GST2GPST(srcGNSSTime, tarGNSSTime);
                 }
                 else
                 {
@@ -250,492 +198,469 @@ namespace sixents
         }
 
         CGNSSTime::~CGNSSTime()
-        {}
+        {
+        }
 
-        // GPS时间从星期天开始
+        //GPS时间从星期天开始
         //已测试 2102w+100s;
-        INT32 CGNSSTime::GPST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
+        int CGNSSTime::GPST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
         {
             do
             {
                 //获取毫秒数
-                DOUBLE milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
                 //计算1970.1.1-1980.1.6
-                INT32 GPStimeSec = EPOCH_TO_GPST0;
+                time_t GPStimeSec = EPOCH_TO_GPST0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
-                GPStimeSec += WEEK_SEC * GNSSTime.m_week + static_cast<INT32>(GNSSTime.m_secAndMsec);
+                GPStimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + static_cast<int>(GNSSTime.m_secAndMsec);
                 //把秒转年月日表达形式
-
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                double second = 0;
-
-                Sec2EpochDataTime(GPStimeSec, year, month, day, hour, minute, second);
-
-                standardTime.m_year = year;
-                standardTime.m_month = month;
-                standardTime.m_day = day;
-                standardTime.m_hour = hour;
-                standardTime.m_minute = minute;
-                standardTime.m_second = second;
+                tm* GPSstandTime = gmtime(&GPStimeSec);
+                standardTime.m_year = GPSstandTime->tm_year + EPOCH_ADD_YEAR;
+                standardTime.m_month = GPSstandTime->tm_mon + NUM_ONE;
+                standardTime.m_day = GPSstandTime->tm_mday;
+                standardTime.m_hour = GPSstandTime->tm_hour;
+                standardTime.m_minute = GPSstandTime->tm_min;
+                standardTime.m_second = GPSstandTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        INT32 CGNSSTime::GST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
+        //int CGNSSTime::GLOT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
+        //{
+        //    do
+        //    {
+        //        //GLO首先获取当前系统时间
+        //        time_t m_gloNowTime = time(nullptr);
+        //        //获取毫秒数
+        //        double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+        //        //把秒转年月日
+        //        struct tm* standTime = gmtime(&m_gloNowTime);
+        //        standardTime.m_year = standTime->tm_year + EPOCH_ADD_YEAR;
+        //        standardTime.m_month = standTime->tm_mon + 1;
+        //        standardTime.m_day = standTime->tm_mday;
+        //        standardTime.m_hour = standTime->tm_hour;
+        //        standardTime.m_minute = standTime->tm_min;
+        //        standardTime.m_seconde = standTime->tm_sec + milliSecond;
+        //    } while (false);
+        //    return 1;
+        //}
+
+        //GAL时间从星期天开始
+        //已测试 1078w+100s;
+        int CGNSSTime::GST2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
         {
             do
             {
                 //获取毫秒数
-                DOUBLE milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
                 ////计算1970.1.1-1999.8.22
-                INT32 GALtimeSec = EPOCH_TO_GALT0;
+                time_t GALtimeSec = EPOCH_TO_GALT0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
                 //与后面的卫星时间相加
-                GALtimeSec += WEEK_SEC * GNSSTime.m_week + static_cast<INT32>(GNSSTime.m_secAndMsec);
+                GALtimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + static_cast<int>(GNSSTime.m_secAndMsec);
                 //把秒转年月日
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                double second = 0;
-
-                Sec2EpochDataTime(GALtimeSec, year, month, day, hour, minute, second);
-                standardTime.m_year = year;
-                standardTime.m_month = month;
-                standardTime.m_day = day;
-                standardTime.m_hour = hour;
-                standardTime.m_minute = minute;
-                standardTime.m_second = second;
+                struct tm* GALstandTime = gmtime(&GALtimeSec);
+                standardTime.m_year = GALstandTime->tm_year + EPOCH_ADD_YEAR;
+                standardTime.m_month = GALstandTime->tm_mon + NUM_ONE;
+                standardTime.m_day = GALstandTime->tm_mday;
+                standardTime.m_hour = GALstandTime->tm_hour;
+                standardTime.m_minute = GALstandTime->tm_min;
+                standardTime.m_second = GALstandTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        // BDS时间从星期天开始
+        //BDS时间从星期天开始
         //已测试 746w+100s;
-        INT32 CGNSSTime::BDT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
+        int CGNSSTime::BDT2Time(SGNSSTime GNSSTime, SStandardTime& standardTime)
         {
             do
             {
                 //获取毫秒数
-                DOUBLE milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
                 //把BDT时间转秒
-                INT32 BDStimeSec = EPOCH_TO_BDT0;
+                time_t BDStimeSec = EPOCH_TO_BDT0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
                 //与后面的卫星时间相加
-                BDStimeSec += WEEK_SEC * GNSSTime.m_week + static_cast<INT32>(GNSSTime.m_secAndMsec);
+                BDStimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + static_cast<int>(GNSSTime.m_secAndMsec);
                 //把秒转年月日
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-                Sec2EpochDataTime(BDStimeSec, year, month, day, hour, minute, second);
-                standardTime.m_year = year;
-                standardTime.m_month = month;
-                standardTime.m_day = day;
-                standardTime.m_hour = hour;
-                standardTime.m_minute = minute;
-                standardTime.m_second = second;
+                struct tm* BDSstandTime = gmtime(&BDStimeSec);
+                standardTime.m_year = BDSstandTime->tm_year + EPOCH_ADD_YEAR;
+                standardTime.m_month = BDSstandTime->tm_mon + NUM_ONE;
+                standardTime.m_day = BDSstandTime->tm_mday;
+                standardTime.m_hour = BDSstandTime->tm_hour;
+                standardTime.m_minute = BDSstandTime->tm_min;
+                standardTime.m_second = BDSstandTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        INT32 CGNSSTime::GPST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
+        int CGNSSTime::GPST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
         {
             do
             {
-                DOUBLE milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
-                UINT64 GPStimeSec = EPOCH_TO_GPST0;
+                double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                time_t GPStimeSec = EPOCH_TO_GPST0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
                 //与后面的卫星时间相加
-                GPStimeSec += static_cast<UINT64>(GNSSTime.m_week) * WEEK_SEC;
-                UINT64 tempGPSSec = 0;
-                for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; i++)
+                GPStimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + static_cast<int>(GNSSTime.m_secAndMsec);
+
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
                 {
-
+                    double tempGPSSec = 0;
                     //依次加入不同的跳秒信息
-                    tempGPSSec = GPStimeSec + GPS_LEAPSEC_INFO[i][NUM_SIX];
-
-                    if ((tempGPSSec - EpochDataTime2Sec(GPS_LEAPSEC_INFO[i])) >= 0.0) //如果差0则表示为当前时间
+                    tempGPSSec = GPStimeSec + LEAPSEC_INFO[i][NUM_SIX];
+                    if ((tempGPSSec - SatTime2Epoch(LEAPSEC_INFO[i])) >= 0.0) //如果差0则表示为当前时间
                     {
                         GPStimeSec = tempGPSSec;
                         break;
                     }
                 }
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-
-                Sec2EpochDataTime(GPStimeSec, year, month, day, hour, minute, second);
-
-                utcTime.m_year = year;
-                utcTime.m_month = month;
-                utcTime.m_day = day;
-                utcTime.m_hour = hour;
-                utcTime.m_minute = minute;
-                utcTime.m_second = second + milliSecond;
+                struct tm* t_utcTime = gmtime(&GPStimeSec);
+                utcTime.m_year = t_utcTime->tm_year + EPOCH_ADD_YEAR;
+                utcTime.m_month = t_utcTime->tm_mon + NUM_ONE;
+                utcTime.m_day = t_utcTime->tm_mday;
+                utcTime.m_hour = t_utcTime->tm_hour;
+                utcTime.m_minute = t_utcTime->tm_min;
+                utcTime.m_second = t_utcTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        INT32 CGNSSTime::GLOT2UTC(SStandardTime GNSSTime, SStandardTime& utcTime)
+        int CGNSSTime::GLOT2UTC(SStandardTime GNSSTime, SStandardTime& utcTime)
         {
             do
             {
-                DOUBLE milliSecond = GNSSTime.m_second - floor(GNSSTime.m_second);
-                DOUBLE gloSec = 0;
-                gloSec = EpochDataTime2Sec(GNSSTime.m_year,
-                                           GNSSTime.m_month,
-                                           GNSSTime.m_day,
-                                           GNSSTime.m_hour,
-                                           GNSSTime.m_minute,
-                                           GNSSTime.m_second);
+                double milliSecond = GNSSTime.m_second - floor(GNSSTime.m_second);
+                time_t gloSec = 0;
+                Time2Epoch(GNSSTime.m_year, GNSSTime.m_month, GNSSTime.m_day, GNSSTime.m_hour, GNSSTime.m_minute, GNSSTime.m_second, gloSec);
 
-                DOUBLE utcSec = gloSec - GLOSEC_TO_UTCSEC;
-
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-
-                Sec2EpochDataTime(utcSec, year, month, day, hour, minute, second);
-
-                utcTime.m_year = year;
-                utcTime.m_month = month;
-                utcTime.m_day = day;
-                utcTime.m_hour = hour;
-                utcTime.m_minute = minute;
-                utcTime.m_second = second;
+                //用秒转换
+                time_t utcSec = gloSec - GLOSEC_TO_UTCSEC;
+                struct tm* t_utcTime = gmtime(&utcSec);
+                utcTime.m_year = t_utcTime->tm_year + EPOCH_ADD_YEAR;
+                utcTime.m_month = t_utcTime->tm_mon + NUM_ONE;
+                utcTime.m_day = t_utcTime->tm_mday;
+                utcTime.m_hour = t_utcTime->tm_hour;
+                utcTime.m_minute = t_utcTime->tm_min;
+                utcTime.m_second = t_utcTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        INT32 CGNSSTime::GST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
+        int CGNSSTime::GST2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
         {
             do
             {
-                DOUBLE milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
-                UINT64 GALtimeSec = EPOCH_TO_GALT0;
+                double milliSecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                time_t GALtimeSec = EPOCH_TO_GALT0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
 
-                GALtimeSec +=
-                    static_cast<UINT64>(GNSSTime.m_week) * WEEK_SEC + static_cast<INT32>(GNSSTime.m_secAndMsec);
-                for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; i++)
+                GALtimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + static_cast<int>(GNSSTime.m_secAndMsec);
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
                 {
                     double tempGALSec = 0;
-                    tempGALSec = GALtimeSec + GPS_LEAPSEC_INFO[i][NUM_SIX];
-                    if ((GALtimeSec - EpochDataTime2Sec(GPS_LEAPSEC_INFO[i])) >= 0.0)
+                    tempGALSec = GALtimeSec + LEAPSEC_INFO[i][NUM_SIX];
+                    if ((GALtimeSec - SatTime2Epoch(LEAPSEC_INFO[i])) >= 0.0)
                     {
                         GALtimeSec = tempGALSec;
                         break;
                     }
                 }
-
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-
-                Sec2EpochDataTime(GALtimeSec, year, month, day, hour, minute, second);
-
-                utcTime.m_year = year;
-                utcTime.m_month = month;
-                utcTime.m_day = day;
-                utcTime.m_hour = hour;
-                utcTime.m_minute = minute;
-                utcTime.m_second = second;
+                tm* t_utcTime = gmtime(&GALtimeSec);
+                utcTime.m_year = t_utcTime->tm_year + EPOCH_ADD_YEAR;
+                utcTime.m_month = t_utcTime->tm_mon + NUM_ONE;
+                utcTime.m_day = t_utcTime->tm_mday;
+                utcTime.m_hour = t_utcTime->tm_hour;
+                utcTime.m_minute = t_utcTime->tm_min;
+                utcTime.m_second = t_utcTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        INT32 CGNSSTime::BDT2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
+        int CGNSSTime::BDT2UTC(SGNSSTime GNSSTime, SStandardTime& utcTime)
         {
             do
             {
-                DOUBLE Millisecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
-                UINT64 BDStimeSec = EPOCH_TO_BDT0;
+                double Millisecond = GNSSTime.m_secAndMsec - floor(GNSSTime.m_secAndMsec);
+                time_t BDStimeSec = EPOCH_TO_BDT0;
                 if (GNSSTime.m_secAndMsec < -1E9 || 1E9 < GNSSTime.m_secAndMsec)
                 {
                     GNSSTime.m_secAndMsec = 0.0;
                 }
-                BDStimeSec += static_cast<UINT64>(GNSSTime.m_week) * WEEK_SEC;
+
+                BDStimeSec += DAYSEC * DAYOFWEEK * GNSSTime.m_week + (int)GNSSTime.m_secAndMsec;
                 //++i;
-                for (INT32 i = 0; BDS_LEAPSEC_INFO[i][0] > 0; i++)
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
                 {
                     double tempBDTSec = 0;
-                    tempBDTSec = BDStimeSec + BDS_LEAPSEC_INFO[i][NUM_SIX];
-
-                    if ((BDStimeSec - EpochDataTime2Sec(BDS_LEAPSEC_INFO[i])) >= 0.0)
+                    tempBDTSec = BDStimeSec + LEAPSEC_INFO[i][NUM_SIX] + GPSLEAP_TO_BDSLEAP;
+                    if ((BDStimeSec - SatTime2Epoch(LEAPSEC_INFO[i])) >= 0.0)
                     {
                         BDStimeSec = tempBDTSec;
                         break;
                     }
                 }
-
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-
-                Sec2EpochDataTime(BDStimeSec, year, month, day, hour, minute, second);
-
-                utcTime.m_year = year;
-                utcTime.m_month = month;
-                utcTime.m_day = day;
-                utcTime.m_hour = hour;
-                utcTime.m_minute = minute;
-                utcTime.m_second = second + Millisecond;
+                tm* t_utcTime = gmtime(&BDStimeSec);
+                utcTime.m_year = t_utcTime->tm_year + EPOCH_ADD_YEAR;
+                utcTime.m_month = t_utcTime->tm_mon + NUM_ONE;
+                utcTime.m_day = t_utcTime->tm_mday;
+                utcTime.m_hour = t_utcTime->tm_hour;
+                utcTime.m_minute = t_utcTime->tm_min;
+                utcTime.m_second = t_utcTime->tm_sec + Millisecond;
             } while (false);
             return 1;
         }
 
-        // GUL_UC_009
-        INT32 CGNSSTime::UTC2GPST(SStandardTime utcTime, SGNSSTime& GNSSTime)
+        //GUL_UC_009
+        int CGNSSTime::UTC2GPST(SStandardTime utcTime, SGNSSTime& GNSSTime)
         {
             do
             {
-                DOUBLE milliSecond = utcTime.m_second - floor(utcTime.m_second);
+                double milliSecond = utcTime.m_second - floor(utcTime.m_second);
 
-                DOUBLE utcSec = 0;
-                utcSec = EpochDataTime2Sec(
-                    utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second);
-                ;
-                DOUBLE GPSSec = utcSec;
-                for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
+                time_t utcSec = 0;
+                Time2Epoch(utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second, utcSec);
+                time_t GPSSec = 0;;
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; ++i)
                 {
-                    INT32 tempGPSSec = 0;
-                    tempGPSSec = utcSec - GPS_LEAPSEC_INFO[i][NUM_SIX];
-
-                    double a = tempGPSSec - EpochDataTime2Sec(GPS_LEAPSEC_INFO[i]);
-                    if (tempGPSSec - EpochDataTime2Sec(GPS_LEAPSEC_INFO[i]) >= 0.0)
+                    time_t tempGPSSec = 0;
+                    tempGPSSec = utcSec - LEAPSEC_INFO[i][NUM_SIX];
+                    if (tempGPSSec - SatTime2Epoch(LEAPSEC_INFO[i]) >= 0.0)
                     {
                         GPSSec = tempGPSSec;
                         break;
                     }
                 }
-                GNSSTime.m_week = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) / WEEK_SEC;
-                GNSSTime.m_secAndMsec = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) % WEEK_SEC + milliSecond;
+                GNSSTime.m_week = (GPSSec - EPOCH_TO_GPST0) / WEEKSEC;
+                GNSSTime.m_secAndMsec = (GPSSec - EPOCH_TO_GPST0) % WEEKSEC + milliSecond;
             } while (false);
             return 1;
         }
 
-        // GUL_UC_010
-        INT32 CGNSSTime::UTC2GLOT(SStandardTime utcTime, SStandardTime& GNSSTime)
+        //GUL_UC_010
+        int CGNSSTime::UTC2GLOT(SStandardTime utcTime, SStandardTime& GNSSTime)
         {
             do
             {
-                DOUBLE milliSecond = GNSSTime.m_second - floor(GNSSTime.m_second);
-                DOUBLE utcSec = 0;
-                utcSec = EpochDataTime2Sec(
-                    utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second);
+                double milliSecond = utcTime.m_second - floor(utcTime.m_second);
+                time_t utcSec = 0;
+                Time2Epoch(utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second, utcSec);
 
-                DOUBLE gloSec = utcSec + GLOSEC_TO_UTCSEC;
+                time_t gloSec = utcSec + GLOSEC_TO_UTCSEC;
+                tm* gloTime = gmtime(&gloSec);
 
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                double second = 0;
-
-                Sec2EpochDataTime(gloSec, year, month, day, hour, minute, second);
-
-                GNSSTime.m_year = year;
-                GNSSTime.m_month = month;
-                GNSSTime.m_day = day;
-                GNSSTime.m_hour = hour;
-                GNSSTime.m_minute = minute;
-                GNSSTime.m_second = second;
+                GNSSTime.m_year = gloTime->tm_year + EPOCH_ADD_YEAR;
+                GNSSTime.m_month = gloTime->tm_mon + NUM_ONE;
+                GNSSTime.m_day = gloTime->tm_mday;
+                GNSSTime.m_hour = gloTime->tm_hour;
+                GNSSTime.m_minute = gloTime->tm_min;
+                GNSSTime.m_second = gloTime->tm_sec + milliSecond;
             } while (false);
             return 1;
         }
 
-        // GUL_UC_011
-        INT32 CGNSSTime::UTC2GST(SStandardTime utcTime, SGNSSTime& GNSSTime)
+        //GUL_UC_011
+        int CGNSSTime::UTC2GST(SStandardTime utcTime, SGNSSTime& GNSSTime)
         {
             do
             {
-                DOUBLE milliSecond = utcTime.m_second - floor(utcTime.m_second);
-                DOUBLE utcSec = 0;
-                utcSec = EpochDataTime2Sec(
-                    utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second);
-
-                DOUBLE GSTSec = utcSec;
-                for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; i++)
+                double milliSecond = utcTime.m_second - floor(utcTime.m_second);
+                time_t utcSec = 0;
+                Time2Epoch(utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second, utcSec);
+                time_t GSTSec = 0;;
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
                 {
-                    INT32 tempGALSec = 0;
-                    ;
-                    tempGALSec = utcSec - GPS_LEAPSEC_INFO[i][NUM_SIX];
-                    if (tempGALSec - EpochDataTime2Sec(GPS_LEAPSEC_INFO[i]) >= 0.0)
+                    time_t tempGALSec = 0;;
+                    tempGALSec = utcSec - LEAPSEC_INFO[i][NUM_SIX];
+                    if (tempGALSec - SatTime2Epoch(LEAPSEC_INFO[i]) >= 0.0)
                     {
                         GSTSec = tempGALSec;
                         break;
                     }
                 }
-                GNSSTime.m_week = static_cast<INT32>(GSTSec - EPOCH_TO_GALT0) / WEEK_SEC;
-                GNSSTime.m_secAndMsec = static_cast<INT32>(GSTSec - EPOCH_TO_GALT0) % WEEK_SEC + milliSecond;
+                GNSSTime.m_week = (GSTSec - EPOCH_TO_GALT0) / WEEKSEC;
+                GNSSTime.m_secAndMsec = (GSTSec - EPOCH_TO_GALT0) % WEEKSEC + milliSecond;
             } while (false);
             return 1;
         }
 
-        // GUL_UC_012
-        INT32 CGNSSTime::UTC2BDT(SStandardTime utcTime, SGNSSTime& GNSSTime)
+        //GUL_UC_012
+        int CGNSSTime::UTC2BDT(SStandardTime utcTime, SGNSSTime& GNSSTime)
         {
             do
             {
-                DOUBLE milliSecond = utcTime.m_second - floor(utcTime.m_second);
+                double milliSecond = utcTime.m_second - floor(utcTime.m_second);
+                struct tm localTime;
+                time_t utcSec = 0;
+                Time2Epoch(utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second, utcSec);
 
-                DOUBLE utcSec = 0;
-                utcSec = EpochDataTime2Sec(
-                    utcTime.m_year, utcTime.m_month, utcTime.m_day, utcTime.m_hour, utcTime.m_minute, utcTime.m_second);
-                double BDTSec = utcSec;
-                for (INT32 i = 0; BDS_LEAPSEC_INFO[i][0] > 0; i++)
+                time_t BDTSec = 0;;
+                for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
                 {
-                    INT32 tempBDTSec = 0;
-                    ;
-                    tempBDTSec = utcSec - BDS_LEAPSEC_INFO[i][NUM_SIX];
-                    if (tempBDTSec - EpochDataTime2Sec(BDS_LEAPSEC_INFO[i]) >= 0.0)
+                    time_t tempBDTSec = 0;;
+                    tempBDTSec = utcSec - LEAPSEC_INFO[i][NUM_SIX] - GPSLEAP_TO_BDSLEAP;
+                    if (tempBDTSec - SatTime2Epoch(LEAPSEC_INFO[i]) >= 0.0)
                     {
                         BDTSec = tempBDTSec;
                         break;
                     }
                 }
-                GNSSTime.m_week = static_cast<INT32>(BDTSec - EPOCH_TO_BDT0) / WEEK_SEC;
-                GNSSTime.m_secAndMsec = static_cast<INT32>(BDTSec - EPOCH_TO_BDT0) % WEEK_SEC + milliSecond;
+                GNSSTime.m_week = (BDTSec - EPOCH_TO_BDT0) / WEEKSEC;
+                GNSSTime.m_secAndMsec = (BDTSec - EPOCH_TO_BDT0) % WEEKSEC + milliSecond;
             } while (false);
             return 1;
         }
 
-        // GUL_UC_013
-        INT32 CGNSSTime::BDT2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime)
+        //GUL_UC_013
+        int CGNSSTime::BDT2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime)
+        {
+            if (srcGNSSTime.m_secAndMsec + GPSLEAP_TO_BDSLEAP < WEEKSEC)
+            {
+                GPSTime.m_week = srcGNSSTime.m_week + GPSWEEK_TO_BDSWEEK;
+                GPSTime.m_secAndMsec = srcGNSSTime.m_secAndMsec + GPSLEAP_TO_BDSLEAP;
+            }
+            else
+            {
+                GPSTime.m_week = srcGNSSTime.m_week + NUM_ONE + GPSWEEK_TO_BDSWEEK;
+                GPSTime.m_secAndMsec = srcGNSSTime.m_secAndMsec + GPSLEAP_TO_BDSLEAP - WEEKSEC;
+            }
+            return 1;
+        }
+
+        ////GUL_UC_014
+        //int CGNSSTime::GLOT2GPST(SStandardTime m_SRCGNSSTime, SGNSSTime& GPSTime)
+        //{
+        //    double Millisecond = m_SRCGNSSTime.m_second - floor(m_SRCGNSSTime.m_second);
+        //    struct tm gloTime;
+        //    gloTime.tm_year = m_SRCGNSSTime.m_year - EPOCH_ADD_YEAR;
+        //    gloTime.tm_mon = m_SRCGNSSTime.m_month - 1;
+        //    gloTime.tm_mday = m_SRCGNSSTime.m_day;
+        //    gloTime.tm_hour = m_SRCGNSSTime.m_hour;
+        //    gloTime.tm_min = m_SRCGNSSTime.m_minute;
+        //    gloTime.tm_sec = m_SRCGNSSTime.m_second;
+        //    time_t m_gloSec = 0;
+        //    Time2Epoch(gloTime.tm_year, gloTime.tm_mon, gloTime.tm_mday, gloTime.tm_hour, gloTime.tm_min, gloTime.tm_sec, m_gloSec);
+
+        //    time_t m_GPSSec = 0;;
+        //    for (int i = 0; LEAPSEC_INFO[i][0] > 0; i++)
+        //    {
+        //        time_t m_tempGloSec = 0;;
+        //        m_tempGloSec = m_gloSec - LEAPSEC_INFO[i][6];
+        //        if (m_tempGloSec - SatTime2Epoch(LEAPSEC_INFO[i]) >= 0.0)
+        //        {
+        //            m_GPSSec = m_tempGloSec;
+        //            break;
+        //        }
+        //    }
+        //    GPSTime.m_week = (m_gloSec - EPOCH_TO_GPST0) / WEEKSEC;
+        //    GPSTime.m_secAndMsec = (m_gloSec - EPOCH_TO_GPST0) % WEEKSEC + Millisecond;
+        //    return 1;
+        //}
+
+        //GUL_UC_015
+        int CGNSSTime::GST2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime)
+        {
+            GPSTime.m_week = srcGNSSTime.m_week + GPSWEEK_TO_GALWEEK;
+            GPSTime.m_secAndMsec = srcGNSSTime.m_secAndMsec;
+            return 1;
+        }
+
+        //GUL_UC_016
+        int CGNSSTime::GPST2BDT(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime)
+        {
+            if (GPSTime.m_secAndMsec - GPSLEAP_TO_BDSLEAP >= 0)
+            {
+                tarGNSSTime.m_week = GPSTime.m_week - GPSWEEK_TO_BDSWEEK;
+                tarGNSSTime.m_secAndMsec = GPSTime.m_secAndMsec - GPSLEAP_TO_BDSLEAP;
+            }
+            else
+            {
+                tarGNSSTime.m_week = GPSTime.m_week - NUM_ONE - GPSWEEK_TO_BDSWEEK;
+                tarGNSSTime.m_secAndMsec = WEEKSEC + GPSTime.m_secAndMsec - GPSLEAP_TO_BDSLEAP;
+            }
+            return 1;
+        }
+        //GUL_UC_017
+       /* int CGNSSTime::GPST2GLOT(SGNSSTime GPSTime, SStandardTime& m_TARGNSSTime)
         {
             do
             {
-                DOUBLE milliSecond = srcGNSSTime.m_secAndMsec - floor(srcGNSSTime.m_secAndMsec);
-                UINT64 BDTSec = 0;
-                WeekSecToSec(srcGNSSTime, BDTSec);
-                UINT64 GPSSec = BDTSec + 14;
-                GPSTime.m_week = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) / WEEK_SEC;
-                GPSTime.m_secAndMsec = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) % WEEK_SEC + milliSecond;
+                time_t m_GPSSec = EPOCH_TO_GPST0 + GPSTime.m_week * WEEKSEC + GPSTime.m_secAndMsec;
+                struct tm* gloTime = gmtime(&m_GPSSec);
+                m_TARGNSSTime.m_year = gloTime->tm_year + EPOCH_ADD_YEAR;
+                m_TARGNSSTime.m_month = gloTime->tm_mon + 1;
+                m_TARGNSSTime.m_day = gloTime->tm_mday;
+                m_TARGNSSTime.m_hour = gloTime->tm_hour;
+                m_TARGNSSTime.m_minute = gloTime->tm_min;
+                m_TARGNSSTime.m_second = gloTime->tm_sec;
             } while (false);
             return 1;
-        }
+        }*/
 
-        // GUL_UC_015
-        INT32 CGNSSTime::GST2GPST(SGNSSTime srcGNSSTime, SGNSSTime& GPSTime)
+        //GUL_UC_018
+        int CGNSSTime::GPST2GST(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime)
         {
-            do
-            {
-                DOUBLE milliSecond = srcGNSSTime.m_secAndMsec - floor(srcGNSSTime.m_secAndMsec);
-                UINT64 GALSec = 0;
-                WeekSecToSec(srcGNSSTime, GALSec);
-                UINT64 GPSSec = GALSec;
-                GPSTime.m_week = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) / WEEK_SEC;
-                GPSTime.m_secAndMsec = static_cast<INT32>(GPSSec - EPOCH_TO_GPST0) % WEEK_SEC + milliSecond;
-            } while (false);
+            tarGNSSTime.m_week = GPSTime.m_week - GPSWEEK_TO_GALWEEK;
+            tarGNSSTime.m_secAndMsec = GPSTime.m_secAndMsec;
             return 1;
         }
 
-        // GUL_UC_016
-        INT32 CGNSSTime::GPST2BDT(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime)
+        long CGNSSTime::WeekToSec(int week, double sec, double& ouPutWeek)
         {
-            do
-            {
-                DOUBLE milliSecond = GPSTime.m_secAndMsec - floor(GPSTime.m_secAndMsec);
-                UINT64 GPSSec = 0;
-                WeekSecToSec(GPSTime, GPSSec);
-                INT64 BDTSec = GPSSec - 14;
-                tarGNSSTime.m_week = static_cast<INT32>(BDTSec - EPOCH_TO_BDT0) / WEEK_SEC;
-                tarGNSSTime.m_secAndMsec = static_cast<INT32>(BDTSec - EPOCH_TO_BDT0) % WEEK_SEC + milliSecond;
-            } while (false);
-
             return 1;
         }
 
-        // GUL_UC_018
-        INT32 CGNSSTime::GPST2GST(SGNSSTime GPSTime, SGNSSTime& tarGNSSTime)
-        {
-            do
-            {
-                DOUBLE milliSecond = GPSTime.m_secAndMsec - floor(GPSTime.m_secAndMsec);
-                UINT64 GPSSec = 0;
-                WeekSecToSec(GPSTime, GPSSec);
-                UINT64 GALSec = GPSSec;
-
-                tarGNSSTime.m_week = static_cast<INT32>(GALSec - EPOCH_TO_GALT0) / WEEK_SEC;
-                tarGNSSTime.m_secAndMsec = (GALSec - EPOCH_TO_GALT0) % WEEK_SEC + milliSecond;
-            } while (false);
-            return 1;
-        }
-
-        bool
-        CGNSSTime::TimeConvert(const double srcTime, const INT32 srcSatType, double& destTime, const INT32 destSatType)
+        bool CGNSSTime::TimeConvert(const double srcTime, const int srcSatType, double& destTime, const int destSatType)
         {
             return false;
         }
 
-        INT32 CGNSSTime::WeekSecToSec(SGNSSTime srcTime, UINT64& tarSec)
+        int CGNSSTime::WeekSecToSec(SGNSSTime srcTime, time_t& tarSec)
         {
             do
             {
-                UINT64 timeChange = 0;
-                if (srcTime.m_timeType == GPS)
+                time_t timeChange = 0;
+                if (srcTime.m_satType == GPS)
                 {
                     timeChange = EPOCH_TO_GPST0;
                 }
-                else if (srcTime.m_timeType == GALILEO)
+                else if (srcTime.m_satType == GALILEO)
                 {
                     timeChange = EPOCH_TO_GALT0;
                 }
-                else if (srcTime.m_timeType == BDS)
+                else if (srcTime.m_satType == BDS)
                 {
                     timeChange = EPOCH_TO_BDT0;
                 }
-                else
+                /*else
                 {
                     return 0;
-                }
-                tarSec = timeChange + static_cast<UINT64>(srcTime.m_week) * WEEK_SEC + srcTime.m_secAndMsec;
+                }*/
+                tarSec = timeChange + srcTime.m_week * DAYOFWEEK * DAYSEC + srcTime.m_secAndMsec;
             } while (false);
             return 1;
         }
-        INT32 CGNSSTime::SecToWeekSec(double srcSec, INT32 satType, SGNSSTime& tarTime)
+        int CGNSSTime::SecToWeekSec(time_t srcSec, int satType, SGNSSTime& tarTime)
         {
             do
             {
-                INT32 timeChange = 0;
-
-                DOUBLE milliSecond = srcSec - floor(srcSec);
+                time_t timeChange = 0;
                 if (satType == GPS)
                 {
                     timeChange = EPOCH_TO_GPST0;
@@ -753,45 +678,36 @@ namespace sixents
                     return 0;
                 }
 
-                tarTime.m_week = (srcSec - timeChange) / WEEK_SEC;
-                tarTime.m_secAndMsec = static_cast<UINT32>(srcSec - timeChange) % WEEK_SEC + milliSecond;
+                tarTime.m_week = (srcSec - timeChange) / (DAYOFWEEK * DAYSEC);
+                tarTime.m_week = (srcSec - timeChange) % (DAYOFWEEK * DAYSEC);
             } while (false);
             return 1;
         }
-        INT32 CGNSSTime::StandTimeToSec(SStandardTime srcTime, UINT64& tarSec)
+        int CGNSSTime::StandTimeToSec(SStandardTime srcTime, time_t& tarSec)
         {
             do
             {
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                DOUBLE second = 0;
-                tarSec = EpochDataTime2Sec(
-                    srcTime.m_year, srcTime.m_month, srcTime.m_day, srcTime.m_hour, srcTime.m_minute, srcTime.m_second);
+                struct tm time;
+                time.tm_year = srcTime.m_year - EPOCH_ADD_YEAR;
+                time.tm_mon = srcTime.m_month - NUM_ONE;
+                time.tm_mday = srcTime.m_day;
+                time.tm_hour = srcTime.m_hour;
+                time.tm_min = srcTime.m_minute;
+                time.tm_sec = srcTime.m_second;
             } while (false);
             return 1;
         }
-        INT32 CGNSSTime::SecToStandTime(double srcSec, SStandardTime& tarTime)
+        int CGNSSTime::SecToStandTime(time_t srcSec, SStandardTime& tarTime)
         {
             do
             {
-                INT32 year = 0;
-                INT32 month = 0;
-                INT32 day = 0;
-                INT32 hour = 0;
-                INT32 minute = 0;
-                double second = 0;
-
-                Sec2EpochDataTime(srcSec, year, month, day, hour, minute, second);
-
-                tarTime.m_year = year;
-                tarTime.m_month = month;
-                tarTime.m_day = day;
-                tarTime.m_hour = hour;
-                tarTime.m_minute = minute;
-                tarTime.m_second = second;
+                tm* time = gmtime(&srcSec);
+                tarTime.m_year = time->tm_year + EPOCH_ADD_YEAR;
+                tarTime.m_month = time->tm_mon + NUM_ONE;
+                tarTime.m_day = time->tm_mday;
+                tarTime.m_hour = time->tm_hour;
+                tarTime.m_minute = time->tm_min;
+                tarTime.m_second = time->tm_sec;
             } while (false);
             return 1;
         }

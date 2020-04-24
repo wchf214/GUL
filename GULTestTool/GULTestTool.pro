@@ -25,7 +25,13 @@ SOURCES += \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.cpp \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.cpp \
-    GULLib/GNSSUtilityLibrary/Time/CGNSSTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CBDSTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CGPSTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CGalileoTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CGlonassTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CTimeFactory.cpp \
+    GULLib/GNSSUtilityLibrary/Time/CUTCTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/IGNSSTime.cpp \
     RtkLib/ephemeris.c \
     RtkLib/preceph.c \
     RtkLib/qzslex.c \
@@ -356,7 +362,13 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.h \
-    GULLib/GNSSUtilityLibrary/Time/CGNSSTime.h \
+    GULLib/GNSSUtilityLibrary/Time/CBDSTime.h \
+    GULLib/GNSSUtilityLibrary/Time/CGPSTime.h \
+    GULLib/GNSSUtilityLibrary/Time/CGalileoTime.h \
+    GULLib/GNSSUtilityLibrary/Time/CGlonassTime.h \
+    GULLib/GNSSUtilityLibrary/Time/CTimeFactory.h \
+    GULLib/GNSSUtilityLibrary/Time/CUTCTime.h \
+    GULLib/GNSSUtilityLibrary/Time/IGNSSTime.h \
     RtkLib/rtklib.h \
     TestFunc.h \
     mainwindow.h

@@ -1,14 +1,14 @@
-/** @file          AppInterface
- *  @brief         接口类
- *  @details       提供与外部接口和内部逻辑的接口
+/**@file           CGNSSCoord
+ *  @brief         坐标类
+ *  @details       所有坐标相关的算法
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
  *  @note          暂无
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
-#ifndef _CAPP_INTERFACE_H_
-#define _CAPP_INTERFACE_H_
+#ifndef _APP_INTERFACE_H_
+#define _APP_INTERFACE_H_
 
 #include "../DllMain/GNSSDataStruct.h"
 
@@ -308,8 +308,8 @@ namespace sixents
              * @brief           空间直角坐标转大地坐标
              * @author          wuchuanfei@sixents.com
              * @param[in]       x,y,z: 空间直角坐标，精确到小数点后9位
-             * @param[out]      lon: 经度，精确到小数点后11位
-                                lat: 纬度，精确到小数点后11位
+             * @param[out]      lon: 经度，以度为单位，精确到小数点后11位
+                                lat: 纬度，以度为单位，精确到小数点后11位
                                 height: 高程，精确到小数点后9位
              * @exception       N/A
              * @return          函数执行是否成功
@@ -321,8 +321,8 @@ namespace sixents
             /**
              * @brief           大地坐标转空间直角坐标
              * @author          wuchuanfei@sixents.com
-             * @param[in]       lon: 经度，精确到小数点后11位
-                                lat: 纬度，精确到小数点后11位
+             * @param[in]       lon: 经度，以度为单位，精确到小数点后11位
+                                lat: 纬度，以度为单位，精确到小数点后11位
                                 height: 高程，精确到小数点后9位
              * @param[out]      x,y,z: 空间直角坐标，精确到小数点后9位
              * @exception       N/A
