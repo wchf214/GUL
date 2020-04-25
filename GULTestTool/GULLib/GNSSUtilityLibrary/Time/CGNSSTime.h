@@ -1,4 +1,4 @@
-﻿/**@file           CGNSSTime
+/**@file           CGNSSTime
  *  @brief         时间类
  *  @details       所有时间相关的算法
  *  @author        wuchuanfei@sixens.com

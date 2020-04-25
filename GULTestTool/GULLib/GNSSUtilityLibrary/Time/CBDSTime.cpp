@@ -1,5 +1,5 @@
 /** @file          CGPSTime.h
- *  @brief         GPSÊ±¼äÀà
+ *  @brief         GPSæ—¶é—´ç±»
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24

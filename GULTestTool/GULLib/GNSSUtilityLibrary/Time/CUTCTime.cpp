@@ -1,5 +1,5 @@
 /** @file          CGPSTime.h
- *  @brief         GPSÊ±¼äÀà
+ *  @brief         GPSÊ±ï¿½ï¿½ï¿½ï¿½
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -32,7 +32,7 @@ namespace sixents
                          << m_time.m_hour << TIME_INTERVAL << m_time.m_minute << TIME_INTERVAL << std::setprecision(3)
                          << m_time.m_second;
             formatString = formatStream.str();
-            formatStream.str(""); // Çå¿Õ»º´æÇø
+            formatStream.str(""); // ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½
             return RETURN_SUCCESS;
         }
 

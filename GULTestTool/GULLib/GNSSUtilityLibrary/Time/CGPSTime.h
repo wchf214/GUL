@@ -1,5 +1,5 @@
 /** @file          CGPSTime.h
- *  @brief         GPS ±º‰¿‡
+ *  @brief         GPSÊó∂Èó¥Á±ª
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -19,7 +19,7 @@ namespace sixents
     {
         /**
          *  @class       CGPSTime
-         *  @brief       GPS ±º‰¿‡
+         *  @brief       GPSÊó∂Èó¥Á±ª
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
@@ -42,7 +42,7 @@ namespace sixents
 
         private:
             SGNSSTime m_time;
-            DOUBLE m_sec; /* “‘√Î∏Ò Ω±Ì æµƒ ±º‰ */
+            DOUBLE m_sec; /* ‰ª•ÁßíÊ†ºÂºèË°®Á§∫ÁöÑÊó∂Èó¥ */
         };                // end class CGPSTime
     }                     // end namespace GNSSUtilityLib
 } // end namespace sixents

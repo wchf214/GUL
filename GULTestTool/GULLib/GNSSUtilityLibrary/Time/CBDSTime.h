@@ -1,5 +1,5 @@
 /** @file          CBDSTime.h
- *  @brief         ±±¶·Ê±¼äÀà
+ *  @brief         åŒ—æ–—æ—¶é—´ç±»
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -19,7 +19,7 @@ namespace sixents
     {
         /**
          *  @class       CBDSTime
-         *  @brief       ±±¶·Ê±¼äÀà
+         *  @brief       åŒ—æ–—æ—¶é—´ç±»
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
@@ -42,7 +42,7 @@ namespace sixents
 
         private:
             SGNSSTime m_time;
-            DOUBLE m_sec; /* ÒÔÃë¸ñÊ½±íÊ¾µÄÊ±¼ä */
+            DOUBLE m_sec; /* ä»¥ç§’æ ¼å¼è¡¨ç¤ºçš„æ—¶é—´ */
         };                // end class CBDSTime
     }                     // end namespace GNSSUtilityLib
 } // end namespace sixents

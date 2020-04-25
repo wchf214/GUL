@@ -1,5 +1,5 @@
 /** @file          CGalileoTime.h
- *  @brief         Galileo时间类
+ *  @brief         Galileo时锟斤拷锟斤拷
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -19,7 +19,7 @@ namespace sixents
     {
         /**
          *  @class       CGalileoTime
-         *  @brief       Galileo时间类
+         *  @brief       Galileo时锟斤拷锟斤拷
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
@@ -42,7 +42,7 @@ namespace sixents
 
         private:
             SGNSSTime m_time;
-            DOUBLE m_sec; /* 以秒格式表示的时间 */
+            DOUBLE m_sec; /* 锟斤拷锟斤拷锟斤拷式锟斤拷示锟斤拷时锟斤拷 */
         };                // end class CGalileoTime
     }                     // end namespace GNSSUtilityLib
 } // end namespace sixents

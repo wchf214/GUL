@@ -1,5 +1,5 @@
 /** @file          CUTCTime.h
- *  @brief         UTC ±º‰¿‡
+ *  @brief         UTCÊó∂Èó¥Á±ª
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -19,7 +19,7 @@ namespace sixents
     {
         /**
          *  @class       CUTCTime
-         *  @brief       UTC ±º‰¿‡
+         *  @brief       UTCÊó∂Èó¥Á±ª
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
@@ -41,7 +41,7 @@ namespace sixents
 
         private:
             SStandardTime m_time;
-            DOUBLE m_sec; /* “‘√Î∏Ò Ω±Ì æµƒ ±º‰ */
+            DOUBLE m_sec; /* ‰ª•ÁßíÊ†ºÂºèË°®Á§∫ÁöÑÊó∂Èó¥ */
         };                // end class CUTCTime
     }                     // end namespace GNSSUtilityLib
 } // end namespace sixents

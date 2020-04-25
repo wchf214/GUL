@@ -1,4 +1,4 @@
-﻿/** @file          IGNSSTime.h
+/** @file          IGNSSTime.h
  *  @brief         时间父类
  *  @details       时间对象的基类
  *  @author        wuchuanfei@sixens.com

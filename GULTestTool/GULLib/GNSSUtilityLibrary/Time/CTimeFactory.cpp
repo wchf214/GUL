@@ -1,4 +1,4 @@
-﻿#include "IGNSSTime.h"
+#include "IGNSSTime.h"
 
 namespace sixents
 {
