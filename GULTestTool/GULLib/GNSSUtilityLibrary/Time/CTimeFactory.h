@@ -1,6 +1,6 @@
-/** @file          IGNSSTime.h
- *  @brief         时间父类
- *  @details       时间对象的基类
+/** @file          CTimeFactory.h
+ *  @brief         时间对象工厂类
+ *  @details       创建时间对象
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
  *  @version       1.0
@@ -11,16 +11,31 @@
 #ifndef _CTIME_FACTORY_H
 #define _CTIME_FACTORY_H
 
-#include <string>
-
-#include "../DllMain/GNSSCommonDef.h"
-#include "../DllMain/GNSSDataStruct.h"
+#include "IGNSSTime.h"
 
 namespace sixents
 {
     namespace GNSSUtilityLib
     {
-
+        /**
+         *  @class       CTimeFactory
+         *  @brief       时间对象工厂类
+         *  @author      wuchuanfei@sixents.com
+         *  @note        创建时间对象
+         */
+        class CTimeFactory
+        {
+            /**
+             * @brief          创建时间对象函数
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      timeType: 时间类型
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         创建成功的时间对象指针
+             * @note           N/A
+             */
+            static IGNSSTime* CreateTimeObj(const TIME_TYPE timeType);
+        };
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents
 

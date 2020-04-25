@@ -26,14 +26,15 @@ namespace sixents
         class CUTCTime : public IGNSSTime
         {
         public:
-            CUTCTime();
+            explicit CUTCTime(const int timeType = UTC);
             virtual ~CUTCTime();
 
             virtual INT32 Format(std::string& formatString);
 
-            virtual DOUBLE ToSec() const;
+            virtual void ToSec() const;
+            virtual void ToSec(DOUBLE& time) const;
             virtual void ToStandTime(SStandardTime& time) const;
-
+            virtual void ToStandTime() const;
             virtual void SetTime(const DOUBLE& time);
             virtual void GetTime(DOUBLE& time) const;
             virtual void SetTime(const SStandardTime& time);

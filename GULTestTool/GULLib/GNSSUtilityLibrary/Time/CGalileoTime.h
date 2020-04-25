@@ -1,5 +1,5 @@
 /** @file          CGalileoTime.h
- *  @brief         Galileoʱ����
+ *  @brief         Galileo时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -19,14 +19,14 @@ namespace sixents
     {
         /**
          *  @class       CGalileoTime
-         *  @brief       Galileoʱ����
+         *  @brief       Galileo时间类
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
         class CGalileoTime : public IGNSSTime
         {
         public:
-            CGalileoTime();
+            explicit CGalileoTime(const TIME_TYPE timeType = GALILEO);
             virtual ~CGalileoTime();
 
             virtual INT32 Format(std::string& formatString);
@@ -42,7 +42,7 @@ namespace sixents
 
         private:
             SGNSSTime m_time;
-            DOUBLE m_sec; /* ������ʽ��ʾ��ʱ�� */
+            DOUBLE m_sec; /* 以秒格式表示的时间 */
         };                // end class CGalileoTime
     }                     // end namespace GNSSUtilityLib
 } // end namespace sixents

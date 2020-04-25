@@ -21,6 +21,7 @@ namespace sixents
         // 时间类型定义
         enum TIME_TYPE
         {
+            NONE = 0, // 不支持的时间类型
             UTC = 1, // UTC
             GPS,     // GPS
             GLONASS, // 格洛纳斯
@@ -62,7 +63,9 @@ namespace sixents
         const std::string TIME_INTERVAL = ":";     /* 时间间隔符 */
         const std::string WEEK_SEC_INTERVAL = ","; /* 周内秒间隔符 */
 
-        const static SStandardTime EPOCHT0 = {1970, 1, 1, 0, 0, 0};
+        const INT32 DAY_OF_YEAR[12] = { 1,32,60,91,121,152,182,213,244,274,305,335 };
+
+        const static SStandardTime EPOCHT0 = {1970, 1, 1, 0, 0, 0, 0};
         const static DOUBLE GPST0[] = {1980, 1, 6, 0, 0, 0}; /* gps time reference */
         const static DOUBLE GST0[] = {1999, 8, 22, 0, 0, 0}; /* galileo system time reference */
         const static DOUBLE BDT0[] = {2006, 1, 1, 0, 0, 0};  /* beidou time reference */
@@ -126,6 +129,10 @@ namespace sixents
         const INT32 WEEK_SEC = 604800;
         const INT32 DAY_SEC = 86400;
         const INT32 DAY_OF_WEEK = 7;
+
+        const INT32 MONTH_IN_YEAR = 12;
+        const INT32 DAY_IN_YEAR = 365;
+        const INT32 CURRENT_MAX_YEAR = 2099;
 
         const INT32 GPSWEEK_TO_GALWEEK = 1024;
         const INT32 GPSWEEK_TO_BDSWEEK = 1356;

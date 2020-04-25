@@ -32,13 +32,13 @@ namespace sixents
             /**
              * @brief          构造函数
              * @author         wuchuanfei@sixents.com
-             * @param[in]      N/A
+             * @param[in]      时间类型，目前仅支持TIME_TYPE中定义的几种时间类型
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
              * @note           N/A
              */
-            IGNSSTime();
+            explicit IGNSSTime(const TIME_TYPE timeType);
 
             /**
              * @brief          析构函数
@@ -66,16 +66,55 @@ namespace sixents
              * @brief          从对象中获取小数形式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     N/A
+             * @param[out]     小数形式的时间数据
              * @exception      N/A
-             * @return         返回小数形式的时间数据
+             * @return         N/A
              * @note           N/A
              */
             virtual void GetTime(DOUBLE& time) const;
 
+            /**
+             * @brief          以标准时间格式设置时间的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      标准时间格式的时间数据
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
             virtual void SetTime(const SStandardTime& time);
+
+            /**
+             * @brief          从对象中获取标准时间格式的时间的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      N/A
+             * @param[out]     标准时间格式的时间数据
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
             virtual void GetTime(SStandardTime& time) const;
+
+            /**
+             * @brief          以周内秒时间格式设置时间的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      周内秒格式的时间数据
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
             virtual void SetTime(const SGNSSTime& time);
+
+            /**
+             * @brief          从对象中获取周内秒格式的时间的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      N/A
+             * @param[out]     周内秒格式的时间数据
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
             virtual void GetTime(SGNSSTime& time) const;
 
             /**
@@ -90,15 +129,26 @@ namespace sixents
             virtual INT32 Format(std::string& formatString) = 0;
 
             /**
-             * @brief          时间转为小数形式的接口
+             * @brief          当前时间转为小数形式的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
              * @param[out]     N/A
              * @exception      N/A
-             * @return         转换后的时间
+             * @return         N/A
              * @note           N/A
              */
-            virtual DOUBLE ToSec() const = 0;
+            virtual void ToSec() const = 0;
+
+            /**
+             * @brief          当前时间转为小数形式的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      N/A
+             * @param[out]     time: 转换后的时间
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
+            virtual void ToSec(DOUBLE& time) const = 0;
 
             /**
              * @brief          把时间转为标准时间结构的接口
@@ -112,13 +162,24 @@ namespace sixents
             virtual void ToStandTime(SStandardTime& time) const = 0;
 
             /**
+             * @brief          把时间转为标准时间结构的接口
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      N/A
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         N/A
+             * @note           N/A
+             */
+            virtual void ToStandTime() const = 0;
+
+            /**
              * @brief          把时间转为周内秒结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
              * @param[out]     time: 转换后的时间
              * @exception      N/A
              * @return         N/A
-             * @note           N/A
+             * @note           只有支持周内秒格式的时间才需要用到此函数
              */
             virtual void ToWeekSec(SGNSSTime& time) const;
 
@@ -128,13 +189,15 @@ namespace sixents
              * @param[in]      N/A
              * @param[out]     N/A
              * @exception      N/A
-             * @return         N/A
+             * @return         当前时间类型
              * @note           N/A
              */
             INT32 GetTimeType();
-
+        protected:
+            INT32 StandTimeToSec(const SStandardTime& stdTime, DOUBLE& sec);
+            INT32 SecToStandTime(const DOUBLE sec, SStandardTime& stdTime);
         private:
-            INT32 m_timeType;
+            INT32 m_timeType;    /* 存放时间,便于直接使用父类指针直接获取对象类型 */
         }; // end class IGNSSTime
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

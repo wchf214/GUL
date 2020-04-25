@@ -14,10 +14,15 @@ namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        CGPSTime::CGPSTime()
-        {}
+        CGPSTime::CGPSTime(const TIME_TYPE timeType)
+            : IGNSSTime(timeType)
+        {
+            m_time.m_timeType = timeType;
+        }
+
         CGPSTime::~CGPSTime()
         {}
+
         INT32 CGPSTime::Format(std::string& formatString)
         {
             return INT32();

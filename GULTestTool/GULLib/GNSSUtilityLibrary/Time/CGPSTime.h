@@ -26,7 +26,7 @@ namespace sixents
         class CGPSTime : public IGNSSTime
         {
         public:
-            CGPSTime();
+            explicit CGPSTime(const TIME_TYPE timeType = GPS);
             virtual ~CGPSTime();
 
             virtual INT32 Format(std::string& formatString);

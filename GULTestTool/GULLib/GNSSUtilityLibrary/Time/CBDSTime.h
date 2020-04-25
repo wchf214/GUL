@@ -26,7 +26,7 @@ namespace sixents
         class CBDSTime : public IGNSSTime
         {
         public:
-            CBDSTime();
+            explicit CBDSTime(const TIME_TYPE timeType = BDS);
             virtual ~CBDSTime();
 
             virtual INT32 Format(std::string& formatString);

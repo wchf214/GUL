@@ -16,9 +16,10 @@ namespace sixents
 {
     namespace GNSSUtilityLib
     {
-        CUTCTime::CUTCTime()
+        CUTCTime::CUTCTime(const TIME_TYPE timeType)
+            :IGNSSTime(timeType)
         {
-            m_time.m_timeType = UTC;
+            m_time.m_timeType = timeType;
         }
 
         CUTCTime::~CUTCTime()
@@ -32,20 +33,33 @@ namespace sixents
                          << m_time.m_hour << TIME_INTERVAL << m_time.m_minute << TIME_INTERVAL << std::setprecision(3)
                          << m_time.m_second;
             formatString = formatStream.str();
-            formatStream.str(""); // ���ջ�����
+            formatStream.str(""); // 清空缓存
             return RETURN_SUCCESS;
         }
 
-        DOUBLE CUTCTime::ToSec() const
+        void CUTCTime::ToSec() const
         {
-            return DOUBLE();
+            m_sec = static_cast<DOUBLE>(0.0);
+        }
+
+        void CUTCTime::ToSec(DOUBLE &time) const
+        {
+
         }
 
         void CUTCTime::ToStandTime(SStandardTime& time) const
         {}
 
+        void CUTCTime::ToStandTime() const
+        {
+
+        }
+
         void CUTCTime::SetTime(const DOUBLE& time)
-        {}
+        {
+            m_sec = time;
+            ToStandTime();
+        }
 
         void CUTCTime::GetTime(DOUBLE& time) const
         {}

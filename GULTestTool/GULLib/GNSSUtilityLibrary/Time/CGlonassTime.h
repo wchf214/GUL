@@ -26,7 +26,7 @@ namespace sixents
         class CGlonassTime : public IGNSSTime
         {
         public:
-            CGlonassTime();
+            explicit CGlonassTime(const TIME_TYPE timeType = GLONASS);
             virtual ~CGlonassTime();
 
             virtual INT32 Format(std::string& formatString);
