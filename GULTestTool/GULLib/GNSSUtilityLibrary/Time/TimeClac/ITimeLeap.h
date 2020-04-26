@@ -1,6 +1,4 @@
-﻿#ifndef ITIME_LEAP_H
-#define ITIME_LEAP_H
-/** @file          ITimeLeap.h
+﻿/** @file          ITimeLeap.h
  *  @brief         跳秒信息父类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -10,7 +8,11 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
+#ifndef ITIME_LEAP_H
+#define ITIME_LEAP_H
+
 #include "../../DllMain/GNSSCommonDef.h"
+
 namespace sixents
 {
     namespace GNSSUtilityLib

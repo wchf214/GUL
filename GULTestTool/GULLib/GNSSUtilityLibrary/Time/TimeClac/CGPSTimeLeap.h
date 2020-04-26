@@ -1,5 +1,5 @@
-﻿/** @file          ITimeLeap.h
- *  @brief         跳秒信息父类
+﻿/** @file          CGPSTimeLeap.h
+ *  @brief         GPS跳秒信息类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/24
@@ -17,8 +17,8 @@ namespace sixents
     namespace GNSSUtilityLib
     {
         /**
-         *  @class       ITimeLeap
-         *  @brief       跳秒信息父类
+         *  @class       CGPSTimeLeap
+         *  @brief       GPS跳秒信息类
          *  @author      wuchuanfei@sixents.com
          *  @note
          */
@@ -26,9 +26,9 @@ namespace sixents
         {
         public:
             explicit CGPSTimeLeap(const TIME_TYPE timeType);
-            virtual ~CGPSTimeLeap();
+            virtual ~CGPSTimeLeap() override;
 
-            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE destTimeType);
+            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE destTimeType) override;
         };
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

@@ -97,10 +97,11 @@ namespace sixents
         const INT32 CURRENT_MAX_YEAR = 2099; // 当前支持的最大天数
         const INT32 LEAP_YEAR_INTERVAL = 4;    // 闰年间隔
         // For Time Leap 跳秒值
-        const INT32 WEEK_BETWEEN_GPS_GAL = 1024;  // GPS 与 Galileo 之间相差1024周
-        const INT32 GPSWEEK_TO_BDSWEEK = 1356;
+        const INT32 WEEK_BETWEEN_GPS_GAL = 1024;  // GPS 与 Galileo 相差1024周
+        const INT32 GPSWEEK_TO_BDSWEEK = 1356;    // GPS 与 BDS 相差1356周
         const INT32 THREE_HOUR = 3;    // Glonass 与 UTC 之间的跳秒值
-        const INT32 SEC_OF_3HOUR = 10800;
+        const INT32 SEC_OF_3HOUR = 3 * BASE_60 * BASE_60;  // 3小时对应的秒数
+        const INT32 SEC_BETWEEN_GPS_BDS = 14;   // GPS 与 BDS 相差14s
         /* leap seconds (y,month,d,h,min,s,utc-gpst) */
         const static DOUBLE GPS_LEAPSEC_INFO[65][7] = {{2017, 1, 1, 0, 0, 0, -18},
                                                        {2015, 7, 1, 0, 0, 0, -17},
