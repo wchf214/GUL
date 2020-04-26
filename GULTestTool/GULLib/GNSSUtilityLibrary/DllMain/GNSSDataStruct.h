@@ -373,13 +373,13 @@ namespace sixents
          */
         struct SStandardTime
         {
-            INT32 m_year;     // 年
-            INT32 m_month;    // 月
-            INT32 m_day;      // 日
-            INT32 m_hour;     // 时
-            INT32 m_minute;   // 分
+            UINT32 m_year;     // 年
+            UINT32 m_month;    // 月
+            UINT32 m_day;      // 日
+            UINT32 m_hour;     // 时
+            UINT32 m_minute;   // 分
             DOUBLE m_second;  // 秒，精确度：3位小数（毫秒级）
-            INT32 m_timeType; // GPS、BD、Galileo
+            UINT32 m_timeType; // GPS、BD、Galileo
         };
 
         /**
@@ -390,9 +390,9 @@ namespace sixents
          */
         struct SGNSSTime
         {
-            INT32 m_week;        // 周
+            INT64 m_week;        // 周
             DOUBLE m_secAndMsec; // 秒，精确度：3位小数（毫秒级）
-            INT32 m_timeType;    // GPS、BD、Galileo
+            UINT32 m_timeType;    // GPS、BD、Galileo
         };
 
         // 大地坐标

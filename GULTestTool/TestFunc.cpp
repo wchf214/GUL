@@ -149,10 +149,10 @@ EXPORT int  matinv(double *A, int n);
 }
 
 // 常量定义
-const static int COORDINATE_ACCURACY = 9;
-const static int BLH_ACCURACY = 11;
-const static int MSEC_ACCURACY = 3;
-const static int MATRIX_ACCURACY = 6;
+const static int COORDINATE_ACCURACY = 9;  // 空间直角坐标，以及大地坐标中高程的精确度
+const static int BLH_ACCURACY = 11;        // 大地坐标中经纬度的精确度
+const static int MSEC_ACCURACY = 3;        // 小数秒的精确度（精确到毫秒）
+const static int MATRIX_ACCURACY = 6;      // 矩阵中double数据的精确度
 
 CTestFunc::CTestFunc()
     : mLoadRtkLibFlag(false)
@@ -527,17 +527,8 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     // 执行GUL接口
     sixents::GNSSUtilityLib::GNSSTimeToUTCTime(week, sec, flag, year, month, day,
                                                hour, minute, second);
-    char* outStr = nullptr;
-    int outLen = 0;
-    sixents::GNSSUtilityLib::FormatStandardTime(year, month, day,
-                                                hour, minute, second, outStr, outLen);
-    if (outLen == 0) {
-        return false;
-    }
-    outStr = new char[static_cast<unsigned long long>(outLen)];
-    memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outLen));
-    sixents::GNSSUtilityLib::FormatStandardTime(year, month, day, hour, minute, second, outStr, outLen);
-    QString gulRet = outStr;
+    QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " "
+            + QString::number(hour) + ":" + QString::number(minute) + ":" + QString::number(second, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
     return true;

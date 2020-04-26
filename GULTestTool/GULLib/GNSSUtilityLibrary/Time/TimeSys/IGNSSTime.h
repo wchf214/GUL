@@ -1,4 +1,4 @@
-/** @file          IGNSSTime.h
+﻿/** @file          IGNSSTime.h
  *  @brief         时间父类
  *  @details       时间对象的基类
  *  @author        wuchuanfei@sixens.com
@@ -13,8 +13,8 @@
 
 #include <string>
 
-#include "../DllMain/GNSSCommonDef.h"
-#include "../DllMain/GNSSDataStruct.h"
+#include "../../DllMain/GNSSCommonDef.h"
+#include "../../DllMain/GNSSDataStruct.h"
 
 namespace sixents
 {
@@ -71,7 +71,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void GetTime(DOUBLE& time) const;
+            virtual void GetTime(DOUBLE& time);
 
             /**
              * @brief          以标准时间格式设置时间的接口
@@ -93,7 +93,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void GetTime(SStandardTime& time) const;
+            virtual void GetTime(SStandardTime& time);
 
             /**
              * @brief          以周内秒时间格式设置时间的接口
@@ -115,7 +115,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void GetTime(SGNSSTime& time) const;
+            virtual void GetTime(SGNSSTime& time);
 
             /**
              * @brief          以年月日时分秒格式对时间进行格式化的接口
@@ -137,7 +137,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void ToSec() const = 0;
+            virtual void ToSec() = 0;
 
             /**
              * @brief          当前时间转为小数形式的接口
@@ -148,7 +148,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void ToSec(DOUBLE& time) const = 0;
+            virtual void ToSec(DOUBLE& time) = 0;
 
             /**
              * @brief          把时间转为标准时间结构的接口
@@ -159,7 +159,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void ToStandTime(SStandardTime& time) const = 0;
+            virtual void ToStandTime(SStandardTime& time) = 0;
 
             /**
              * @brief          把时间转为标准时间结构的接口
@@ -170,7 +170,7 @@ namespace sixents
              * @return         N/A
              * @note           N/A
              */
-            virtual void ToStandTime() const = 0;
+            virtual void ToStandTime() = 0;
 
             /**
              * @brief          把时间转为周内秒结构的接口
@@ -181,7 +181,7 @@ namespace sixents
              * @return         N/A
              * @note           只有支持周内秒格式的时间才需要用到此函数
              */
-            virtual void ToWeekSec(SGNSSTime& time) const;
+            virtual void ToWeekSec(SGNSSTime& time);
 
             /**
              * @brief          获取当前时间的时间类型
@@ -193,9 +193,11 @@ namespace sixents
              * @note           N/A
              */
             INT32 GetTimeType();
-        protected:
-            INT32 StandTimeToSec(const SStandardTime& stdTime, DOUBLE& sec);
+
+            DOUBLE StandTimeToSec(const SStandardTime& stdTime);
             INT32 SecToStandTime(const DOUBLE sec, SStandardTime& stdTime);
+            DOUBLE WeekSecToSec(const SGNSSTime& stdTime, const UINT64 startTime);
+            INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
         private:
             INT32 m_timeType;    /* 存放时间,便于直接使用父类指针直接获取对象类型 */
         }; // end class IGNSSTime

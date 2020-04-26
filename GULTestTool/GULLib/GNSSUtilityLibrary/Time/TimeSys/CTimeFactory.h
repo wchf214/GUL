@@ -1,4 +1,4 @@
-/** @file          CTimeFactory.h
+﻿/** @file          CTimeFactory.h
  *  @brief         时间对象工厂类
  *  @details       创建时间对象
  *  @author        wuchuanfei@sixens.com
@@ -25,6 +25,7 @@ namespace sixents
          */
         class CTimeFactory
         {
+        public:
             /**
              * @brief          创建时间对象函数
              * @author         wuchuanfei@sixents.com

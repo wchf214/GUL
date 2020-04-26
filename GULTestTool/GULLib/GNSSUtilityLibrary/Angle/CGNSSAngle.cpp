@@ -38,6 +38,7 @@ namespace sixents
         CGNSSAngle::~CGNSSAngle()
         {
         }
+
         INT32 CGNSSAngle::GetLength(const bool formatType)
         {
             if (formatType == true)
@@ -72,7 +73,7 @@ namespace sixents
             if (formatType)
             {
                 std::stringstream ss;
-                ss << std::setprecision(15) << m_decimalDegree;
+                ss << std::setprecision(DEGREE_ACCURACY) << m_decimalDegree;
                 std::string str = ss.str();  // 3.14159265358979
                 str += "°";
                 std::cout << str << std::endl;
@@ -95,55 +96,44 @@ namespace sixents
             return 1;
         }
 
-        INT32 CGNSSAngle::DegToRad(double degree, double& radian)
+        INT32 CGNSSAngle::DegToRad(const DOUBLE degree, DOUBLE& radian)
         {
-            do
-            {
-                radian = (degree * PI) / 180;
-            } while (false);
-            return 1;
+            radian = degree * D2R;
+            return RETURN_SUCCESS;
         }
 
-        INT32 CGNSSAngle::RadToDeg(double radian, double& degree)
+        INT32 CGNSSAngle::RadToDeg(const DOUBLE radian, DOUBLE& degree)
         {
-            do
-            {
-                degree = radian * 180 / PI;
-            } while (false);
-            return 1;
+            degree = radian * R2D;
+            return RETURN_SUCCESS;
         }
 
-        INT32 CGNSSAngle::DegToDMS(double Degree, INT32& degree, INT32& minute, double& second)
+        INT32 CGNSSAngle::DegToDMS(const DOUBLE deg, INT32& degree, INT32& minute, DOUBLE& second)
         {
             do
             {
-                INT32 sign = 0;
-                if (Degree >= 0)
-                {
-                    sign = 1;
-                }
-                else
-                {
-                    sign = -1;
-                }
-                Degree = fabs(Degree);
-                degree = floor(Degree);
-                double degreetomin = (Degree - degree)*NUM_SIXTY;
-                minute = floor(degreetomin);
-                double mintosec = (degreetomin - minute)*NUM_SIXTY;
+                const INT32 MINUS_FLAG = -1;
+                DOUBLE absDeg = fabs(deg);
+                degree = static_cast<INT32>(floor(absDeg));
+                DOUBLE degreetomin = (absDeg - degree) * BASE_60;
+                minute = static_cast<INT32>(floor(degreetomin));
+                DOUBLE mintosec = (degreetomin - minute) * BASE_60;
                 second = floor(mintosec);
-                degree *= sign;
+                if (deg < 0) {
+                    degree *= MINUS_FLAG;
+                }
             } while (false);
-            return 1;
+            return RETURN_SUCCESS;
         }
-        INT32 CGNSSAngle::DMSToDeg(const INT32 degree, const INT32 minute, const double second, double& Degree)
+
+        INT32 CGNSSAngle::DMSToDeg(const INT32 degree, const INT32 minute, const DOUBLE second, DOUBLE& deg)
         {
-            do
-            {
-                double sign = degree < 0.0 ? -1.0 : 1.0;
-                Degree = sign * (fabs(degree) + minute / NUM_SIXTY + second / DEG_TO_SEC);
-            } while (false);
-            return 1;
+            const DOUBLE MINUS_FLAG = -1.0;
+            deg = fabs(degree) + minute / BASE_60 + second / DEG_TO_SEC;
+            if (degree < 0.0) {
+                deg *= MINUS_FLAG;
+            }
+            return RETURN_SUCCESS;
         }
     }
 }

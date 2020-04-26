@@ -1,4 +1,4 @@
-/** @file          CGlonassTime.h
+﻿/** @file          CGlonassTime.h
  *  @brief         Glonass时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -27,17 +27,19 @@ namespace sixents
         {
         public:
             explicit CGlonassTime(const TIME_TYPE timeType = GLONASS);
-            virtual ~CGlonassTime();
+            virtual ~CGlonassTime() override;
 
-            virtual INT32 Format(std::string& formatString);
+            virtual INT32 Format(std::string& formatString) override;
 
-            virtual DOUBLE ToSec() const;
-            virtual void ToStandTime(SStandardTime& time) const;
+            virtual void ToSec() override;
+            virtual void ToSec(DOUBLE& time) override;
+            virtual void ToStandTime() override;
+            virtual void ToStandTime(SStandardTime& time) override;
 
-            virtual void SetTime(const DOUBLE& time);
-            virtual void GetTime(DOUBLE& time) const;
-            virtual void SetTime(const SStandardTime& time);
-            virtual void GetTime(SStandardTime& time) const;
+            virtual void SetTime(const DOUBLE& time) override;
+            virtual void GetTime(DOUBLE& time) override;
+            virtual void SetTime(const SStandardTime& time) override;
+            virtual void GetTime(SStandardTime& time) override;
 
         private:
             SStandardTime m_time;

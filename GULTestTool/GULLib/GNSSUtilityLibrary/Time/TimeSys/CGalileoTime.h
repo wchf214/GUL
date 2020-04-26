@@ -1,4 +1,4 @@
-/** @file          CGalileoTime.h
+﻿/** @file          CGalileoTime.h
  *  @brief         Galileo时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -27,18 +27,20 @@ namespace sixents
         {
         public:
             explicit CGalileoTime(const TIME_TYPE timeType = GALILEO);
-            virtual ~CGalileoTime();
+            virtual ~CGalileoTime() override;
 
-            virtual INT32 Format(std::string& formatString);
+            virtual INT32 Format(std::string& formatString) override;
 
-            virtual DOUBLE ToSec() const;
-            virtual void ToStandTime(SStandardTime& time) const;
-            virtual void ToWeekSec(SGNSSTime& time) const;
+            virtual void ToSec() override;
+            virtual void ToSec(DOUBLE& time) override;
+            virtual void ToStandTime() override;
+            virtual void ToStandTime(SStandardTime& time) override;
+            virtual void ToWeekSec(SGNSSTime& time) override;
 
-            virtual void SetTime(const DOUBLE& time);
-            virtual void GetTime(DOUBLE& time) const;
-            virtual void SetTime(const SGNSSTime& time);
-            virtual void GetTime(SGNSSTime& time) const;
+            virtual void SetTime(const DOUBLE& time) override;
+            virtual void GetTime(DOUBLE& time) override;
+            virtual void SetTime(const SGNSSTime& time) override;
+            virtual void GetTime(SGNSSTime& time) override;
 
         private:
             SGNSSTime m_time;

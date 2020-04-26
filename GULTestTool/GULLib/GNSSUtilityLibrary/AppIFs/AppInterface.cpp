@@ -13,7 +13,7 @@
 #include "../Coordinate/CGNSSCoord.h"
 #include "../DllMain/GNSSCommonDef.h"
 #include "../Ephemeris/CGNSSEphemeris.h"
-#include "../Time/IGNSSTime.h"
+#include "../Time/TimeSys/IGNSSTime.h"
 
 namespace sixents
 {

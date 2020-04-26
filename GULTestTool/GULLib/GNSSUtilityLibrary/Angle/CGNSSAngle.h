@@ -43,13 +43,13 @@ namespace sixents
 
             // degree to radian
             // GUL_UC_026
-            INT32 DegToRad(DOUBLE degree, DOUBLE& radian);
+            INT32 DegToRad(const DOUBLE degree, DOUBLE& radian);
             // radian to degree
             // GUL_UC_027
-            INT32 RadToDeg(DOUBLE radian, DOUBLE& degree);
+            INT32 RadToDeg(const DOUBLE radian, DOUBLE& degree);
             // transfrom between two degree form
-            INT32 DegToDMS(DOUBLE Degree, INT32& degree, INT32& minute, DOUBLE& second);
-            INT32 DMSToDeg(const INT32 degree, const INT32 minute, const DOUBLE second, DOUBLE& Degree);
+            INT32 DegToDMS(const DOUBLE deg, INT32& degree, INT32& minute, DOUBLE& second);
+            INT32 DMSToDeg(const INT32 degree, const INT32 minute, const DOUBLE second, DOUBLE& deg);
 
         private:
             INT32 m_degree;

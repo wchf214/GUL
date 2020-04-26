@@ -1,4 +1,4 @@
-/** @file          CUTCTime.h
+﻿/** @file          CUTCTime.h
  *  @brief         UTC时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -26,20 +26,19 @@ namespace sixents
         class CUTCTime : public IGNSSTime
         {
         public:
-            explicit CUTCTime(const int timeType = UTC);
-            virtual ~CUTCTime();
+            explicit CUTCTime(const TIME_TYPE timeType = UTC);
+            virtual ~CUTCTime() override;
 
-            virtual INT32 Format(std::string& formatString);
+            virtual INT32 Format(std::string& formatString) override;
 
-            virtual void ToSec() const;
-            virtual void ToSec(DOUBLE& time) const;
-            virtual void ToStandTime(SStandardTime& time) const;
-            virtual void ToStandTime() const;
-            virtual void SetTime(const DOUBLE& time);
-            virtual void GetTime(DOUBLE& time) const;
-            virtual void SetTime(const SStandardTime& time);
-            virtual void GetTime(SStandardTime& time) const;
-
+            virtual void ToSec() override;
+            virtual void ToSec(DOUBLE& time) override;
+            virtual void ToStandTime(SStandardTime& time) override;
+            virtual void ToStandTime() override;
+            virtual void SetTime(const DOUBLE& time) override;
+            virtual void GetTime(DOUBLE& time) override;
+            virtual void SetTime(const SStandardTime& time) override;
+            virtual void GetTime(SStandardTime& time) override;
         private:
             SStandardTime m_time;
             DOUBLE m_sec; /* 以秒格式表示的时间 */
