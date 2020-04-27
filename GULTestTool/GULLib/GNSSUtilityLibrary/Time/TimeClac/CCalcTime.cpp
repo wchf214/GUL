@@ -186,9 +186,9 @@ namespace sixents
         {
             DOUBLE retTime = 0.0;
             if (!isGps) {
-                retTime = srcTime + GPSWEEK_TO_BDSWEEK * WEEK_SEC + SEC_BETWEEN_GPS_BDS;
+                retTime = srcTime - (GPSWEEK_TO_BDSWEEK * WEEK_SEC + SEC_BETWEEN_GPS_BDS);
             } else {
-                retTime = srcTime - GPSWEEK_TO_BDSWEEK * WEEK_SEC - SEC_BETWEEN_GPS_BDS;
+                retTime = srcTime + (GPSWEEK_TO_BDSWEEK * WEEK_SEC + SEC_BETWEEN_GPS_BDS);
             }
             return retTime;
         }
