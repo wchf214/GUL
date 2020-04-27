@@ -28,7 +28,10 @@ namespace sixents
             explicit CGPSTimeLeap(const TIME_TYPE timeType);
             virtual ~CGPSTimeLeap() override;
 
-            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE destTimeType) override;
+            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE timeType) override;
+        private:
+            DOUBLE ToUTCLeapTime(const DOUBLE timeSec);
+            DOUBLE ToBDSLeapTime();
         };
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

@@ -24,7 +24,7 @@ namespace sixents
             ToStandTime(curTime);
             formatStream << curTime.m_year << DAY_INTERVAL << curTime.m_month << DAY_INTERVAL << curTime.m_day << " "
                          << curTime.m_hour << TIME_INTERVAL << curTime.m_minute << TIME_INTERVAL
-                         << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
+                         << std::fixed << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
             formatString = formatStream.str();
             formatStream.str(""); // 清空缓存
             return RETURN_SUCCESS;
@@ -32,12 +32,12 @@ namespace sixents
 
         void CBDSTime::ToSec()
         {
-            m_sec = WeekSecToSec(m_time, EPOCH_TO_GPST0);
+            m_sec = WeekSecToSec(m_time, EPOCH_TO_BDT0);
         }
 
         void CBDSTime::ToSec(DOUBLE &time)
         {
-            time = WeekSecToSec(m_time, EPOCH_TO_GPST0);
+            time = WeekSecToSec(m_time, EPOCH_TO_BDT0);
         }
 
         void CBDSTime::ToStandTime(SStandardTime &time)
@@ -51,7 +51,7 @@ namespace sixents
 
         void CBDSTime::ToWeekSec(SGNSSTime &time)
         {
-            SecToWeekSec(m_sec, EPOCH_TO_GPST0, time);
+            SecToWeekSec(m_sec, EPOCH_TO_BDT0, time);
         }
 
         void CBDSTime::SetTime(const DOUBLE &time)

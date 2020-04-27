@@ -29,7 +29,7 @@ namespace sixents
             explicit ITimeLeap(const TIME_TYPE timeType);
             virtual ~ITimeLeap();
 
-            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE destTimeType) = 0;
+            virtual DOUBLE GetLeapTime(const DOUBLE timeSec, const TIME_TYPE timeType) = 0;
 
             TIME_TYPE GetTimeType() const;
         private:

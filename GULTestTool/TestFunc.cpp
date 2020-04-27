@@ -310,40 +310,40 @@ void CTestFunc::ExecuteTestTime(QString& testData, const int testFunc)
     case 1: // GPS时间格式化
     case 5: // GPS时间转为UTC时间
     case 9: // UTC时间转为GPS时间
-        flag = "1";
+        flag = "2";
         break;
     case 2: // GLONASS时间格式化
     case 6: // GLONASS时间转为UTC时间
     case 10: // UTC时间转为GLONASS时间
-        flag = "2";
+        flag = "3";
         break;
     case 3: // Galileo时间格式化
     case 7: // GALILEO时间转为UTC时间
     case 11: // UTC时间转为GALILEO时间
-        flag = "3";
+        flag = "4";
         break;
     case 4: // 北斗时间格式化
     case 8: // 北斗时间转为UTC时间
     case 12: // UTC时间转为北斗时间
-        flag = "4";
+        flag = "5";
         break;
     case 13: // 北斗时间转为GPS时间
-        flag = "4,1";
+        flag = "5,2";
         break;
     case 14: // GLONASS时间转为GPS时间
-        flag = "2,1";
+        flag = "3,2";
         break;
     case 15: // GALILEO时间转为GPS时间
-        flag = "3,1";
+        flag = "4,2";
         break;
     case 16: // GPS时间转为北斗时间
-        flag = "1,4";
+        flag = "2,5";
         break;
     case 17: // GPS时间转为GLONASS时间
-        flag = "1,2";
+        flag = "2,3";
         break;
     case 18: // GPS时间转为GALILEO时间
-        flag = "1,3";
+        flag = "2,4";
         break;
     default:
         break;
@@ -502,13 +502,13 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     // 调用Rtk时间接口
     gtime_t rtkTime;
     switch (flag) {
-    case 1:    // GPS时间
+    case 2:    // GPS时间
         rtkTime = gpst2time(week, sec);
         break;
-    case 3:    // Galileo时间
+    case 4:    // Galileo时间
         rtkTime = gst2time(week, sec);
         break;
-    case 4:    // BD时间
+    case 5:    // BD时间
         rtkTime = bdt2time(week, sec);
         rtkTime = bdt2gpst(rtkTime);
         break;
@@ -572,13 +572,13 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
     double second = 0.0;
     // 执行Rtk接口，未实现该结果
     switch (flag) {
-    case 1:    // GPS时间
+    case 2:    // GPS时间
         second = time2gpst(rtkTime, &week);
         break;
-    case 3:    // Galileo时间
+    case 4:    // Galileo时间
         second = time2gst(rtkTime, &week);
         break;
-    case 4:    // BD时间
+    case 5:    // BD时间
         second = time2bdt(rtkTime, &week);
         break;
     default:
@@ -587,9 +587,11 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
 
     QString rtkRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
     // 执行GUL接口
+    week = 0;
+    second = 0.0;
     sixents::GNSSUtilityLib::UTCTimeToGNSSTime(year, month, day, hour, minute, sec,
-                                               flag, week, sec);
-    QString gulRet = QString::number(week) + "," + QString::number(sec, 'f', MSEC_ACCURACY);
+                                               flag, week, second);
+    QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
     return true;
@@ -624,18 +626,18 @@ bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
     int destWeek = 0;
     double destSec = 0.0;
     // 执行Rtk接口，未实现该结果
-    if (srcType == 1) {  // GPS to BD or Galileo
+    if (srcType == 2) {  // GPS to BD or Galileo
         gtime_t gpsTime = gpst2time(srcWeek, srcSec);
-        if (destType == 3) { // to Galileo
+        if (destType == 4) { // to Galileo
             // 暂不处理
-        } else if (destType == 4){ // to BD
+        } else if (destType == 5){ // to BD
             gtime_t bdTime = gpst2bdt(gpsTime);
             destSec = time2bdt(bdTime, &destWeek);
         }
-    } else if (destType == 1) { // BD or Galileo to GPS
-        if (srcType == 3) {
+    } else if (destType == 2) { // BD or Galileo to GPS
+        if (srcType == 4) {
             // 暂不处理
-        } else if (srcType == 4) {
+        } else if (srcType == 5) {
             gtime_t bdTime = bdt2time(srcWeek, srcSec);
             gtime_t gpsTime = bdt2gpst(bdTime);
             destSec = time2gpst(gpsTime, &destWeek);

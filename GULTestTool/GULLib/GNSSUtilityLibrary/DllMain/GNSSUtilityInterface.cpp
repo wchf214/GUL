@@ -12,6 +12,7 @@
 
 #include "GNSSUtilityInterface.h"
 #include "../AppIFs/AppInterface.h"
+#include "GNSSCommonDef.h"
 
 namespace sixents
 {
@@ -21,7 +22,7 @@ namespace sixents
         extern "C" DLL_API int STD_CALL
         FormatWeekSecTime(const int week, const double sec, const int timeType, char* formatString, int& len)
         {
-            return CAppInterface::FormatWeekSecTime(week, sec, timeType, formatString, len);
+            return CAppInterface::FormatWeekSecTime(static_cast<INT64>(week), sec, timeType, formatString, len);
         }
 
         // GUL_UC_002
@@ -90,7 +91,11 @@ namespace sixents
                                                           int& week,
                                                           double& sec)
         {
-            return CAppInterface::UTCTimeToGNSSTime(year, month, day, hour, minute, second, timeType, week, sec);
+            INT64 weekNum = 0;
+            int ret = CAppInterface::UTCTimeToGNSSTime(year, month, day, hour, minute, second,
+                                                    timeType, weekNum, sec);
+            week = static_cast<int>(weekNum);
+            return ret;
         }
 
         extern "C" DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year,
@@ -146,7 +151,10 @@ namespace sixents
                                                         double& destSec,
                                                         const int destTimeType)
         {
-            return CAppInterface::GNSSTimeConvert(srcWeek, srcSec, srcTimeType, destWeek, destSec, destTimeType);
+            INT64 temp = 0;
+            int ret = CAppInterface::GNSSTimeConvert(srcWeek, srcSec, srcTimeType, temp, destSec, destTimeType);
+            destWeek = static_cast<int>(temp);
+            return ret;
         }
 
         // GUL_UC_014
@@ -159,7 +167,10 @@ namespace sixents
                                                              int& week,
                                                              double& sec)
         {
-            return CAppInterface::GlonassTimeToGPSTime(year, month, day, hour, minute, second, week, sec);
+            INT64 temp = 0;
+            int ret = CAppInterface::GlonassTimeToGPSTime(year, month, day, hour, minute, second, temp, sec);
+            week = static_cast<int>(temp);
+            return ret;
         }
 
         // GUL_UC_017

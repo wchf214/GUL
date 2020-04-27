@@ -377,8 +377,8 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/CTimeLeapFactory.h \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/CUTCTimeLeap.h \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/ITimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/CCalcTime.h \
+    GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGalileoTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGlonassTime.h \

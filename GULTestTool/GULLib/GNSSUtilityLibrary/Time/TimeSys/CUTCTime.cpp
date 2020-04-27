@@ -31,7 +31,7 @@ namespace sixents
             std::stringstream formatStream("");
             formatStream << m_time.m_year << DAY_INTERVAL << m_time.m_month << DAY_INTERVAL << m_time.m_day << " "
                          << m_time.m_hour << TIME_INTERVAL << m_time.m_minute << TIME_INTERVAL
-                         << std::setprecision(MSEC_ACCURACY) << m_time.m_second;
+                         << std::fixed << std::setprecision(MSEC_ACCURACY) << m_time.m_second;
             formatString = formatStream.str();
             formatStream.str(""); // 清空缓存
             return RETURN_SUCCESS;
@@ -71,6 +71,7 @@ namespace sixents
         void CUTCTime::SetTime(const SStandardTime& time)
         {
             m_time = std::move(time);
+            ToSec();
         }
 
         void CUTCTime::GetTime(SStandardTime& time)

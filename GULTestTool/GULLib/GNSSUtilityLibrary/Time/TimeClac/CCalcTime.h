@@ -12,7 +12,7 @@
 #define CCALC_TIME_H
 
 #include "../../DllMain/GNSSCommonDef.h"
-class ITimeLeap;
+//class ITimeLeap;
 
 namespace sixents
 {
@@ -40,7 +40,16 @@ namespace sixents
              */
             static DOUBLE TimeConvert(const DOUBLE srcSec, const TIME_TYPE srctimeType, const TIME_TYPE destTimeType);
         private:
-            ITimeLeap* m_leap;
+            static DOUBLE GPST2UTC(const DOUBLE srcTime, const BOOL_T isUtc);
+            static DOUBLE GLOT2UTC(const DOUBLE srcTime, const BOOL_T isUtc);
+            static DOUBLE GST2UTC(const DOUBLE srcTime, const BOOL_T isUtc);
+            static DOUBLE BDT2UTC(const DOUBLE srcTime, const BOOL_T isUtc);
+
+            static DOUBLE BDT2GPST(const DOUBLE srcTime, const BOOL_T isGps);
+            static DOUBLE GLOT2GPST(const DOUBLE srcTime, const BOOL_T isGps);
+            static DOUBLE GST2GPST(const DOUBLE srcTime, const BOOL_T isGps);
+//        private:
+//            ITimeLeap* m_leap;
         };
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

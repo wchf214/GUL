@@ -70,7 +70,7 @@ namespace sixents
             INT32 curDayInYear = static_cast<INT32>((stdTime.m_year - EPOCHT0.m_year)) * DAY_IN_YEAR;
             // 除当前年以前的年数中存在的闰年年数
             INT32 leapYearCount =
-                    static_cast<INT32>((stdTime.m_year - EPOCHT0.m_year - BEFORE_ONE_DATA)) / LEAP_YEAR_INTERVAL;
+                    static_cast<INT32>((stdTime.m_year - (EPOCHT0.m_year - BEFORE_ONE_DATA))) / LEAP_YEAR_INTERVAL;
             // 当前月份之前所有月的天数
             INT32 curDayInMonth = DAY_OF_YEAR[stdTime.m_month - BEFORE_ONE_DATA];
             // 当前日期对应的天数 stdTime.m_day
@@ -86,7 +86,7 @@ namespace sixents
                 dayOfLeapMonth = FEB_LEAP_DAY;
             }
 
-            INT32 allDay = curDayInYear + leapYearCount + curDayInMonth - dayOfLeapMonth;
+            INT32 allDay = curDayInYear + leapYearCount + curDayInMonth + stdTime.m_day - dayOfLeapMonth;
             // 根据天数计算秒数
             retSec = static_cast<DOUBLE>(allDay * SEC_IN_DAY) + stdTime.m_hour * BASE_60 * BASE_60 +
                   stdTime.m_minute * BASE_60 + stdTime.m_second;
@@ -117,7 +117,8 @@ namespace sixents
                 }
             }
 
-            stdTime.m_year = EPOCHT0.m_year + static_cast<UINT32>(allDays / DAY_IN_4YEAR + month / MONTH_IN_YEAR);
+            stdTime.m_year = EPOCHT0.m_year +
+                    static_cast<UINT32>(allDays / DAY_IN_4YEAR * LEAP_YEAR_INTERVAL + month / MONTH_IN_YEAR);
             stdTime.m_month = static_cast<UINT32>(month % MONTH_IN_YEAR) + EPOCHT0.m_month;
             stdTime.m_day = static_cast<UINT32>(day) + EPOCHT0.m_day;
             stdTime.m_hour = curSec / (BASE_60 * BASE_60);

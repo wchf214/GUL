@@ -37,8 +37,8 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int
-            FormatWeekSecTime(const int week, const double sec, const int timeType, char* formatString, int& len);
+            static INT32
+            FormatWeekSecTime(const INT64 week, const DOUBLE sec, const INT32 timeType, CHAR* formatString, INT32& len);
 
             /**
              * @brief           格式化标准时间 以年月日时分秒格式输出
@@ -55,14 +55,14 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int FormatStandardTime(const int year,
-                                          const int month,
-                                          const int day,
-                                          const int hour,
-                                          const int minute,
-                                          const double second,
-                                          char* formatString,
-                                          int& len);
+            static INT32 FormatStandardTime(const INT32 year,
+                                          const INT32 month,
+                                          const INT32 day,
+                                          const INT32 hour,
+                                          const INT32 minute,
+                                          const DOUBLE second,
+                                          CHAR* formatString,
+                                          INT32& len);
 
             /**
              * @brief           UTC时间转Glonass时间
@@ -83,18 +83,18 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.20新增
              */
-            static int UTCTimeToGlonassTime(const int utcYear,
-                                            const int utcMonth,
-                                            const int utcDay,
-                                            const int utcHour,
-                                            const int utcMinute,
-                                            const double utcSecond,
-                                            int& gloYear,
-                                            int& gloMonth,
-                                            int& gloDay,
-                                            int& gloHour,
-                                            int& gloMinute,
-                                            double& gloSecond);
+            static INT32 UTCTimeToGlonassTime(const INT32 utcYear,
+                                            const INT32 utcMonth,
+                                            const INT32 utcDay,
+                                            const INT32 utcHour,
+                                            const INT32 utcMinute,
+                                            const DOUBLE utcSecond,
+                                            INT32& gloYear,
+                                            INT32& gloMonth,
+                                            INT32& gloDay,
+                                            INT32& gloHour,
+                                            INT32& gloMinute,
+                                            DOUBLE& gloSecond);
 
             /**
              * @brief           Glonass时间转UTC时间
@@ -115,18 +115,18 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.20新增
              */
-            static int GlonassTimeToUTCTime(const int gloYear,
-                                            const int gloMonth,
-                                            const int gloDay,
-                                            const int gloHour,
-                                            const int gloMinute,
-                                            const double gloSecond,
-                                            int& utcYear,
-                                            int& utcMonth,
-                                            int& utcDay,
-                                            int& utcHour,
-                                            int& utcMinute,
-                                            double& utcSecond);
+            static INT32 GlonassTimeToUTCTime(const INT32 gloYear,
+                                            const INT32 gloMonth,
+                                            const INT32 gloDay,
+                                            const INT32 gloHour,
+                                            const INT32 gloMinute,
+                                            const DOUBLE gloSecond,
+                                            INT32& utcYear,
+                                            INT32& utcMonth,
+                                            INT32& utcDay,
+                                            INT32& utcHour,
+                                            INT32& utcMinute,
+                                            DOUBLE& utcSecond);
 
             // GNSS时间类型与UTC时间互转
             /**
@@ -145,15 +145,15 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int GNSSTimeToUTCTime(const int week,
-                                         const double sec,
-                                         const int timeType,
-                                         int& year,
-                                         int& month,
-                                         int& day,
-                                         int& hour,
-                                         int& minute,
-                                         double& second);
+            static INT32 GNSSTimeToUTCTime(const INT64 week,
+                                         const DOUBLE sec,
+                                         const INT32 timeType,
+                                         INT32& year,
+                                         INT32& month,
+                                         INT32& day,
+                                         INT32& hour,
+                                         INT32& minute,
+                                         DOUBLE& second);
 
             /**
              * @brief           GNSS时间转UTC时间，以小数秒表示转换后的UTC时间
@@ -166,7 +166,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.17新增
              */
-            static int GNSSTimeToUTCSecTime(const int week, const double second, const int timeType, double& sec);
+            static INT32 GNSSTimeToUTCSecTime(const INT64 week, const DOUBLE second, const INT32 timeType, DOUBLE& sec);
 
             /**
              * @brief           UTC时间转GNSS时间
@@ -184,15 +184,15 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int UTCTimeToGNSSTime(const int year,
-                                         const int month,
-                                         const int day,
-                                         const int hour,
-                                         const int minute,
-                                         const double second,
-                                         const int timeType,
-                                         int& week,
-                                         double& sec);
+            static INT32 UTCTimeToGNSSTime(const INT32 year,
+                                         const INT32 month,
+                                         const INT32 day,
+                                         const INT32 hour,
+                                         const INT32 minute,
+                                         const DOUBLE second,
+                                         const INT32 timeType,
+                                         INT64& week,
+                                         DOUBLE& sec);
 
             /**
              * @brief           UTC时间转GNSS时间，以小数秒表示转换后的GNSS时间
@@ -209,14 +209,14 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.17新增
              */
-            static int UTCTimeToGNSSSecTime(const int year,
-                                            const int month,
-                                            const int day,
-                                            const int hour,
-                                            const int minute,
-                                            const double second,
-                                            const int timeType,
-                                            double& sec);
+            static INT32 UTCTimeToGNSSSecTime(const INT32 year,
+                                            const INT32 month,
+                                            const INT32 day,
+                                            const INT32 hour,
+                                            const INT32 minute,
+                                            const DOUBLE second,
+                                            const INT32 timeType,
+                                            DOUBLE& sec);
 
             /**
              * @brief           BD、Glonass、Galileo时间类型与GPS时间互转
@@ -231,12 +231,12 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.17新增
              */
-            static int GNSSTimeConvert(const int srcWeek,
-                                       const double srcSec,
-                                       const int srcTimeType,
-                                       int& destWeek,
-                                       double& destSec,
-                                       const int destTimeType);
+            static INT32 GNSSTimeConvert(const INT64 srcWeek,
+                                       const DOUBLE srcSec,
+                                       const INT32 srcTimeType,
+                                       INT64& destWeek,
+                                       DOUBLE& destSec,
+                                       const INT32 destTimeType);
 
             /**
              * @brief           周内秒转秒
@@ -249,7 +249,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.17新增
              */
-            static int WeekSecToSec(const int week, const double second, const int timeType, double& sec);
+            static INT32 WeekSecToSec(const INT64 week, const DOUBLE second, const INT32 timeType, DOUBLE& sec);
 
             /**
              * @brief           GPS时间转Glonass时间
@@ -266,14 +266,14 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.20新增
              */
-            static int GPSTimeToGlonassTime(const int week,
-                                            const double second,
-                                            int& year,
-                                            int& month,
-                                            int& day,
-                                            int& hour,
-                                            int& minute,
-                                            double& sec);
+            static INT32 GPSTimeToGlonassTime(const INT64 week,
+                                            const DOUBLE second,
+                                            INT32& year,
+                                            INT32& month,
+                                            INT32& day,
+                                            INT32& hour,
+                                            INT32& minute,
+                                            DOUBLE& sec);
 
             /**
              * @brief           Glonass时间转GPS时间
@@ -290,14 +290,14 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            2020.04.20新增
              */
-            static int GlonassTimeToGPSTime(const int year,
-                                            const int month,
-                                            const int day,
-                                            const int hour,
-                                            const int minute,
-                                            const double second,
-                                            int& week,
-                                            double& sec);
+            static INT32 GlonassTimeToGPSTime(const INT32 year,
+                                            const INT32 month,
+                                            const INT32 day,
+                                            const INT32 hour,
+                                            const INT32 minute,
+                                            const DOUBLE second,
+                                            INT64& week,
+                                            DOUBLE& sec);
 
             // 坐标相关接口
             // 坐标结构
@@ -315,8 +315,8 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int
-            XYZ2BLH(const double x, const double y, const double z, double& lon, double& lat, double& height);
+            static INT32
+            XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lon, DOUBLE& lat, DOUBLE& height);
 
             /**
              * @brief           大地坐标转空间直角坐标
@@ -329,8 +329,8 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int
-            BLH2XYZ(const double lon, const double lat, const double height, double& x, double& y, double& z);
+            static INT32
+            BLH2XYZ(const DOUBLE lon, const DOUBLE lat, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
             /**
              * @brief           空间直角坐标转站心坐标
@@ -342,15 +342,15 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int XYZ2ENU(const double curX,
-                               const double curY,
-                               const double curZ,
-                               const double refX,
-                               const double refY,
-                               const double refZ,
-                               double& east,
-                               double& north,
-                               double& up);
+            static INT32 XYZ2ENU(const DOUBLE curX,
+                               const DOUBLE curY,
+                               const DOUBLE curZ,
+                               const DOUBLE refX,
+                               const DOUBLE refY,
+                               const DOUBLE refZ,
+                               DOUBLE& east,
+                               DOUBLE& north,
+                               DOUBLE& up);
 
             // 站心坐标转空间直角坐标
             /**
@@ -363,15 +363,15 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int ENU2XYZ(const double east,
-                               const double north,
-                               const double up,
-                               const double refX,
-                               const double refY,
-                               const double refZ,
-                               double& curX,
-                               double& curY,
-                               double& curZ);
+            static INT32 ENU2XYZ(const DOUBLE east,
+                               const DOUBLE north,
+                               const DOUBLE up,
+                               const DOUBLE refX,
+                               const DOUBLE refY,
+                               const DOUBLE refZ,
+                               DOUBLE& curX,
+                               DOUBLE& curY,
+                               DOUBLE& curZ);
 
             // 星历相关接口 2020.04.17修改
             // 计算钟差
@@ -388,7 +388,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int CalcGlonassEphSatClock(const double& sec, const SGlonassEphemeris& ephObj, double& clockVal);
+            static INT32 CalcGlonassEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal);
 
             /**
              * @brief           计算钟差
@@ -400,7 +400,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+            static INT32 CalcEphSatClock(const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& clockVal);
 
             /**
              * @brief           计算Glonass位置
@@ -412,8 +412,8 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int
-            CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
+            static INT32
+            CalcGlonassEphSatPos(const DOUBLE sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
             /**
              * @brief           计算位置
@@ -425,7 +425,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z);
+            static INT32 CalcEphSatPos(const DOUBLE sec, const SEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
             // 角度相关接口
             /**
@@ -439,8 +439,8 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int
-            FormatAngleByDegree(const double degree, char* formatString, int& len, const bool formatType = true);
+            static INT32
+            FormatAngleByDegree(const DOUBLE degree, char* formatString, INT32& len, const BOOL_T formatType = true);
 
             /**
              * @brief           将度分秒形式的角度格式化
@@ -455,12 +455,12 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int FormatAngleByDMS(const int degree,
-                                        const int minute,
-                                        const double sec,
-                                        char* formatString,
-                                        int& len,
-                                        const bool formatType = true);
+            static INT32 FormatAngleByDMS(const INT32 degree,
+                                        const INT32 minute,
+                                        const DOUBLE sec,
+                                        CHAR* formatString,
+                                        INT32& len,
+                                        const BOOL_T formatType = true);
 
             /**
              * @brief           度转弧度
@@ -471,7 +471,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int Deg2Rad(const double degree, double& radian);
+            static INT32 Deg2Rad(const DOUBLE degree, DOUBLE& radian);
 
             /**
              * @brief           度转弧度
@@ -484,7 +484,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int DMS2Rad(const int degree, const int minute, const double sec, double& radian);
+            static INT32 DMS2Rad(const INT32 degree, const INT32 minute, const DOUBLE sec, DOUBLE& radian);
 
             /**
              * @brief           弧度转度
@@ -495,7 +495,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int Rad2Deg(const double radian, double& degree);
+            static INT32 Rad2Deg(const DOUBLE radian, DOUBLE& degree);
 
             /**
              * @brief           弧度转度
@@ -508,7 +508,7 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static int Rad2DMS(const double radian, int& degree, int& minute, double& sec);
+            static INT32 Rad2DMS(const DOUBLE radian, INT32& degree, INT32& minute, DOUBLE& sec);
         }; // end class CAppInterface
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

@@ -49,11 +49,11 @@ namespace sixents
         };
 
         // 错误码定义
-        const static INT32 RETURN_SUCCESS = 0; // 成功
-        const static INT32 RETURN_FAIL = -1;   // 失败
-        // static const int RETURN_PACKAGE_LENGHT_ERROR = -2; // 包长度错误
-        // static const int RETURN_CRC_CHECK_FAILED = -3;     // CRC校验失败
-        // static const int RETURN_STATION_CORRECT = -4;      // StatioinId校验失败
+        static const INT32 RETURN_SUCCESS = 0; // 成功
+        static const INT32 RETURN_FAIL = -1;   // 失败
+        static const INT32 RETURN_NEW_PTR_FAILED = -2; // new指针失败
+        static const INT32 RETURN_TIME_TYPE_ERROR = -3;     // 时间类型错误
+        static const INT32 RETURN_PTR_LENGTH_ERROR = -4;      // 指针长度不正确
         // static const int RETURN_PERMISSION_ERROR = -5;     // 权限错误
         // static const int RETURN_UNSUPPORTED_RTCM_MSG = -6; // 暂不支持的协议
         // static const int RETURN_NOT_INITIALIZED = -7;      // 未初始化
@@ -63,8 +63,8 @@ namespace sixents
         // For Accuracy
         const int COORDINATE_ACCURACY = 9;  // 空间直角坐标，以及大地坐标中高程的精确度
         const int BLH_ACCURACY = 11;        // 大地坐标中经纬度的精确度
-        const int MSEC_ACCURACY = 3;        // 秒的精确度(精确到毫秒)(包括时间的秒和角度的秒)
-        const int MATRIX_ACCURACY = 6;      // 矩阵中double数据的精确度
+        const int MSEC_ACCURACY = 3;        // 秒的精确度(精确到毫秒)
+        const int MATRIX_ACCURACY = 6;      // 矩阵中double数据的精确度(角分秒格式中的秒，精确度也是6)
         const int DEGREE_ACCURACY = 9;      // 小数度的精确度(小数后9位)
         // For Time
         const std::string DAY_INTERVAL = "-";      /* 日期间隔符 */
@@ -81,9 +81,9 @@ namespace sixents
         const static DOUBLE GST0[] = {1999, 8, 22, 0, 0, 0}; /* galileo system time reference */
         const static DOUBLE BDT0[] = {2006, 1, 1, 0, 0, 0};  /* beidou time reference */
 
-        const UINT64 EPOCH_TO_GPST0 = 315964800;
-        const UINT64 EPOCH_TO_GALT0 = 935280000;
-        const UINT64 EPOCH_TO_BDT0 = 1136073600;
+        const UINT64 EPOCH_TO_GPST0 = 315964800;    // GPS
+        const UINT64 EPOCH_TO_GALT0 = 935280000;    // Galileo
+        const UINT64 EPOCH_TO_BDT0 = 1136073600;    // BDS
 
         const INT32 BASE_60 = 60;  // 60 进制, ，时间进制
         const INT32 SEC_IN_DAY = 24 * 60 * 60;  // 一天内的秒数 86400
@@ -121,14 +121,16 @@ namespace sixents
                                                        {1983, 7, 1, 0, 0, 0, -3},
                                                        {1982, 7, 1, 0, 0, 0, -2},
                                                        {1981, 7, 1, 0, 0, 0, -1},
-                                                       {1980, 1, 6, 0, 0, 0, 0}};
+                                                       {1980, 1, 6, 0, 0, 0, 0},
+                                                       {0}};
 
         /* leap seconds (y,m,d,h,m,s,utc-gpst) */
         const static DOUBLE BDS_LEAPSEC_INFO[65][7] = {{2017, 1, 1, 0, 0, 0, -4},
                                                        {2015, 7, 1, 0, 0, 0, -3},
                                                        {2012, 7, 1, 0, 0, 0, -2},
                                                        {2009, 1, 1, 0, 0, 0, -1},
-                                                       {2006, 1, 1, 0, 0, 0, 0}};
+                                                       {2006, 1, 1, 0, 0, 0, 0},
+                                                       {0}};
 
         // For Angle
         const static INT32 ANGLE_LENGTH = 11;
@@ -156,8 +158,6 @@ namespace sixents
         const static DOUBLE BDS_ANGULAR_VELOCITY = 7.292115E-5;     /* earth angular velocity (rad/s) ref [9] */
         const static DOUBLE DOUBLE_ZONE_LITTLE = -1E9;
         const static DOUBLE DOUBLE_ZONE_BIG = 1E9;
-
-        const INT32 GPSLEAP_TO_BDSLEAP = 14;
 
         const INT32 NUM_ONE = 1;
         const INT32 NUM_SIX = 6;

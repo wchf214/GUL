@@ -29,11 +29,12 @@ namespace sixents
         INT32 CGPSTime::Format(std::string& formatString)
         {
             std::stringstream formatStream("");
+            formatStream.str("");
             SStandardTime curTime;
             ToStandTime(curTime);
             formatStream << curTime.m_year << DAY_INTERVAL << curTime.m_month << DAY_INTERVAL << curTime.m_day << " "
                          << curTime.m_hour << TIME_INTERVAL << curTime.m_minute << TIME_INTERVAL
-                         << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
+                         << std::fixed << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
             formatString = formatStream.str();
             formatStream.str(""); // 清空缓存
             return RETURN_SUCCESS;
