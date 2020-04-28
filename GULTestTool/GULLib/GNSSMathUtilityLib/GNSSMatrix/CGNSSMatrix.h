@@ -22,20 +22,25 @@ namespace sixents
         {
         public:
             explicit CGNSSMatrix();
+            explicit CGNSSMatrix(int row,int col);
             explicit CGNSSMatrix(const SGNSSMatrix& matrix);
             CGNSSMatrix(const CGNSSMatrix& matrixObj);
-            ~CGNSSMatrix();
+            virtual ~CGNSSMatrix();
 
             void SetMatrix(const SGNSSMatrix& matrix);
             SGNSSMatrix GetMatrix();
 
             // 计算方法
-            int MatrixTransposition(SGNSSMatrix& matrix); // 转置
-            int MatrixInverse(SGNSSMatrix& matrix);       // 求逆
+            SGNSSMatrix MatrixTransposition(SGNSSMatrix& matrix); // 转置
+            SGNSSMatrix MatrixInverse(SGNSSMatrix& matrix);       // 求逆
             CGNSSMatrix operator+(CGNSSMatrix& matrix) const; // 加法
             CGNSSMatrix operator-(CGNSSMatrix& matrix); // 减法
             CGNSSMatrix operator*(CGNSSMatrix& matrix); // 乘法
+            CGNSSMatrix operator=(CGNSSMatrix& matrix); // 赋值
 
+
+            SGNSSMatrix MatrixAdd(int addNum); //增加一行
+            SGNSSMatrix MatrixSub(int subNum); //增加一行
         private:
             SGNSSMatrix m_matrix;
         };

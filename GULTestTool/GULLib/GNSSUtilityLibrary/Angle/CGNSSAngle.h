@@ -10,8 +10,8 @@
 
 #ifndef _GNSS_ANGLE_H
 #define _GNSS_ANGLE_H
-#include <sstream>
 #include <string>
+
 #include "../DllMain/GNSSDataStruct.h"
 
 namespace sixents
@@ -43,14 +43,17 @@ namespace sixents
 
             // degree to radian
             // GUL_UC_026
+            INT32 DegToRad();
             INT32 DegToRad(const DOUBLE degree, DOUBLE& radian);
             // radian to degree
             // GUL_UC_027
+            INT32 RadToDeg();
             INT32 RadToDeg(const DOUBLE radian, DOUBLE& degree);
             // transfrom between two degree form
             INT32 DegToDMS(const DOUBLE deg, INT32& degree, INT32& minute, DOUBLE& second);
+            INT32 DegToDMS();
             INT32 DMSToDeg(const INT32 degree, const INT32 minute, const DOUBLE second, DOUBLE& deg);
-
+            INT32 DMSToDeg();
         private:
             INT32 m_degree;
             INT32 m_minute;

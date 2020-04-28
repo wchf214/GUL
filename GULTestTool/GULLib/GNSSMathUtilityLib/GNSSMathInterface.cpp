@@ -12,7 +12,7 @@ namespace sixents
             CGNSSMatrix mat1(srcMatrix);
             CGNSSMatrix mat2(destMatrix);
             CGNSSMatrix mat3;
-            mat3 = mat1 + mat2;
+//            mat3 = mat1 + mat2;
             return 0;
         }
 
@@ -21,7 +21,7 @@ namespace sixents
             CGNSSMatrix mat1(srcMatrix);
             CGNSSMatrix mat2(destMatrix);
             CGNSSMatrix mat3;
-            mat3 = mat1 - mat2;
+//            mat3 = mat1 - mat2;
             return 0;
         }
 
@@ -30,7 +30,7 @@ namespace sixents
             CGNSSMatrix mat1(srcMatrix);
             CGNSSMatrix mat2(destMatrix);
             CGNSSMatrix mat3;
-            mat3 = mat1 * mat2;
+//            mat3 = mat1 * mat2;
             return 0;
         }
 

@@ -25,15 +25,8 @@ SOURCES += \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.cpp \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CBDSTimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGPSTimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGalileoTimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGlonassTimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CTimeLeapFactory.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CUTCTimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/ITimeLeap.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/CCalcTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGalileoTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGlonassTime.cpp \
@@ -370,13 +363,6 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CBDSTimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGPSTimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGalileoTimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CGlonassTimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CTimeLeapFactory.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CUTCTimeLeap.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/ITimeLeap.h \
     GULLib/GNSSUtilityLibrary/Time/TimeClac/CCalcTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.h \
