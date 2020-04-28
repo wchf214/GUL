@@ -112,6 +112,9 @@ void MainWindow::OpenFolderDlg()
 
 void MainWindow::ExecTest()
 {
+    ui->txtRtkResult->text().clear();
+    ui->txtGULResult->text().clear();
+
     QString testData;
     QString result;
     bool dataType = false;
@@ -124,7 +127,7 @@ void MainWindow::ExecTest()
         }
         testData = ui->txtTestDataPath->text() + ";" + ui->txtSimpleTestData->text();
         result = QString("");
-    } else if (funcIdx >= 30 && funcIdx <= 36) { // 矩阵运算，源数据由两个文件组成
+    } else if (funcIdx >= 31 && funcIdx <= 37) { // 矩阵运算，源数据由两个文件组成
         if (ui->txtTestDataPath->text().isEmpty() || ui->txtResultPath->text().isEmpty()) {
             return;
         }
@@ -139,9 +142,6 @@ void MainWindow::ExecTest()
     }
 
     // 执行测试用例
-    ui->txtRtkResult->text().clear();
-    ui->txtGULResult->text().clear();
-
     CTestFunc testFunc;
     testFunc.ExecuteTest(testData, ui->comboTestIF->currentIndex(), result);
 

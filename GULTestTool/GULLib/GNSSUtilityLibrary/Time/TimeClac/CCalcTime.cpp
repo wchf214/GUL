@@ -77,15 +77,15 @@ namespace sixents
         DOUBLE CCalcTime::GPST2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
-            INT32 retTimeSec = 0;
+            INT64 retTimeSec = 0;
             DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
             for (int i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
                 //依次加入不同的跳秒信息
-                if (!isUtc) {
-                    retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {
-                    retTimeSec = static_cast<INT32>(srcTime) - static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
+                if (!isUtc) {  // UTC to GPS
+                    retTimeSec = static_cast<INT64>(srcTime) - static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
+                } else {  // GPS to UTC
+                    retTimeSec = static_cast<INT64>(srcTime) + static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
@@ -110,9 +110,9 @@ namespace sixents
         DOUBLE CCalcTime::GLOT2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
-            if (!isUtc) {
+            if (!isUtc) {  // UTC to Glonass
                 retTime = srcTime + static_cast<DOUBLE>(SEC_OF_3HOUR);
-            } else {
+            } else {  // Glonass to UTC
                 retTime = srcTime - static_cast<DOUBLE>(SEC_OF_3HOUR);
             }
             return retTime;
@@ -126,9 +126,9 @@ namespace sixents
             for (int i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
                 //依次加入不同的跳秒信息
-                if (!isUtc) {
+                if (!isUtc) {  // UTC to Galileo
                     retTimeSec = static_cast<INT32>(srcTime) - static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {
+                } else {   // Galileo to UTC
                     retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
@@ -158,10 +158,10 @@ namespace sixents
             DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
             for (int i = 0; BDS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
-                if (!isUtc) {
-                    retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {
+                if (!isUtc) {  // UTC to BDS
                     retTimeSec = static_cast<INT32>(srcTime) - static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
+                } else {  // BDS to UTC
+                    retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
@@ -185,10 +185,10 @@ namespace sixents
         DOUBLE CCalcTime::BDT2GPST(const DOUBLE srcTime, const BOOL_T isGps)
         {
             DOUBLE retTime = 0.0;
-            if (!isGps) {
-                retTime = srcTime - (GPSWEEK_TO_BDSWEEK * WEEK_SEC + SEC_BETWEEN_GPS_BDS);
-            } else {
-                retTime = srcTime + (GPSWEEK_TO_BDSWEEK * WEEK_SEC + SEC_BETWEEN_GPS_BDS);
+            if (!isGps) {  // GPS To BDS
+                retTime = srcTime - SEC_BETWEEN_GPS_BDS;
+            } else { // BDS To GPS
+                retTime = srcTime + SEC_BETWEEN_GPS_BDS;
             }
             return retTime;
         }
@@ -196,25 +196,19 @@ namespace sixents
         DOUBLE CCalcTime::GLOT2GPST(const DOUBLE srcTime, const BOOL_T isGps)
         {
             DOUBLE retTime = 0.0;
-            if (!isGps) {
+            if (!isGps) { // GPS To Glonass
+                retTime = GPST2UTC(srcTime, !isGps);
+                retTime = GLOT2UTC(retTime, isGps);
+            } else { // Glonass To GPS
                 retTime = GLOT2UTC(srcTime, isGps);
                 retTime = GPST2UTC(retTime, !isGps);
-            } else {
-                retTime = GPST2UTC(srcTime, isGps);
-                retTime = GLOT2UTC(retTime, !isGps);
             }
             return  retTime;
         }
 
         DOUBLE CCalcTime::GST2GPST(const DOUBLE srcTime, const BOOL_T isGps)
         {
-            DOUBLE retTime = 0.0;
-            if (!isGps) {
-                retTime = srcTime + WEEK_BETWEEN_GPS_GAL * WEEK_SEC;
-            } else {
-                retTime = srcTime - WEEK_BETWEEN_GPS_GAL * WEEK_SEC;
-            }
-            return retTime;
+            return srcTime;
         }
     }      // end namespace GNSSUtilityLib
 } // end namespace sixents

@@ -86,7 +86,8 @@ namespace sixents
                 dayOfLeapMonth = FEB_LEAP_DAY;
             }
 
-            INT32 allDay = curDayInYear + leapYearCount + curDayInMonth + stdTime.m_day - dayOfLeapMonth;
+            INT64 allDay = static_cast<INT64>(curDayInYear) + leapYearCount +
+                           curDayInMonth + stdTime.m_day - dayOfLeapMonth;
             // 根据天数计算秒数
             retSec = static_cast<DOUBLE>(allDay * SEC_IN_DAY) + stdTime.m_hour * BASE_60 * BASE_60 +
                   stdTime.m_minute * BASE_60 + stdTime.m_second;
@@ -98,16 +99,16 @@ namespace sixents
             if (sec < DOUBLE_ZONE_LITTLE) {
                 return RETURN_FAIL;
             }
-            INT32 secOfIntegerPart = static_cast<INT32>(sec);  // 秒的整数部分
+            INT64 secOfIntegerPart = static_cast<INT64>(sec);  // 秒的整数部分
             DOUBLE secOfMsec = sec - static_cast<DOUBLE>(secOfIntegerPart);  // 毫秒
 
             /* leap year if year%4==0 in 1901-2099 */
-            INT32 allDays = secOfIntegerPart / SEC_IN_DAY;  // 当前总天数
-            UINT32 curSec = static_cast<UINT32>(secOfIntegerPart - allDays * SEC_IN_DAY); // 当前秒的整数部分
+            INT64 allDays = secOfIntegerPart / SEC_IN_DAY;  // 当前总天数
+            INT64 curSec = static_cast<INT64>(secOfIntegerPart - allDays * SEC_IN_DAY); // 当前秒的整数部分
 
             // 计算日期
-            INT32 day = allDays % DAY_IN_4YEAR; // 在4年中确定日期
-            INT32 month = 0;
+            INT64 day = allDays % DAY_IN_4YEAR; // 在4年中确定日期
+            INT64 month = 0;
             while (month < MONTH_IN_4YRAR) {
                 if (day >= DAY_IN_EACH_MON[month]) { // 天数大于当前月的天数，则说明不在当前月
                     day = day - DAY_IN_EACH_MON[month]; // 不在当前月，则将天数减当前月对应的天数
@@ -121,7 +122,7 @@ namespace sixents
                     static_cast<UINT32>(allDays / DAY_IN_4YEAR * LEAP_YEAR_INTERVAL + month / MONTH_IN_YEAR);
             stdTime.m_month = static_cast<UINT32>(month % MONTH_IN_YEAR) + EPOCHT0.m_month;
             stdTime.m_day = static_cast<UINT32>(day) + EPOCHT0.m_day;
-            stdTime.m_hour = curSec / (BASE_60 * BASE_60);
+            stdTime.m_hour = static_cast<UINT32>(curSec / (BASE_60 * BASE_60));
             stdTime.m_minute = curSec % (BASE_60 * BASE_60) / BASE_60;
             stdTime.m_second = static_cast<DOUBLE>(curSec % BASE_60) + secOfMsec;
 
@@ -130,14 +131,17 @@ namespace sixents
 
         DOUBLE IGNSSTime::WeekSecToSec(const SGNSSTime &stdTime, const UINT64 startTime)
         {
-            return static_cast<DOUBLE>(startTime) + stdTime.m_week * WEEK_SEC + stdTime.m_secAndMsec;
+            DOUBLE retTime = static_cast<DOUBLE>(startTime) +
+                             static_cast<DOUBLE>(stdTime.m_week) *
+                             WEEK_SEC + stdTime.m_secAndMsec;
+            return retTime;
         }
 
-        INT32 IGNSSTime::SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime &stdTime)
+        INT32 IGNSSTime::SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime)
         {
             DOUBLE curSec = sec - static_cast<DOUBLE>(startTime);
             stdTime.m_week = static_cast<INT64>(curSec) / WEEK_SEC;
-            stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week * WEEK_SEC);
+            stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week) * WEEK_SEC;
             return RETURN_SUCCESS;
         }
     } // end namespace GNSSUtilityLib

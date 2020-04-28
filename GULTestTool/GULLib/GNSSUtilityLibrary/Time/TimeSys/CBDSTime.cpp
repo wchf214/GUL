@@ -17,9 +17,10 @@ namespace sixents
         CBDSTime::~CBDSTime()
         {}
 
-        INT32 CBDSTime::Format(std::string &formatString)
+        INT32 CBDSTime::Format(std::string& formatString)
         {
             std::stringstream formatStream("");
+            formatStream.str("");
             SStandardTime curTime;
             ToStandTime(curTime);
             formatStream << curTime.m_year << DAY_INTERVAL << curTime.m_month << DAY_INTERVAL << curTime.m_day << " "
@@ -49,32 +50,31 @@ namespace sixents
         {
         }
 
-        void CBDSTime::ToWeekSec(SGNSSTime &time)
+        void CBDSTime::ToWeekSec(SGNSSTime& time)
         {
             SecToWeekSec(m_sec, EPOCH_TO_BDT0, time);
         }
 
-        void CBDSTime::SetTime(const DOUBLE &time)
+        void CBDSTime::SetTime(const DOUBLE& time)
         {
             m_sec = time;
             ToWeekSec(m_time);
         }
 
-        void CBDSTime::GetTime(DOUBLE &time)
+        void CBDSTime::GetTime(DOUBLE& time)
         {
             time = m_sec;
         }
 
-        void CBDSTime::SetTime(const SGNSSTime &time)
+        void CBDSTime::SetTime(const SGNSSTime& time)
         {
             m_time = std::move(time);
             ToSec();
         }
 
-        void CBDSTime::GetTime(SGNSSTime &time)
+        void CBDSTime::GetTime(SGNSSTime& time)
         {
             time = std::move(m_time);
         }
-
     } // end namespace GNSSUtilityLib
 } // end namespace sixents

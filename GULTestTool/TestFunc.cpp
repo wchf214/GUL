@@ -568,18 +568,20 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
     double standTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                            static_cast<double>(hour), static_cast<double>(minute), sec};
     gtime_t rtkTime = epoch2time(standTime);
+    gtime_t gpsTime = utc2gpst(rtkTime);
     int week = 0;
     double second = 0.0;
     // 执行Rtk接口，未实现该结果
     switch (flag) {
     case 2:    // GPS时间
-        second = time2gpst(rtkTime, &week);
+        second = time2gpst(gpsTime, &week);
         break;
     case 4:    // Galileo时间
-        second = time2gst(rtkTime, &week);
+        second = time2gst(gpsTime, &week);
         break;
     case 5:    // BD时间
-        second = time2bdt(rtkTime, &week);
+        gtime_t bdTime = gpst2bdt(gpsTime);
+        second = time2bdt(bdTime, &week);
         break;
     default:
         break;
@@ -629,24 +631,22 @@ bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
     if (srcType == 2) {  // GPS to BD or Galileo
         gtime_t gpsTime = gpst2time(srcWeek, srcSec);
         if (destType == 4) { // to Galileo
-            // 暂不处理
+            destSec = time2gst(gpsTime, &destWeek);
         } else if (destType == 5){ // to BD
             gtime_t bdTime = gpst2bdt(gpsTime);
             destSec = time2bdt(bdTime, &destWeek);
         }
     } else if (destType == 2) { // BD or Galileo to GPS
         if (srcType == 4) {
-            // 暂不处理
+            gtime_t gstTime = gst2time(srcWeek, srcSec);
+            destSec = time2gpst(gstTime, &destWeek);
         } else if (srcType == 5) {
             gtime_t bdTime = bdt2time(srcWeek, srcSec);
             gtime_t gpsTime = bdt2gpst(bdTime);
             destSec = time2gpst(gpsTime, &destWeek);
         }
     }
-    QString rtkRet("null");
-    if (destWeek < 0) {
-        rtkRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
-    }
+    QString rtkRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
 
     // 执行GUL接口
     destWeek = 0;
