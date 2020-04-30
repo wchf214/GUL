@@ -38,13 +38,14 @@ namespace sixents
             DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 
             // 矩阵乘法
-            // destMatrix：输入/输出参数，既是被乘数，又是结果
-            // srcMatrix 输入参数，乘数
-            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
+            // srcMatrix,destMatrix：输入参数，既是乘数和被乘数
+            // outPutMatrix 输出参数
+            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix, SGNSSMatrix& outPutMatrix);
 
             // 矩阵转置
-            // desMatrix：输入/输出参数，待转置矩阵，同时也是结果
-            DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix);
+            // desMatrix：输入参数，待转置矩阵
+            // outPutMatrix:输出参数，转置矩阵结果
+            DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix,SGNSSMatrix& outPutMatrix);
 
             // 矩阵求逆
             // desMatrix：输入/输出参数，待求逆矩阵，同时也是结果
@@ -55,13 +56,13 @@ namespace sixents
             // desMatrix：输入/输出参数，待增加行列的矩阵，同时也是结果
             // row: 输入参数，增加的行数
             // col: 输入参数，增加的列数
-            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col);
+            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
 
             // 矩阵减少行列
             // desMatrix：输入/输出参数，待减少行列的矩阵，同时也是结果
             // row: 输入参数，减少的行数
             // col: 输入参数，减少的列数
-            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col);
+            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
 
 #ifdef __cplusplus
         }

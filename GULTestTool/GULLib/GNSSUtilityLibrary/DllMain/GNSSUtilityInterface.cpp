@@ -1,13 +1,3 @@
-/**@file             文件名
- *  @brief          项目简述
- *  @details       项目细节
- *  @author       作者
- *  @date          日期
- *  @version      版本
- *  @note          注解
- *  @copyright   版权
- */
-
 #define DLL_EXPORT
 
 #include "GNSSUtilityInterface.h"
@@ -19,51 +9,54 @@ namespace sixents
     namespace GNSSUtilityLib
     {
         // GUL_UC_001 GUL_UC_003 GUL_UC_004
-        extern "C" DLL_API int STD_CALL
-        FormatWeekSecTime(const int week, const double sec, const int timeType, char* formatString, int& len)
+        extern "C" DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
+                                                          const double sec,
+                                                          const unsigned int timeType,
+                                                          char* formatString,
+                                                          unsigned int& len)
         {
             return CAppInterface::FormatWeekSecTime(static_cast<INT64>(week), sec, timeType, formatString, len);
         }
 
         // GUL_UC_002
-        extern "C" DLL_API int STD_CALL FormatStandardTime(const int year,
-                                                           const int month,
-                                                           const int day,
-                                                           const int hour,
-                                                           const int minute,
+        extern "C" DLL_API int STD_CALL FormatStandardTime(const unsigned int year,
+                                                           const unsigned int month,
+                                                           const unsigned int day,
+                                                           const unsigned int hour,
+                                                           const unsigned int minute,
                                                            const double second,
                                                            char* formatString,
-                                                           int& len)
+                                                           unsigned int& len)
         {
             return CAppInterface::FormatStandardTime(year, month, day, hour, minute, second, formatString, len);
         }
 
         // GUL_UC_005 GUL_UC_007 GUL_UC_008
-        extern "C" DLL_API int STD_CALL GNSSTimeToUTCTime(const int week,
+        extern "C" DLL_API int STD_CALL GNSSTimeToUTCTime(const unsigned int week,
                                                           const double sec,
-                                                          const int timeType,
-                                                          int& year,
-                                                          int& month,
-                                                          int& day,
-                                                          int& hour,
-                                                          int& minute,
+                                                          const unsigned int timeType,
+                                                          unsigned int& year,
+                                                          unsigned int& month,
+                                                          unsigned int& day,
+                                                          unsigned int& hour,
+                                                          unsigned int& minute,
                                                           double& second)
         {
             return CAppInterface::GNSSTimeToUTCTime(week, sec, timeType, year, month, day, hour, minute, second);
         }
 
         // GUL_UC_006
-        extern "C" DLL_API int STD_CALL GlonassTimeToUTCTime(const int gloYear,
-                                                             const int gloMonth,
-                                                             const int gloDay,
-                                                             const int gloHour,
-                                                             const int gloMinute,
+        extern "C" DLL_API int STD_CALL GlonassTimeToUTCTime(const unsigned int gloYear,
+                                                             const unsigned int gloMonth,
+                                                             const unsigned int gloDay,
+                                                             const unsigned int gloHour,
+                                                             const unsigned int gloMinute,
                                                              const double gloSecond,
-                                                             int& utcYear,
-                                                             int& utcMonth,
-                                                             int& utcDay,
-                                                             int& utcHour,
-                                                             int& utcMinute,
+                                                             unsigned int& utcYear,
+                                                             unsigned int& utcMonth,
+                                                             unsigned int& utcDay,
+                                                             unsigned int& utcHour,
+                                                             unsigned int& utcMinute,
                                                              double& utcSecond)
         {
             return CAppInterface::GlonassTimeToUTCTime(gloYear,
@@ -81,52 +74,54 @@ namespace sixents
         }
 
         // GUL_UC_009 GUL_UC_011 GUL_UC_012
-        extern "C" DLL_API int STD_CALL UTCTimeToGNSSTime(const int year,
-                                                          const int month,
-                                                          const int day,
-                                                          const int hour,
-                                                          const int minute,
+        extern "C" DLL_API int STD_CALL UTCTimeToGNSSTime(const unsigned int year,
+                                                          const unsigned int month,
+                                                          const unsigned int day,
+                                                          const unsigned int hour,
+                                                          const unsigned int minute,
                                                           const double second,
-                                                          const int timeType,
-                                                          int& week,
+                                                          const unsigned int timeType,
+                                                          unsigned int& week,
                                                           double& sec)
         {
-            INT64 weekNum = 0;
-            int ret = CAppInterface::UTCTimeToGNSSTime(year, month, day, hour, minute, second,
-                                                    timeType, weekNum, sec);
-            week = static_cast<int>(weekNum);
+            UINT64 weekNum = 0;
+            int ret = CAppInterface::UTCTimeToGNSSTime(year, month, day, hour, minute, second, timeType, weekNum, sec);
+            week = static_cast<unsigned int>(weekNum);
             return ret;
         }
 
-        extern "C" DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year,
-                                                             const int month,
-                                                             const int day,
-                                                             const int hour,
-                                                             const int minute,
+        extern "C" DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
+                                                             const unsigned int month,
+                                                             const unsigned int day,
+                                                             const unsigned int hour,
+                                                             const unsigned int minute,
                                                              const double second,
-                                                             const int timeType,
+                                                             const unsigned int timeType,
                                                              double& sec)
         {
             return CAppInterface::UTCTimeToGNSSSecTime(year, month, day, hour, minute, second, timeType, sec);
         }
 
-        extern "C" int STD_CALL WeekSecToSec(const int week, const double second, const int timeType, double& sec)
+        extern "C" int STD_CALL WeekSecToSec(const unsigned int week,
+                                             const double second,
+                                             const unsigned int timeType,
+                                             double& sec)
         {
             return CAppInterface::WeekSecToSec(week, second, timeType, sec);
         }
 
         // GUL_UC_010
-        extern "C" DLL_API int STD_CALL UTCTimeToGlonassTime(const int utcYear,
-                                                             const int utcMonth,
-                                                             const int utcDay,
-                                                             const int utcHour,
-                                                             const int utcMinute,
+        extern "C" DLL_API int STD_CALL UTCTimeToGlonassTime(const unsigned int utcYear,
+                                                             const unsigned int utcMonth,
+                                                             const unsigned int utcDay,
+                                                             const unsigned int utcHour,
+                                                             const unsigned int utcMinute,
                                                              const double utcSecond,
-                                                             int& gloYear,
-                                                             int& gloMonth,
-                                                             int& gloDay,
-                                                             int& gloHour,
-                                                             int& gloMinute,
+                                                             unsigned int& gloYear,
+                                                             unsigned int& gloMonth,
+                                                             unsigned int& gloDay,
+                                                             unsigned int& gloHour,
+                                                             unsigned int& gloMinute,
                                                              double& gloSecond)
         {
             return CAppInterface::UTCTimeToGlonassTime(utcYear,
@@ -144,38 +139,44 @@ namespace sixents
         }
 
         // GUL_UC_013  GUL_UC_015 GUL_UC_016  GUL_UC_018
-        extern "C" DLL_API int STD_CALL GNSSTimeConvert(const int srcWeek,
+        extern "C" DLL_API int STD_CALL GNSSTimeConvert(const unsigned int srcWeek,
                                                         const double srcSec,
-                                                        const int srcTimeType,
-                                                        int& destWeek,
+                                                        const unsigned int srcTimeType,
+                                                        unsigned int& destWeek,
                                                         double& destSec,
-                                                        const int destTimeType)
+                                                        const unsigned int destTimeType)
         {
-            INT64 temp = 0;
+            UINT64 temp = 0;
             int ret = CAppInterface::GNSSTimeConvert(srcWeek, srcSec, srcTimeType, temp, destSec, destTimeType);
-            destWeek = static_cast<int>(temp);
+            destWeek = static_cast<unsigned int>(temp);
             return ret;
         }
 
         // GUL_UC_014
-        extern "C" DLL_API int STD_CALL GlonassTimeToGPSTime(const int year,
-                                                             const int month,
-                                                             const int day,
-                                                             const int hour,
-                                                             const int minute,
+        extern "C" DLL_API int STD_CALL GlonassTimeToGPSTime(const unsigned int year,
+                                                             const unsigned int month,
+                                                             const unsigned int day,
+                                                             const unsigned int hour,
+                                                             const unsigned int minute,
                                                              const double second,
-                                                             int& week,
+                                                             unsigned int& week,
                                                              double& sec)
         {
-            INT64 temp = 0;
+            UINT64 temp = 0;
             int ret = CAppInterface::GlonassTimeToGPSTime(year, month, day, hour, minute, second, temp, sec);
             week = static_cast<int>(temp);
             return ret;
         }
 
         // GUL_UC_017
-        extern "C" DLL_API int STD_CALL GPSTimeToGlonassTime(
-            const int week, const double second, int& year, int& month, int& day, int& hour, int& minute, double& sec)
+        extern "C" DLL_API int STD_CALL GPSTimeToGlonassTime(const unsigned int week,
+                                                             const double second,
+                                                             unsigned int& year,
+                                                             unsigned int& month,
+                                                             unsigned int& day,
+                                                             unsigned int& hour,
+                                                             unsigned int& minute,
+                                                             double& sec)
         {
             return CAppInterface::GPSTimeToGlonassTime(week, second, year, month, day, hour, minute, sec);
         }
@@ -244,14 +245,18 @@ namespace sixents
 
         extern "C" DLL_API int STD_CALL FormatAngleByDegree(const double degree,
                                                             char* formatString,
-                                                            int& len,
+                                                            unsigned int& len,
                                                             const bool formatType)
         {
             return CAppInterface::FormatAngleByDegree(degree, formatString, len, formatType);
         }
 
-        extern "C" DLL_API int STD_CALL FormatAngleByDMS(
-            const int degree, const int minute, const double sec, char* formatString, int& len, const bool formatType)
+        extern "C" DLL_API int STD_CALL FormatAngleByDMS(const int degree,
+                                                         const int minute,
+                                                         const double sec,
+                                                         char* formatString,
+                                                         unsigned int& len,
+                                                         const bool formatType)
         {
             return CAppInterface::FormatAngleByDMS(degree, minute, sec, formatString, len, formatType);
         }

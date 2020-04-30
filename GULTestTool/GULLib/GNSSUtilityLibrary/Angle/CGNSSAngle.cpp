@@ -1,12 +1,10 @@
 #include "CGNSSAngle.h"
-
 #include <algorithm>
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
-#include <string>
 #include <sstream>
-
+#include <string>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
 
@@ -30,6 +28,26 @@ namespace sixents
             }
         }
 
+        void CGNSSAngle::SetDeg(const DOUBLE degreeVal)
+        {
+            m_decimalDegree = degreeVal;
+        }
+
+        void CGNSSAngle::SetRad(const DOUBLE radVal)
+        {
+            m_radian = radVal;
+        }
+
+        DOUBLE CGNSSAngle::GetRad()
+        {
+            return m_radian;
+        }
+
+        DOUBLE CGNSSAngle::GetDeg()
+        {
+            return m_decimalDegree;
+        }
+
         CGNSSAngle::CGNSSAngle(const INT32 degree, const INT32 minute, const double second)
         {
             m_degree = degree;
@@ -38,8 +56,7 @@ namespace sixents
         }
 
         CGNSSAngle::~CGNSSAngle()
-        {
-        }
+        {}
 
         INT32 CGNSSAngle::DegToRad()
         {
@@ -54,15 +71,15 @@ namespace sixents
                 std::stringstream ss;
                 ss.str("");
                 ss << std::setprecision(DEGREE_ACCURACY) << m_decimalDegree;
-                std::string str = ss.str();  // 3.14159265358979
-                str += "'";  // 替代方案，待修改
+                std::string str = ss.str(); // 3.14159265358979
+                str += "'";                 // 替代方案，待修改
                 curLen = static_cast<INT32>(strlen(str.c_str()));
                 ss.str("");
             }
             else
             {
                 std::string result = "";
-                result += std::to_string(m_degree) + "du";  // 替代方案，待修改
+                result += std::to_string(m_degree) + "du"; // 替代方案，待修改
                 result += std::to_string(m_minute) + "'";
                 result += std::to_string(m_second) + "\"";
                 curLen = static_cast<INT32>(strlen(result.c_str()));
@@ -70,15 +87,15 @@ namespace sixents
             return curLen;
         }
 
-        INT32 CGNSSAngle::ToDegString(char* angleString, INT32& len, const bool formatType)
+        INT32 CGNSSAngle::ToDegString(char* angleString, UINT32& len, const bool formatType)
         {
             if (formatType)
             {
                 std::stringstream ss;
                 ss << std::setprecision(DEGREE_ACCURACY) << m_decimalDegree;
-                std::string str = ss.str();  // 3.14159265358979
+                std::string str = ss.str(); // 3.14159265358979
                 str += "'";
-                strcpy_s(angleString, len+1, str.c_str());
+                strcpy_s(angleString, len + 1, str.c_str());
             }
             else
             {
@@ -86,7 +103,7 @@ namespace sixents
                 result += std::to_string(m_degree) + "du";
                 result += std::to_string(m_minute) + "'";
                 result += std::to_string(m_second) + "\"";
-                strcpy_s(angleString, len+1, result.c_str());
+                strcpy_s(angleString, len + 1, result.c_str());
             }
             return 1;
         }
@@ -99,7 +116,7 @@ namespace sixents
 
         INT32 CGNSSAngle::RadToDeg()
         {
-            return  RadToDeg(m_radian, m_decimalDegree);
+            return RadToDeg(m_radian, m_decimalDegree);
         }
 
         INT32 CGNSSAngle::RadToDeg(const DOUBLE radian, DOUBLE& degree)
@@ -138,10 +155,11 @@ namespace sixents
         {
             const DOUBLE MINUS_FLAG = -1.0;
             deg = fabs(degree) + minute / BASE_60 + second / DEG_TO_SEC;
-            if (degree < 0.0) {
+            if (degree < 0.0)
+            {
                 deg *= MINUS_FLAG;
             }
             return RETURN_SUCCESS;
         }
-    }
-}
+    } // namespace GNSSUtilityLib
+} // namespace sixents

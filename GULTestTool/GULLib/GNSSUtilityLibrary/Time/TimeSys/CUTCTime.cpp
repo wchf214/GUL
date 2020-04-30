@@ -1,4 +1,4 @@
-﻿/** @file          CGPSTime.h
+/** @file          CGPSTime.h
  *  @brief         GPSʱ����
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com

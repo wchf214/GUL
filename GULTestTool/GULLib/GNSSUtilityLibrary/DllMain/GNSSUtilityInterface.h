@@ -1,6 +1,6 @@
-/**@file           CGNSSCoord
- *  @brief         坐标类
- *  @details       所有坐标相关的算法
+/** @file          GNSSUtilityInterface.h
+ *  @brief         对外接口
+ *  @details       GNSS Utility 对外接口，包含星历的钟差和位置计算、导航时间转换和格式化、坐标转换、角度转换和格式化
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
@@ -28,7 +28,6 @@ namespace sixents
 #define DLL_API __attribute__((visibility("default")))
 #define STD_CALL
 #endif
-#define UNREFERENCED_PARAMETER(P) (P)
 
 #ifdef __cplusplus
         extern "C" {
@@ -42,269 +41,283 @@ namespace sixents
         /**
          * @brief           格式化周内秒时间 以年月日时分秒格式输出
          * @author          wuchuanfei@sixents.com
-         * @param[in]       week: 周
-                            sec: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      formatString: 时间格式化后字符串
-                            len: formatString的长度
+         * @param[in]       week            周
+         * @param[in]       sec             秒，精确到毫秒
+         * @param[in]       timeType        时间类型
+         * @param[out]      formatString    时间格式化后字符串
+         * @param[out]      len             formatString的长度
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL
-        FormatWeekSecTime(const int week, const double sec, const int timeType, char* formatString, int& len);
+        DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
+                                               const double sec,
+                                               const unsigned int timeType,
+                                               char* formatString,
+                                               unsigned int& len);
 
         /**
          * @brief           格式化标准时间 以年月日时分秒格式输出
          * @author          wuchuanfei@sixents.com
-         * @param[in]       year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            second: 秒，精确到毫秒
-         * @param[out]      formatString: 时间格式化后字符串
-                            len: formatString的长度
+         * @param[in]       year            年
+         * @param[in]       month           月
+         * @param[in]       day             日
+         * @param[in]       hour            时
+         * @param[in]       minute          分
+         * @param[in]       second          秒，精确到毫秒
+         * @param[out]      formatString    时间格式化后字符串
+         * @param[out]      len             formatString的长度
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL FormatStandardTime(const int year,
-                                                const int month,
-                                                const int day,
-                                                const int hour,
-                                                const int minute,
+        DLL_API int STD_CALL FormatStandardTime(const unsigned int year,
+                                                const unsigned int month,
+                                                const unsigned int day,
+                                                const unsigned int hour,
+                                                const unsigned int minute,
                                                 const double second,
                                                 char* formatString,
-                                                int& len);
+                                                unsigned int& len);
 
         /**
          * @brief           UTC时间转Glonass时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       utcYear: 年
-                            utcMonth: 月
-                            utcDay: 日
-                            utcHour: 时
-                            utcMinute: 分
-                            utcSecond: 秒，精确到毫秒
-         * @param[out]      gloYear: 年
-                            gloMonth: 月
-                            gloDay: 日
-                            gloHour: 时
-                            gloMinute: 分
-                            gloSecond: 秒，精确到毫秒
+         * @param[in]       utcYear     年
+         * @param[in]       utcMonth    月
+         * @param[in]       utcDay      日
+         * @param[in]       utcHour     时
+         * @param[in]       utcMinute   分
+         * @param[in]       utcSecond   秒，精确到毫秒
+         * @param[out]      gloYear     年
+         * @param[out]      gloMonth    月
+         * @param[out]      gloDay      日
+         * @param[out]      gloHour     时
+         * @param[out]      gloMinute   分
+         * @param[out]      gloSecond   秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.20新增
          */
-        DLL_API int STD_CALL UTCTimeToGlonassTime(const int utcYear,
-                                                  const int utcMonth,
-                                                  const int utcDay,
-                                                  const int utcHour,
-                                                  const int utcMinute,
+        DLL_API int STD_CALL UTCTimeToGlonassTime(const unsigned int utcYear,
+                                                  const unsigned int utcMonth,
+                                                  const unsigned int utcDay,
+                                                  const unsigned int utcHour,
+                                                  const unsigned int utcMinute,
                                                   const double utcSecond,
-                                                  int& gloYear,
-                                                  int& gloMonth,
-                                                  int& gloDay,
-                                                  int& gloHour,
-                                                  int& gloMinute,
+                                                  unsigned int& gloYear,
+                                                  unsigned int& gloMonth,
+                                                  unsigned int& gloDay,
+                                                  unsigned int& gloHour,
+                                                  unsigned int& gloMinute,
                                                   double& gloSecond);
 
         /**
          * @brief           Glonass时间转UTC时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       gloYear: 年
-                            gloMonth: 月
-                            gloDay: 日
-                            gloHour: 时
-                            gloMinute: 分
-                            gloSecond: 秒，精确到毫秒
-         * @param[out]      utcYear: 年
-                            utcMonth: 月
-                            utcDay: 日
-                            utcHour: 时
-                            utcMinute: 分
-                            utcSecond: 秒，精确到毫秒
+         * @param[in]       gloYear     年
+         * @param[in]       gloMonth    月
+         * @param[in]       gloDay      日
+         * @param[in]       gloHour     时
+         * @param[in]       gloMinute   分
+         * @param[in]       gloSecond   秒，精确到毫秒
+         * @param[out]      utcYear     年
+         * @param[out]      utcMonth    月
+         * @param[out]      utcDay      日
+         * @param[out]      utcHour     时
+         * @param[out]      utcMinute   分
+         * @param[out]      utcSecond   秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.20新增
          */
-        DLL_API int STD_CALL GlonassTimeToUTCTime(const int gloYear,
-                                                  const int gloMonth,
-                                                  const int gloDay,
-                                                  const int gloHour,
-                                                  const int gloMinute,
+        DLL_API int STD_CALL GlonassTimeToUTCTime(const unsigned int gloYear,
+                                                  const unsigned int gloMonth,
+                                                  const unsigned int gloDay,
+                                                  const unsigned int gloHour,
+                                                  const unsigned int gloMinute,
                                                   const double gloSecond,
-                                                  int& utcYear,
-                                                  int& utcMonth,
-                                                  int& utcDay,
-                                                  int& utcHour,
-                                                  int& utcMinute,
+                                                  unsigned int& utcYear,
+                                                  unsigned int& utcMonth,
+                                                  unsigned int& utcDay,
+                                                  unsigned int& utcHour,
+                                                  unsigned int& utcMinute,
                                                   double& utcSecond);
 
-        // GNSS时间类型与UTC时间互转
         /**
          * @brief           GNSS时间转UTC时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       week: 周
-                            sec: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            second: 秒，精确到毫秒
+         * @param[in]       week         周
+         * @param[in]       sec          秒，精确到毫秒
+         * @param[in]       timeType     时间类型
+         * @param[out]      year         年
+         * @param[out]      month        月
+         * @param[out]      day          日
+         * @param[out]      hour         时
+         * @param[out]      minute       分
+         * @param[out]      second       秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL GNSSTimeToUTCTime(const int week,
+        DLL_API int STD_CALL GNSSTimeToUTCTime(const unsigned int week,
                                                const double sec,
-                                               const int timeType,
-                                               int& year,
-                                               int& month,
-                                               int& day,
-                                               int& hour,
-                                               int& minute,
+                                               const unsigned int timeType,
+                                               unsigned int& year,
+                                               unsigned int& month,
+                                               unsigned int& day,
+                                               unsigned int& hour,
+                                               unsigned int& minute,
                                                double& second);
 
         /**
          * @brief           GNSS时间转UTC时间，以小数秒表示转换后的UTC时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       week: 周
-                            sec: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      sec: 秒，精确到毫秒
+         * @param[in]       week        周
+         * @param[in]       sec         秒，精确到毫秒
+         * @param[in]       timeType    时间类型
+         * @param[out]      sec         秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.17新增
          */
-        DLL_API int STD_CALL GNSSTimeToUTCSecTime(const int week, const double second, const int timeType, double& sec);
+        DLL_API int STD_CALL GNSSTimeToUTCSecTime(const unsigned int week,
+                                                  const double second,
+                                                  const unsigned int timeType,
+                                                  double& sec);
 
         /**
          * @brief           UTC时间转GNSS时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            second: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      week: 周
-                            sec: 秒
+         * @param[in]       year        年
+         * @param[in]       month       月
+         * @param[in]       day         日
+         * @param[in]       hour        时
+         * @param[in]       minute      分
+         * @param[in]       second      秒，精确到毫秒
+         * @param[in]       timeType    时间类型
+         * @param[out]      week        周
+         * @param[out]      sec         秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL UTCTimeToGNSSTime(const int year,
-                                               const int month,
-                                               const int day,
-                                               const int hour,
-                                               const int minute,
+        DLL_API int STD_CALL UTCTimeToGNSSTime(const unsigned int year,
+                                               const unsigned int month,
+                                               const unsigned int day,
+                                               const unsigned int hour,
+                                               const unsigned int minute,
                                                const double second,
-                                               const int timeType,
-                                               int& week,
+                                               const unsigned int timeType,
+                                               unsigned int& week,
                                                double& sec);
 
         /**
          * @brief           UTC时间转GNSS时间，以小数秒表示转换后的GNSS时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            second: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      sec: 秒，精确到毫秒
+         * @param[in]       year        年
+         * @param[in]       month       月
+         * @param[in]       day         日
+         * @param[in]       hour        时
+         * @param[in]       minute      分
+         * @param[in]       second      秒，精确到毫秒
+         * @param[in]       timeType    时间类型
+         * @param[out]      sec         秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.17新增
          */
-        DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year,
-                                                  const int month,
-                                                  const int day,
-                                                  const int hour,
-                                                  const int minute,
+        DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
+                                                  const unsigned int month,
+                                                  const unsigned int day,
+                                                  const unsigned int hour,
+                                                  const unsigned int minute,
                                                   const double second,
-                                                  const int timeType,
+                                                  const unsigned int timeType,
                                                   double& sec);
 
         /**
          * @brief           BD、Glonass、Galileo时间类型与GPS时间互转
          * @author          wuchuanfei@sixents.com
-         * @param[in]       srcWeek: 源GNSS时间的周
-                            srcSec: 源GNSS时间的秒，精确到毫秒
-                            srcTimeType: 源GNSS时间的时间类型
-                            destTimeType: 目标GNSS时间的时间类型
-         * @param[out]      destWeek: 目标GNSS时间的周
-                            destSec: 目标GNSS时间的秒，精确到毫秒
-         * @exception       N/A
+         * @param[in]       srcWeek         源GNSS时间的周
+         * @param[in]       srcSec          源GNSS时间的秒，精确到毫秒
+         * @param[in]       srcTimeType     源GNSS时间的时间类型
+         * @param[in]       destTimeType    目标GNSS时间的时间类型
+         * @param[out]      destWeek        目标GNSS时间的周
+         * @param[out]      destSec         目标GNSS时间的秒，精确到毫秒
+         * @exception       有不支持的类型，返回类型不支持错误码
          * @return          函数执行是否成功
          * @note            2020.04.17新增
          */
-        DLL_API int STD_CALL GNSSTimeConvert(const int srcWeek,
+        DLL_API int STD_CALL GNSSTimeConvert(const unsigned int srcWeek,
                                              const double srcSec,
-                                             const int srcTimeType,
-                                             int& destWeek,
+                                             const unsigned int srcTimeType,
+                                             unsigned int& destWeek,
                                              double& destSec,
-                                             const int destTimeType);
+                                             const unsigned int destTimeType);
 
         /**
          * @brief           周内秒转秒
          * @author          wuchuanfei@sixents.com
-         * @param[in]       week: 周
-                            sec: 秒，精确到毫秒
-                            timeType: 时间类型
-         * @param[out]      sec: 秒，精确到毫秒
+         * @param[in]       week        周
+         * @param[in]       sec         秒，精确到毫秒
+         * @param[in]       timeType    时间类型
+         * @param[out]      sec         秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.17新增
          */
-        DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int timeType, double& sec);
+        DLL_API int STD_CALL WeekSecToSec(const unsigned int week,
+                                          const double second,
+                                          const unsigned int timeType,
+                                          double& sec);
 
         /**
          * @brief           GPS时间转Glonass时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       week: 周
-                            second: 秒，精确到毫秒
-         * @param[out]      year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            sec: 秒，精确到毫秒
+         * @param[in]       week        周
+         * @param[in]       second      秒，精确到毫秒
+         * @param[out]      year        年
+         * @param[out]      month       月
+         * @param[out]      day         日
+         * @param[out]      hour        时
+         * @param[out]      minute      分
+         * @param[out]      second      秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.20新增
          */
-        DLL_API int STD_CALL GPSTimeToGlonassTime(
-            const int week, const double second, int& year, int& month, int& day, int& hour, int& minute, double& sec);
+        DLL_API int STD_CALL GPSTimeToGlonassTime(const unsigned int week,
+                                                  const double second,
+                                                  unsigned int& year,
+                                                  unsigned int& month,
+                                                  unsigned int& day,
+                                                  unsigned int& hour,
+                                                  unsigned int& minute,
+                                                  double& sec);
 
         /**
          * @brief           Glonass时间转GPS时间
          * @author          wuchuanfei@sixents.com
-         * @param[in]       year: 年
-                            month: 月
-                            day: 日
-                            hour: 时
-                            minute: 分
-                            second: 秒，精确到毫秒
-         * @param[out]      week: 周
-                            second: 秒，精确到毫秒
+         * @param[in]       year        年
+         * @param[in]       month       月
+         * @param[in]       day         日
+         * @param[in]       hour        时
+         * @param[in]       minute      分
+         * @param[in]       second      秒，精确到毫秒
+         * @param[out]      week        周
+         * @param[out]      second      秒，精确到毫秒
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            2020.04.20新增
          */
-        DLL_API int STD_CALL GlonassTimeToGPSTime(const int year,
-                                                  const int month,
-                                                  const int day,
-                                                  const int hour,
-                                                  const int minute,
+        DLL_API int STD_CALL GlonassTimeToGPSTime(const unsigned int year,
+                                                  const unsigned int month,
+                                                  const unsigned int day,
+                                                  const unsigned int hour,
+                                                  const unsigned int minute,
                                                   const double second,
-                                                  int& week,
+                                                  unsigned int& week,
                                                   double& sec);
 
         // 坐标相关接口
@@ -383,10 +396,7 @@ namespace sixents
                                      double& curZ);
 
         // 星历相关接口 2020.04.17修改
-        // 计算钟差
-        // ephObj: 输入参数，星历数据
-        // clockVal: 输入/输出参数，计算出来的钟差值
-        // 站心坐标转空间直角坐标
+
         /**
          * @brief           计算Glonass钟差
          * @author          wuchuanfei@sixents.com
@@ -452,7 +462,7 @@ namespace sixents
          */
         DLL_API int STD_CALL FormatAngleByDegree(const double degree,
                                                  char* formatString,
-                                                 int& len,
+                                                 unsigned int& len,
                                                  const bool formatType = true);
 
         /**
@@ -472,7 +482,7 @@ namespace sixents
                                               const int minute,
                                               const double sec,
                                               char* formatString,
-                                              int& len,
+                                              unsigned int& len,
                                               const bool formatType = true);
 
         /**
@@ -487,7 +497,7 @@ namespace sixents
         DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
 
         /**
-         * @brief           度转弧度
+         * @brief           度分秒转弧度
          * @author          wuchuanfei@sixents.com
          * @param[in]       degree: 度
                             minute: 分
@@ -511,7 +521,7 @@ namespace sixents
         DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
 
         /**
-         * @brief           弧度转度
+         * @brief           弧度转度分秒
          * @author          wuchuanfei@sixents.com
          * @param[in]       radian: 弧度，精确到小数点后9位
          * @param[out]      degree: 度

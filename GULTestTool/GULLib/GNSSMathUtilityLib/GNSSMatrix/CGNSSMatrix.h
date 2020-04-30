@@ -17,30 +17,158 @@ namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
-        // 矩阵结构
         class CGNSSMatrix
         {
         public:
+            /**
+             * @brief       矩阵的默认构造函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             explicit CGNSSMatrix();
-            explicit CGNSSMatrix(int row,int col);
+            /**
+             * @brief       参数为行和列的构造函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            explicit CGNSSMatrix(int row, int col);
+            /**
+             * @brief       参数为矩阵类型的构造函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             explicit CGNSSMatrix(const SGNSSMatrix& matrix);
+
+            /**
+             * @brief       拷贝构造函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             CGNSSMatrix(const CGNSSMatrix& matrixObj);
+            /**
+             * @brief       析构函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             virtual ~CGNSSMatrix();
 
             void SetMatrix(const SGNSSMatrix& matrix);
+            /**
+             * @brief       获取矩阵数据
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             SGNSSMatrix GetMatrix();
 
-            // 计算方法
-            SGNSSMatrix MatrixTransposition(SGNSSMatrix& matrix); // 转置
-            SGNSSMatrix MatrixInverse(SGNSSMatrix& matrix);       // 求逆
-            CGNSSMatrix operator+(CGNSSMatrix& matrix) const; // 加法
-            CGNSSMatrix operator-(CGNSSMatrix& matrix); // 减法
-            CGNSSMatrix operator*(CGNSSMatrix& matrix); // 乘法
-            CGNSSMatrix operator=(CGNSSMatrix& matrix); // 赋值
+            /**
+             * @brief       矩阵加法运算符重载
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix operator+(CGNSSMatrix& matrix) const;
+            /**
+             * @brief       矩阵减法运算符重载
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix operator-(CGNSSMatrix& matrix);
+            /**
+             * @brief       矩阵乘法运算符重载
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix operator*(CGNSSMatrix& matrix);
 
+            /**
+             * @brief       矩阵转置运算
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix MatrixTransposition(SGNSSMatrix& matrix);
+            /**
+             * @brief       矩阵求逆运算
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            SGNSSMatrix MatrixInverse(SGNSSMatrix& matrix);
+            /**
+             * @brief       矩阵添加行列运算
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix MatrixAdd(int addNum);
+            /**
+             * @brief       矩阵删除行列
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
+            CGNSSMatrix MatrixSub(int subNum);
 
-            SGNSSMatrix MatrixAdd(int addNum); //增加一行
-            SGNSSMatrix MatrixSub(int subNum); //增加一行
         private:
             SGNSSMatrix m_matrix;
         };

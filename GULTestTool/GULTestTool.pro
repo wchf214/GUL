@@ -25,7 +25,7 @@ SOURCES += \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.cpp \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.cpp \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CCalcTime.cpp \
+    GULLib/GNSSUtilityLibrary/Time/TimeCalc/CCalcTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGalileoTime.cpp \
@@ -363,7 +363,7 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.h \
-    GULLib/GNSSUtilityLibrary/Time/TimeClac/CCalcTime.h \
+    GULLib/GNSSUtilityLibrary/Time/TimeCalc/CCalcTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGalileoTime.h \

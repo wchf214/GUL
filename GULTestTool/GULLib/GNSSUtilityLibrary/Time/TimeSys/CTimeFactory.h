@@ -37,7 +37,7 @@ namespace sixents
              */
             static IGNSSTime* CreateTimeObj(const TIME_TYPE timeType);
         };
-    }      // end namespace GNSSUtilityLib
+    } // end namespace GNSSUtilityLib
 } // end namespace sixents
 
 #endif

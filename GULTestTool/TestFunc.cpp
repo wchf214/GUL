@@ -21,67 +21,143 @@
 namespace sixents {
     namespace GNSSUtilityLib {
         extern "C" {
-        DLL_API int STD_CALL FormatWeekSecTime(const int week, const double sec, const int satType,
-                                               char* formatString, int& len);
-        DLL_API int STD_CALL FormatStandardTime(const int year, const int month, const int day,
-                                                const int hour, const int minute, const double second,
-                                                char* formatString, int& len);
-        DLL_API int STD_CALL GNSSTimeToUTCTime(const int week, const double sec, const int satType,
-            int& year, int& month, int& day, int& hour, int& minute, double& second);
-        DLL_API int STD_CALL GNSSTimeToUTCSecTime(const int week, const double second, const int satType, double& sec);
-        DLL_API int STD_CALL UTCTimeToGNSSTime(const int year, const int month, const int day,
-            const int hour, const int minute, const double second, const int satType,
-            int& week, double& sec);
-        DLL_API int STD_CALL UTCTimeToGNSSSecTime(const int year, const int month, const int day,
-            const int hour, const int minute, const double second, const int satType, double& sec);
-        DLL_API int STD_CALL GNSSTimeConvert(const int srcWeek, const double srcSec, const int srcSatType,
-            int& destWeek, double& destSec, const int destSatType);
-        DLL_API int STD_CALL WeekSecToSec(const int week, const double second, const int satType, double& sec);
-        DLL_API int STD_CALL UTCTimeToGlonassTime(const int year, const int month, const int day,
-                                                  const int hour, const int minute, const double second,
-                                                  int& gyear, int& gmonth, int& gday,
-                                                  int& ghour, int& gminute, double& gsec);
-        DLL_API int STD_CALL GlonassTimeToUTCTime(const int year, const int month, const int day,
-                                                  const int hour, const int minute, const double second,
-                                                  int& utcYear, int& utcMonth, int& utcDay,
-                                                  int& utcHour, int& utcMinute, double& utcSec);
-        DLL_API int STD_CALL GPSTimeToGlonassTime(const int week, const double second,
-                                                  int& gyear, int& gmonth, int& gday,
-                                                  int& ghour, int& gminute, double& gsec);
-        DLL_API int STD_CALL GlonassTimeToGPSTime(const int year, const int month, const int day,
-                                                  const int hour, const int minute, const double second,
-                                                  int& week, double& sec);
-        DLL_API int STD_CALL XYZ2BLH(const double x, const double y, const double z,
-                                     double& lon, double& lat, double& height);
-        DLL_API int STD_CALL BLH2XYZ(const double lon, const double lat, const double height,
-                                     double& x, double& y, double& z);
-        DLL_API int STD_CALL XYZ2ENU(const double curX, const double curY, const double curZ,
-                                     const double refX, const double refY, const double refZ,
-                                     double& east, double& north, double& up);
-        DLL_API int STD_CALL ENU2XYZ(const double east, const double north, const double up,
-                                     const double refX, const double refY, const double refZ,
-                                     double& curX, double& curY, double& curZ);
-        DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec, const SGlonassEphemeris& ephObj,
-                                                    double& clockVal);
-        DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
-        DLL_API int STD_CALL CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj,
-                                                  double& x, double& y, double& z);
-        DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj,
-                                           double& x, double& y, double& z);
-        DLL_API int STD_CALL FormatAngleByDegree(const double degree,
+            DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
+                                                  const double sec,
+                                                  const unsigned int timeType,
+                                                  char* formatString,
+                                                  unsigned int& len);
+            DLL_API int STD_CALL FormatStandardTime(const unsigned int year,
+                                                   const unsigned int month,
+                                                   const unsigned int day,
+                                                   const unsigned int hour,
+                                                   const unsigned int minute,
+                                                   const double second,
+                                                   char* formatString,
+                                                   unsigned int& len);
+            DLL_API int STD_CALL UTCTimeToGlonassTime(const unsigned int utcYear,
+                                                     const unsigned int utcMonth,
+                                                     const unsigned int utcDay,
+                                                     const unsigned int utcHour,
+                                                     const unsigned int utcMinute,
+                                                     const double utcSecond,
+                                                     unsigned int& gloYear,
+                                                     unsigned int& gloMonth,
+                                                     unsigned int& gloDay,
+                                                     unsigned int& gloHour,
+                                                     unsigned int& gloMinute,
+                                                     double& gloSecond);
+            DLL_API int STD_CALL GlonassTimeToUTCTime(const unsigned int gloYear,
+                                                     const unsigned int gloMonth,
+                                                     const unsigned int gloDay,
+                                                     const unsigned int gloHour,
+                                                     const unsigned int gloMinute,
+                                                     const double gloSecond,
+                                                     unsigned int& utcYear,
+                                                     unsigned int& utcMonth,
+                                                     unsigned int& utcDay,
+                                                     unsigned int& utcHour,
+                                                     unsigned int& utcMinute,
+                                                     double& utcSecond);
+            DLL_API int STD_CALL GNSSTimeToUTCTime(const unsigned int week,
+                                                  const double sec,
+                                                  const unsigned int timeType,
+                                                  unsigned int& year,
+                                                  unsigned int& month,
+                                                  unsigned int& day,
+                                                  unsigned int& hour,
+                                                  unsigned int& minute,
+                                                  double& second);
+            DLL_API int STD_CALL GNSSTimeToUTCSecTime(const unsigned int week,
+                                                     const double second,
+                                                     const unsigned int timeType,
+                                                     double& sec);
+            DLL_API int STD_CALL UTCTimeToGNSSTime(const unsigned int year,
+                                                  const unsigned int month,
+                                                  const unsigned int day,
+                                                  const unsigned int hour,
+                                                  const unsigned int minute,
+                                                  const double second,
+                                                  const unsigned int timeType,
+                                                  unsigned int& week,
+                                                  double& sec);
+            DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
+                                                     const unsigned int month,
+                                                     const unsigned int day,
+                                                     const unsigned int hour,
+                                                     const unsigned int minute,
+                                                     const double second,
+                                                     const unsigned int timeType,
+                                                     double& sec);
+            DLL_API int STD_CALL GNSSTimeConvert(const unsigned int srcWeek,
+                                                const double srcSec,
+                                                const unsigned int srcTimeType,
+                                                unsigned int& destWeek,
+                                                double& destSec,
+                                                const unsigned int destTimeType);
+            DLL_API int STD_CALL WeekSecToSec(const unsigned int week,
+                                             const double second,
+                                             const unsigned int timeType,
+                                             double& sec);
+            DLL_API int STD_CALL GPSTimeToGlonassTime(const unsigned int week,
+                                                     const double second,
+                                                     unsigned int& year,
+                                                     unsigned int& month,
+                                                     unsigned int& day,
+                                                     unsigned int& hour,
+                                                     unsigned int& minute,
+                                                     double& sec);
+            DLL_API int STD_CALL GlonassTimeToGPSTime(const unsigned int year,
+                                                     const unsigned int month,
+                                                     const unsigned int day,
+                                                     const unsigned int hour,
+                                                     const unsigned int minute,
+                                                     const double second,
+                                                     unsigned int& week,
+                                                     double& sec);
+            DLL_API int STD_CALL
+            XYZ2BLH(const double x, const double y, const double z, double& lon, double& lat, double& height);
+            DLL_API int STD_CALL
+            BLH2XYZ(const double lon, const double lat, const double height, double& x, double& y, double& z);
+            DLL_API int STD_CALL XYZ2ENU(const double curX,
+                                        const double curY,
+                                        const double curZ,
+                                        const double refX,
+                                        const double refY,
+                                        const double refZ,
+                                        double& east,
+                                        double& north,
+                                        double& up);
+            DLL_API int STD_CALL ENU2XYZ(const double east,
+                                        const double north,
+                                        const double up,
+                                        const double refX,
+                                        const double refY,
+                                        const double refZ,
+                                        double& curX,
+                                        double& curY,
+                                        double& curZ);
+            DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec,
+                                                       const SGlonassEphemeris& ephObj,
+                                                       double& clockVal);
+            DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+            DLL_API int STD_CALL
+            CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
+            DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj,
+                                              double& x, double& y, double& z);
+            DLL_API int STD_CALL FormatAngleByDegree(const double degree,
+                                                    char* formatString,
+                                                    unsigned int& len,
+                                                    const bool formatType);
+            DLL_API int STD_CALL FormatAngleByDMS(const int degree,
+                                                 const int minute,
+                                                 const double sec,
                                                  char* formatString,
-                                                 int& len,
+                                                 unsigned int& len,
                                                  const bool formatType);
-        DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                              const int minute,
-                                              const double sec,
-                                              char* formatString,
-                                              int& len,
-                                              const bool formatType);
-        DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
-        DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
-        DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
-        DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
+            DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
+            DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
+            DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
+            DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
         }
     } // end namespace GNSSUtilityLib
 
@@ -89,11 +165,11 @@ namespace sixents {
         extern "C" {
             DLL_API int STD_CALL MatrixAdd(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
             DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
-            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
-            DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix);
+            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix, SGNSSMatrix& outPutMatrix);
+            DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix,SGNSSMatrix& outPutMatrix);
             DLL_API int STD_CALL MatrixInverse(SGNSSMatrix& matrix);
-            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col);
-            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col);
+            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
+            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
         }
     } // end namespace GNSSMathUtilityLib
 } // end namespace sixents
@@ -411,7 +487,7 @@ bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
     double sec = weekSecData[1].toDouble();
 
     char* outStr = nullptr;
-    int outStrLen = 0;
+    unsigned int outStrLen = 0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
@@ -460,7 +536,7 @@ bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
     double sec = hourTime[2].toDouble();
 
     char* outStr = nullptr;
-    int outStrLen = 0;
+    unsigned int outStrLen = 0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
@@ -493,11 +569,11 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     int week = weekSecData[0].toInt();
     double sec = weekSecData[1].toDouble();
 
-    int year = 0;
-    int month = 0;
-    int day = 0;
-    int hour = 0;
-    int minute = 0;
+    unsigned int year = 0;
+    unsigned int month = 0;
+    unsigned int day = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
     double second = 0.0;
     // 执行Rtk接口，未实现该结果
     // 调用Rtk时间接口
@@ -570,36 +646,40 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
                            static_cast<double>(hour), static_cast<double>(minute), sec};
     gtime_t rtkTime = epoch2time(standTime);
     gtime_t gpsTime = utc2gpst(rtkTime);
-    int week = 0;
-    double second = 0.0;
+    int rtkWeek = 0;
+    double rtkSecond = 0.0;
     // 执行Rtk接口，未实现该结果
     switch (flag) {
     case 2:    // GPS时间
     {
-        second = time2gpst(gpsTime, &week);
+        rtkSecond = time2gpst(gpsTime, &rtkWeek);
         break;
     }
     case 4:    // Galileo时间
     {
-        second = time2gst(gpsTime, &week);
+        rtkSecond = time2gst(gpsTime, &rtkWeek);
         break;
     }
     case 5:    // BD时间
     {
         gtime_t bdTime = gpst2bdt(gpsTime);
-        second = time2bdt(bdTime, &week);
+        rtkSecond = time2bdt(bdTime, &rtkWeek);
         break;
     }
     default:
         break;
     }
 
-    QString rtkRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
+    QString rtkRet = QString::number(rtkWeek) + "," + QString::number(rtkSecond, 'f', MSEC_ACCURACY);
     // 执行GUL接口
-    week = 0;
-    second = 0.0;
-    sixents::GNSSUtilityLib::UTCTimeToGNSSTime(year, month, day, hour, minute, sec,
-                                               flag, week, second);
+    unsigned int week = 0;
+    double second = 0.0;
+    sixents::GNSSUtilityLib::UTCTimeToGNSSTime(static_cast<UINT32>(year),
+                                               static_cast<UINT32>(month),
+                                               static_cast<UINT32>(day),
+                                               static_cast<UINT32>(hour),
+                                               static_cast<UINT32>(minute),
+                                               sec, static_cast<UINT32>(flag), week, second);
     QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -632,33 +712,34 @@ bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
     int srcWeek = weekSecData[0].toInt();
     double srcSec = weekSecData[1].toDouble();
 
-    int destWeek = 0;
-    double destSec = 0.0;
+    int destRtkWeek = 0;
+    double destRtkSec = 0.0;
     // 执行Rtk接口，未实现该结果
     if (srcType == 2) {  // GPS to BD or Galileo
         gtime_t gpsTime = gpst2time(srcWeek, srcSec);
         if (destType == 4) { // to Galileo
-            destSec = time2gst(gpsTime, &destWeek);
+            destRtkSec = time2gst(gpsTime, &destRtkWeek);
         } else if (destType == 5){ // to BD
             gtime_t bdTime = gpst2bdt(gpsTime);
-            destSec = time2bdt(bdTime, &destWeek);
+            destRtkSec = time2bdt(bdTime, &destRtkWeek);
         }
     } else if (destType == 2) { // BD or Galileo to GPS
         if (srcType == 4) {
             gtime_t gstTime = gst2time(srcWeek, srcSec);
-            destSec = time2gpst(gstTime, &destWeek);
+            destRtkSec = time2gpst(gstTime, &destRtkWeek);
         } else if (srcType == 5) {
             gtime_t bdTime = bdt2time(srcWeek, srcSec);
             gtime_t gpsTime = bdt2gpst(bdTime);
-            destSec = time2gpst(gpsTime, &destWeek);
+            destRtkSec = time2gpst(gpsTime, &destRtkWeek);
         }
     }
-    QString rtkRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
+    QString rtkRet = QString::number(destRtkWeek) + "," + QString::number(destRtkSec, 'f', MSEC_ACCURACY);
 
     // 执行GUL接口
-    destWeek = 0;
-    destSec = 0.0;
-    sixents::GNSSUtilityLib::GNSSTimeConvert(srcWeek, srcSec, srcType, destWeek, destSec, destType);
+    unsigned int destWeek = 0;
+    double destSec = 0.0;
+    sixents::GNSSUtilityLib::GNSSTimeConvert(static_cast<UINT32>(srcWeek), srcSec, static_cast<UINT32>(srcType),
+                                             destWeek, destSec, static_cast<UINT32>(destType));
     QString gulRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -692,17 +773,17 @@ bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
         return false;
     }
 
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
+    unsigned int year = dayTime[0].toInt();
+    unsigned int month = dayTime[1].toInt();
+    unsigned int day = dayTime[2].toInt();
+    unsigned int hour = hourTime[0].toInt();
+    unsigned int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
-    int utcYear = 0;
-    int utcMonth = 0;
-    int utcDay = 0;
-    int utcHour = 0;
-    int utcMinute = 0;
+    unsigned int utcYear = 0;
+    unsigned int utcMonth = 0;
+    unsigned int utcDay = 0;
+    unsigned int utcHour = 0;
+    unsigned int utcMinute = 0;
     double utcSec = 0.0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
@@ -743,17 +824,17 @@ bool CTestFunc::UTCToGlonass(const QString testData, QString &result)
         return false;
     }
 
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
+    unsigned int year = dayTime[0].toInt();
+    unsigned int month = dayTime[1].toInt();
+    unsigned int day = dayTime[2].toInt();
+    unsigned int hour = hourTime[0].toInt();
+    unsigned int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
-    int gloYear = 0;
-    int gloMonth = 0;
-    int gloDay = 0;
-    int gloHour = 0;
-    int gloMinute = 0;
+    unsigned int gloYear = 0;
+    unsigned int gloMonth = 0;
+    unsigned int gloDay = 0;
+    unsigned int gloHour = 0;
+    unsigned int gloMinute = 0;
     double gloSec = 0.0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
@@ -794,14 +875,14 @@ bool CTestFunc::GlonassToGPS(const QString testData, QString &result)
         return false;
     }
 
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
+    unsigned int year = dayTime[0].toInt();
+    unsigned int month = dayTime[1].toInt();
+    unsigned int day = dayTime[2].toInt();
+    unsigned int hour = hourTime[0].toInt();
+    unsigned int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
 
-    int week = 0;
+    unsigned int week = 0;
     double second = 0.0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
@@ -830,14 +911,14 @@ bool CTestFunc::GPSToGlonass(const QString testData, QString &result)
     if (weekSecData.count() != 2) {
         return false;
     }
-    int week = weekSecData[0].toInt();
+    unsigned int week = weekSecData[0].toInt();
     double second = weekSecData[1].toDouble();
 
-    int year = 0;
-    int month = 0;
-    int day = 0;
-    int hour = 0;
-    int minute = 0;
+    unsigned int year = 0;
+    unsigned int month = 0;
+    unsigned int day = 0;
+    unsigned int hour = 0;
+    unsigned int minute = 0;
     double sec = 0.0;
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
@@ -1113,6 +1194,47 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
     QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
+
+
+    sixents::GNSSUtilityLib::SGlonassEphemeris glonassEphemeris;
+
+    glonassEphemeris.m_dbGammaTb=2.72848e-12;
+    glonassEphemeris.m_dbGmDeltaTn=0;
+    glonassEphemeris.m_dbGmTGps=0;
+    glonassEphemeris.m_dbTc=0;
+    glonassEphemeris.m_dbTnTb=-0.0018718;
+    glonassEphemeris.m_dbXnTb=-9490.91;
+    glonassEphemeris.m_dbXnTbFirstDerivative=-7.3524;
+    glonassEphemeris.m_dbXnTbSecondDerivative=9.31323e-10;
+    glonassEphemeris.m_dbYnTb=8989.82;
+    glonassEphemeris.m_dbYnTbFirstDerivative=0.35082;
+    glonassEphemeris.m_dbYnTbSecondDerivative=0;
+    glonassEphemeris.m_dbZnTb=-27565.3;
+    glonassEphemeris.m_dbZnTbFirstDerivative=3.48408;
+    glonassEphemeris.m_dbZnTbSecondDerivative=0;
+    glonassEphemeris.m_ui16GmNt=1422;
+    glonassEphemeris.m_ui16MsgType=1020;
+    glonassEphemeris.m_ui16NA=0;
+    glonassEphemeris.m_ui16Tb=375;
+    glonassEphemeris.m_ui16Tk=768;
+    glonassEphemeris.m_ui8AHAI=0;
+    glonassEphemeris.m_ui8AOAD=0;
+    glonassEphemeris.m_ui8AlmanacHealth=0;
+    glonassEphemeris.m_ui8En=0;
+    glonassEphemeris.m_ui8GmFt=0;
+    glonassEphemeris.m_ui8GmLn3=0;
+    glonassEphemeris.m_ui8GmLn5=0;
+    glonassEphemeris.m_ui8GmM=0;
+    glonassEphemeris.m_ui8GmN4=0;
+    glonassEphemeris.m_ui8GmP=0;
+    glonassEphemeris.m_ui8GmP4=0;
+    glonassEphemeris.m_ui8MsbOfBn=0;
+    glonassEphemeris.m_ui8P1=0;
+    glonassEphemeris.m_ui8P2=0;
+    glonassEphemeris.m_ui8P3=0;
+    glonassEphemeris.m_ui8Reserved=0;
+    glonassEphemeris.m_ui8SatFrequencyChannelNumber=6;
+    glonassEphemeris.m_ui8SatId=12;
 
     // 调用GUL接口解算
     QString gulRet("null");
@@ -1412,7 +1534,7 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
     QString rtkRet("null");
     // 执行GUL接口
     char* gulChRet = nullptr;
-    int len = 0;
+    unsigned int len = 0;
     sixents::GNSSUtilityLib::FormatAngleByDegree(deg, gulChRet, len);
 
     gulChRet=new char[len + 1];
@@ -1443,7 +1565,7 @@ bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
     QString rtkRet("null");
     // 执行GUL接口
     char* gulChRet = nullptr;
-    int len = 0;
+    unsigned int len = 0;
     sixents::GNSSUtilityLib::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
 
     gulChRet=new char[len + 1];
@@ -1899,8 +2021,8 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
     double beta = 0.0;
     // 执行Rtk接口，未实现该结果
     matmul("NN", srcRow, destCol, srcCol, alpha, srcMatrixData, destMatrixData, beta, resultMatrixData);
-    QString rtkRet("");
-    rtkRet = QString::number(srcRow) + "," + QString::number(destCol) + "\n";
+    QString rtkRet("Rtk Result\n");
+    rtkRet += QString::number(srcRow) + "," + QString::number(destCol) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < srcRow; rIdx ++) {
         for (int cIdx = 0; cIdx < destCol; cIdx++) {
@@ -1942,14 +2064,31 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
             ++dataIdx;
         }
     }
-    sixents::GNSSMathUtilityLib::MatrixMul(srcMatrix, destMatrix);
-    QString gulRet("GUL Result\n");
-    gulRet = QString::number(destMatrix.row) + "," + QString::number(destMatrix.col) + "\n";
+
+    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
+    outPutMatrix.row = srcRow;
+    outPutMatrix.col = destCol;
+    outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(srcRow)];    //初始化Q矩阵
+    for(int i = 0; i < srcRow; ++i) {
+        outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
+    }
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < destMatrix.row; ++rIdx) {
-        for (int cIdx = 0; cIdx < destMatrix.col; ++cIdx) {
-            gulRet += QString::number(destMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != destMatrix.col - 1) {
+    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+            outPutMatrix.matrixNum[rowIdx][colIdx] = 0;
+
+        }
+    }
+
+    sixents::GNSSMathUtilityLib::MatrixMul(srcMatrix, destMatrix, outPutMatrix);
+
+    QString gulRet("GUL Result\n");
+    gulRet += QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    dataIdx = 0;
+    for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
+        for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
+            gulRet += QString::number(outPutMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != outPutMatrix.col - 1) {
                 gulRet += ",";
             }
         }
@@ -1994,13 +2133,13 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
     int col = rowAndCol[1].toInt();
 
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\nnull");
+    QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
     sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.row = col;
-    srcMatrix.col = row;
+    srcMatrix.row = row;
+    srcMatrix.col = col;
     srcMatrix.matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
-    for(int i = 0; i < col; ++i) {
+    for(int i = 0; i < row; ++i) {
         srcMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
     }
 
@@ -2013,16 +2152,29 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
         ++dataIdx;
     }
 
+    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
+    outPutMatrix.row = col;
+    outPutMatrix.col = row;
+    outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(col)];    //初始化Q矩阵
+    for(int i = 0; i < col; ++i) {
+        outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(row)]();
+    }
+
+    dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < col; ++ rowIdx) {
+        for (int colIdx = 0; colIdx < row; ++ colIdx) {
+            outPutMatrix.matrixNum[rowIdx][colIdx] = 0;
+        }
+    }
 
     QString gulRet("GUL Result\n");
-
-    sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix);
-    gulRet = QString::number(srcMatrix.row) + "," + QString::number(srcMatrix.col) + "\n";
+    sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix,outPutMatrix);
+    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < srcMatrix.row; ++rIdx) {
-        for (int cIdx = 0; cIdx < srcMatrix.col; ++cIdx) {
-            gulRet += QString::number(srcMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != srcMatrix.col - 1) {
+    for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
+        for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
+            gulRet += QString::number(outPutMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != outPutMatrix.col - 1) {
                 gulRet += ",";
             }
         }
@@ -2130,7 +2282,6 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
         gulRet = gulRet + "\n";
     }
 
-
     // 写文件
     result = rtkRet + "\n" + gulRet;
     QDateTime curDateTime =QDateTime::currentDateTime();
@@ -2171,9 +2322,55 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
 
     double* data = new double[row * col];
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\nnull");
+    QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-    QString gulRet("GUL Result");
+    QString gulRet("GUL Result\n");
+
+    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
+    srcMatrix.row = row;
+    srcMatrix.col = col;
+    srcMatrix.matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
+    for(int i = 0; i < row; ++i) {
+        srcMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
+    }
+
+    int dataIdx = 1;
+    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+        QStringList colData = allData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < col; ++ colIdx) {
+            srcMatrix.matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+        }
+        ++dataIdx;
+    }
+    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
+    outPutMatrix.row = srcMatrix.row+2;
+    outPutMatrix.col = srcMatrix.col+2;
+    outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.row)];    //初始化Q矩阵
+    for(int i = 0; i < outPutMatrix.row; ++i) {
+        outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.col)]();
+    }
+
+    dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < outPutMatrix.row; ++ rowIdx) {
+        for (int colIdx = 0; colIdx < outPutMatrix.col; ++ colIdx) {
+            outPutMatrix.matrixNum[rowIdx][colIdx] = 0;
+        }
+    }
+
+
+    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix,2,2,outPutMatrix);
+    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    dataIdx = 0;
+    for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
+        for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
+            gulRet += QString::number(outPutMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != outPutMatrix.col - 1) {
+                gulRet += ",";
+            }
+        }
+        gulRet = gulRet + "\n";
+    }
+
     // 写文件
     result = rtkRet + "\n" + gulRet;
     QDateTime curDateTime =QDateTime::currentDateTime();
@@ -2214,9 +2411,56 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
 
     double* data = new double[row * col];
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\nnull");
+    QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-    QString gulRet("GUL Result");
+    QString gulRet("GUL Result\n");
+
+    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
+    srcMatrix.row = row;
+    srcMatrix.col = col;
+    srcMatrix.matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
+    for(int i = 0; i < row; ++i) {
+        srcMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
+    }
+
+
+    int dataIdx = 1;
+    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+        QStringList colData = allData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < col; ++ colIdx) {
+            srcMatrix.matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+        }
+        ++dataIdx;
+    }
+
+    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
+    outPutMatrix.row = srcMatrix.row-2;
+    outPutMatrix.col = srcMatrix.col-2;
+    outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.row)];    //初始化Q矩阵
+    for(int i = 0; i < outPutMatrix.row; ++i) {
+        outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.col)]();
+    }
+    dataIdx = 0;
+    for (int rowIdx = 0; rowIdx < outPutMatrix.row; ++ rowIdx) {
+        for (int colIdx = 0; colIdx < outPutMatrix.col; ++ colIdx) {
+            outPutMatrix.matrixNum[rowIdx][colIdx] = 0;
+        }
+    }
+
+
+    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix,2,2,outPutMatrix);
+    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    dataIdx = 0;
+    for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
+        for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
+            gulRet += QString::number(outPutMatrix.matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
+            if (cIdx != outPutMatrix.col - 1) {
+                gulRet += ",";
+            }
+        }
+        gulRet = gulRet + "\n";
+    }
+
     // 写文件
     result = rtkRet + "\n" + gulRet;
     QDateTime curDateTime =QDateTime::currentDateTime();
