@@ -964,8 +964,11 @@ bool CTestFunc::XYZ2BLH(const QString testData, QString& result)
 
     // 执行Rtk接口，未实现该结果
     ecef2pos(xyz, blh);
-    QString rtkRet = QString::number(blh[0], 'f', BLH_ACCURACY) + "," +
-                     QString::number(blh[1], 'f', BLH_ACCURACY) + "," +
+    // blh值转角度
+    double lat = blh[0] * R2D;
+    double lon = blh[1] * R2D;
+    QString rtkRet = QString::number(lat, 'f', BLH_ACCURACY) + "," +
+                     QString::number(lon, 'f', BLH_ACCURACY) + "," +
                      QString::number(blh[2], 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     double b = 0;
@@ -1000,7 +1003,11 @@ bool CTestFunc::BLH2XYZ(const QString testData, QString& result)
     }
 
     // 执行Rtk接口，未实现该结果
-    pos2ecef(blh, xyz);
+    // blh进行角度转弧度
+    double lat = blh[0] * D2R;
+    double lon = blh[1] * D2R;
+    double rtkBLH[3] = {lat, lon, blh[2]};
+    pos2ecef(rtkBLH, xyz);
     QString rtkRet = QString::number(xyz[0], 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(xyz[1], 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(xyz[2], 'f', COORDINATE_ACCURACY);
