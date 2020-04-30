@@ -8,11 +8,12 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _GNSS_COORDINATE_H
-#define _GNSS_COORDINATE_H
+#ifndef GNSS_COORDINATE_H
+#define GNSS_COORDINATE_H
 #include <map>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../DllMain/GNSSDataStruct.h"
+
 namespace sixents
 {
     namespace GNSSUtilityLib

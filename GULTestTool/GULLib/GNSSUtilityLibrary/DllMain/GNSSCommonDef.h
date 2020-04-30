@@ -8,8 +8,8 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _GNSS_COMMON_DEF_H
-#define _GNSS_COMMON_DEF_H
+#ifndef GNSS_COMMON_DEF_H
+#define GNSS_COMMON_DEF_H
 
 #include <string>
 #include "GNSSDataStruct.h"

@@ -9,7 +9,6 @@
 #include "GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h"
 #include "GULLib/GNSSMathUtilityLib/GNSSMathInterface.h"
 #include "GULLib/GNSSMathUtilityLib/GNSSCommonStruct.h"
-#include "GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.h"
 #include "GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h"
 #include <QFile>
 #include <QTextStream>
@@ -491,13 +490,15 @@ bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::FormatWeekSecTime(week, sec, flag, outStr, outStrLen);
+    sixents::GNSSUtilityLib::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+                                               outStr, outStrLen);
     if (outStrLen == 0) {
         return false;
     }
     outStr = new char[static_cast<unsigned long long>(outStrLen)];
     memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outStrLen));
-    sixents::GNSSUtilityLib::FormatWeekSecTime(week, sec, flag, outStr, outStrLen);
+    sixents::GNSSUtilityLib::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+                                               outStr, outStrLen);
     QString gulRet = outStr;
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -512,7 +513,6 @@ bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
     result.clear();
     // 拆分参数
     QStringList testDatas = testData.split(";");
-//    int flag = testDatas[1].toInt();    // 没有用上这个参数
     QStringList weekSecData = testDatas[0].split(",");
     if (weekSecData.count() != 2) {
         return false;
@@ -540,13 +540,17 @@ bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::FormatStandardTime(year, month, day, hour, minute, sec, outStr, outStrLen);
+    sixents::GNSSUtilityLib::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                static_cast<unsigned int>(minute), sec, outStr, outStrLen);
     if (outStrLen == 0) {
         return false;
     }
     outStr = new char[static_cast<unsigned long long>(outStrLen)];
     memset(outStr, 0, sizeof (char)* static_cast<unsigned long long>(outStrLen));
-    sixents::GNSSUtilityLib::FormatStandardTime(year, month, day, hour, minute, sec, outStr, outStrLen);
+    sixents::GNSSUtilityLib::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                static_cast<unsigned int>(minute), sec, outStr, outStrLen);
     QString gulRet = outStr;
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -602,8 +606,8 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     }
     QString rtkRet(chRet);
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GNSSTimeToUTCTime(week, sec, flag, year, month, day,
-                                               hour, minute, second);
+    sixents::GNSSUtilityLib::GNSSTimeToUTCTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+                                               year, month, day, hour, minute, second);
     QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " "
             + QString::number(hour) + ":" + QString::number(minute) + ":" + QString::number(second, 'f', MSEC_ACCURACY);
     // 组装结果
@@ -773,11 +777,11 @@ bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
         return false;
     }
 
-    unsigned int year = dayTime[0].toInt();
-    unsigned int month = dayTime[1].toInt();
-    unsigned int day = dayTime[2].toInt();
-    unsigned int hour = hourTime[0].toInt();
-    unsigned int minute = hourTime[1].toInt();
+    int year = dayTime[0].toInt();
+    int month = dayTime[1].toInt();
+    int day = dayTime[2].toInt();
+    int hour = hourTime[0].toInt();
+    int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
     unsigned int utcYear = 0;
     unsigned int utcMonth = 0;
@@ -788,10 +792,13 @@ bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GlonassTimeToUTCTime(year, month, day, hour, minute, sec,
+    sixents::GNSSUtilityLib::GlonassTimeToUTCTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                  static_cast<unsigned int>(minute), sec,
                                                   utcYear, utcMonth, utcDay, utcHour, utcMinute, utcSec);
     QString gulRet = QString::number(utcYear) + "-" + QString::number(utcMonth) + "-" + QString::number(utcDay) + " " +
-                     QString::number(utcHour) + ":" + QString::number(utcMinute) + ":" + QString::number(utcSec, 'f', MSEC_ACCURACY);
+                     QString::number(utcHour) + ":" + QString::number(utcMinute) + ":" +
+                     QString::number(utcSec, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
     return true;
@@ -824,11 +831,11 @@ bool CTestFunc::UTCToGlonass(const QString testData, QString &result)
         return false;
     }
 
-    unsigned int year = dayTime[0].toInt();
-    unsigned int month = dayTime[1].toInt();
-    unsigned int day = dayTime[2].toInt();
-    unsigned int hour = hourTime[0].toInt();
-    unsigned int minute = hourTime[1].toInt();
+    int year = dayTime[0].toInt();
+    int month = dayTime[1].toInt();
+    int day = dayTime[2].toInt();
+    int hour = hourTime[0].toInt();
+    int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
     unsigned int gloYear = 0;
     unsigned int gloMonth = 0;
@@ -839,7 +846,9 @@ bool CTestFunc::UTCToGlonass(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::UTCTimeToGlonassTime(year, month, day, hour, minute, sec,
+    sixents::GNSSUtilityLib::UTCTimeToGlonassTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                  static_cast<unsigned int>(minute), sec,
                                                   gloYear, gloMonth, gloDay, gloHour, gloMinute, gloSec);
     QString gulRet = QString::number(gloYear) + "-" + QString::number(gloMonth) + "-" + QString::number(gloDay) + " " +
                      QString::number(gloHour) + ":" + QString::number(gloMinute) + ":" + QString::number(gloSec, 'f', MSEC_ACCURACY);
@@ -875,11 +884,11 @@ bool CTestFunc::GlonassToGPS(const QString testData, QString &result)
         return false;
     }
 
-    unsigned int year = dayTime[0].toInt();
-    unsigned int month = dayTime[1].toInt();
-    unsigned int day = dayTime[2].toInt();
-    unsigned int hour = hourTime[0].toInt();
-    unsigned int minute = hourTime[1].toInt();
+    int year = dayTime[0].toInt();
+    int month = dayTime[1].toInt();
+    int day = dayTime[2].toInt();
+    int hour = hourTime[0].toInt();
+    int minute = hourTime[1].toInt();
     double sec = hourTime[2].toDouble();
 
     unsigned int week = 0;
@@ -887,8 +896,9 @@ bool CTestFunc::GlonassToGPS(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GlonassTimeToGPSTime(year, month, day, hour, minute, sec,
-                                                  week, second);
+    sixents::GNSSUtilityLib::GlonassTimeToGPSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                  static_cast<unsigned int>(minute), sec, week, second);
     QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -911,7 +921,7 @@ bool CTestFunc::GPSToGlonass(const QString testData, QString &result)
     if (weekSecData.count() != 2) {
         return false;
     }
-    unsigned int week = weekSecData[0].toInt();
+    int week = weekSecData[0].toInt();
     double second = weekSecData[1].toDouble();
 
     unsigned int year = 0;
@@ -923,10 +933,11 @@ bool CTestFunc::GPSToGlonass(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GPSTimeToGlonassTime(week, second,
+    sixents::GNSSUtilityLib::GPSTimeToGlonassTime(static_cast<unsigned int>(week), second,
                                                   year, month, day, hour, minute, sec);
     QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " " +
-                     QString::number(hour) + ":" + QString::number(minute) + ":" + QString::number(sec, 'f', MSEC_ACCURACY);
+                     QString::number(hour) + ":" + QString::number(minute) + ":" +
+                     QString::number(sec, 'f', MSEC_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
     return true;
@@ -1750,9 +1761,8 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     }
 
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\nnull");
+    QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-
     sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
     srcMatrix.row = srcRow;
     srcMatrix.col = srcCol;
@@ -1784,7 +1794,7 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     }
     sixents::GNSSMathUtilityLib::MatrixAdd(srcMatrix, destMatrix);
     QString gulRet("GUL Result\n");
-    gulRet = QString::number(destMatrix.row) + "," + QString::number(destMatrix.col) + "\n";
+    gulRet += QString::number(destMatrix.row) + "," + QString::number(destMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < destMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < destMatrix.col; ++cIdx) {
@@ -1856,9 +1866,9 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
     memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
     int dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; rowIdx++) {
+    for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
         QStringList colDatas = srcData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < srcCol; colIdx++) {
+        for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
             srcMatrixData[dataIdx] = colDatas[colIdx].toDouble();
             dataIdx++;
         }
@@ -1867,9 +1877,9 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
     memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
     dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; rowIdx++) {
+    for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
         QStringList colDatas = destData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < destCol; colIdx++) {
+        for (int colIdx = 0; colIdx < destCol; ++colIdx) {
             destMatrixData[dataIdx] = colDatas[colIdx].toDouble();
             dataIdx++;
         }
@@ -1878,11 +1888,8 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     double* resultMatrixData = new double[static_cast<unsigned long long>(srcRow * destCol)];
     memset(resultMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * destCol));
 
-    double alpha = 1.0;
-    double beta = 0.0;
-
     // 执行Rtk接口，未实现该结果
-    QString rtkRet("Rtk Result\nnull");
+    QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
 
     sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
@@ -1893,8 +1900,8 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
         srcMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(srcCol)]();
     }
     dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+    for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
+        for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
             srcMatrix. matrixNum[rowIdx][colIdx] = srcMatrixData[dataIdx];
             ++dataIdx;
         }
@@ -1908,15 +1915,15 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
         destMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
     }
     dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+    for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
+        for (int colIdx = 0; colIdx < destCol; ++colIdx) {
             destMatrix.matrixNum[rowIdx][colIdx] = destMatrixData[dataIdx];
             ++dataIdx;
         }
     }
     sixents::GNSSMathUtilityLib::MatrixSub(srcMatrix, destMatrix);
     QString gulRet("GUL Result\n");
-    gulRet = QString::number(destMatrix.row) + "," + QString::number(destMatrix.col) + "\n";
+    gulRet += QString::number(destMatrix.row) + "," + QString::number(destMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < destMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < destMatrix.col; ++cIdx) {
@@ -1927,10 +1934,6 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
         }
         gulRet = gulRet + "\n";
     }
-
-
-
-
 
     // 写文件
     result = rtkRet + "\n" + gulRet;
@@ -2169,7 +2172,7 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
 
     QString gulRet("GUL Result\n");
     sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix,outPutMatrix);
-    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    gulRet += QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
@@ -2235,8 +2238,8 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     }
     // 执行Rtk接口，未实现该结果
     matinv(data, row);
-    QString rtkRet("");
-    rtkRet = QString::number(row) + "," + QString::number(col) + "\n";
+    QString rtkRet("Rtk Result\n");
+    rtkRet += QString::number(row) + "," + QString::number(col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < row; rIdx ++) {
         for (int cIdx = 0; cIdx < col; cIdx++) {
@@ -2250,7 +2253,6 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     }
     // 执行GUL接口
     QString gulRet("GUL Result\n");
-
     sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
     srcMatrix.row = row;
     srcMatrix.col = col;
@@ -2270,7 +2272,7 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     }
 
     sixents::GNSSMathUtilityLib::MatrixInverse(srcMatrix);
-    gulRet = QString::number(srcMatrix.row) + "," + QString::number(srcMatrix.col) + "\n";
+    gulRet += QString::number(srcMatrix.row) + "," + QString::number(srcMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < srcMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < srcMatrix.col; ++cIdx) {
@@ -2309,7 +2311,19 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
     }
 
     QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = srcData.split("\n");
+    QStringList srcDataList = srcData.split(";");
+    if (srcDataList.count() != 2) {
+        return false;
+    }
+
+    QStringList newMatrixRowCol = srcDataList[1].split(",");
+    if (newMatrixRowCol.count() != 2) {
+        return false;
+    }
+    int addRow = newMatrixRowCol[0].toInt();
+    int addCol = newMatrixRowCol[1].toInt();
+
+    QStringList allData = srcDataList[0].split("\n");
     if (allData.count() < 2) {
         return false;
     }
@@ -2318,9 +2332,8 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
         return false;
     }
     int row = rowAndCol[0].toInt();
-    const int col = rowAndCol[1].toInt();
+    int col = rowAndCol[1].toInt();
 
-    double* data = new double[row * col];
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
@@ -2343,8 +2356,8 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
         ++dataIdx;
     }
     sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.row = srcMatrix.row+2;
-    outPutMatrix.col = srcMatrix.col+2;
+    outPutMatrix.row = srcMatrix.row + addRow;
+    outPutMatrix.col = srcMatrix.col + addCol;
     outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.row)];    //初始化Q矩阵
     for(int i = 0; i < outPutMatrix.row; ++i) {
         outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.col)]();
@@ -2357,9 +2370,8 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
         }
     }
 
-
-    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix,2,2,outPutMatrix);
-    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix, addRow, addCol, outPutMatrix);
+    gulRet += QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {
@@ -2398,7 +2410,19 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
     }
 
     QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = srcData.split("\n");
+    QStringList srcDataList = srcData.split(";");
+    if (srcDataList.count() != 2) {
+        return false;
+    }
+
+    QStringList subRowCol = srcDataList[1].split(",");
+    if (subRowCol.count() != 2) {
+        return false;
+    }
+    int subRow = subRowCol[0].toInt();
+    int subCol = subRowCol[1].toInt();
+
+    QStringList allData = srcDataList[0].split("\n");
     if (allData.count() < 2) {
         return false;
     }
@@ -2409,12 +2433,10 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
     int row = rowAndCol[0].toInt();
     const int col = rowAndCol[1].toInt();
 
-    double* data = new double[row * col];
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
     QString gulRet("GUL Result\n");
-
     sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
     srcMatrix.row = row;
     srcMatrix.col = col;
@@ -2434,8 +2456,8 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
     }
 
     sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.row = srcMatrix.row-2;
-    outPutMatrix.col = srcMatrix.col-2;
+    outPutMatrix.row = srcMatrix.row - subRow;
+    outPutMatrix.col = srcMatrix.col - subCol;
     outPutMatrix.matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.row)];    //初始化Q矩阵
     for(int i = 0; i < outPutMatrix.row; ++i) {
         outPutMatrix.matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.col)]();
@@ -2447,9 +2469,8 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
         }
     }
 
-
-    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix,2,2,outPutMatrix);
-    gulRet = QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
+    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix, subRow, subCol, outPutMatrix);
+    gulRet += QString::number(outPutMatrix.row) + "," + QString::number(outPutMatrix.col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < outPutMatrix.row; ++rIdx) {
         for (int cIdx = 0; cIdx < outPutMatrix.col; ++cIdx) {

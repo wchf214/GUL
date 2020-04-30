@@ -505,7 +505,7 @@ namespace sixents
 
         INT32 CAppInterface::Rad2Deg(const DOUBLE radian, DOUBLE& degree)
         {
-            CGNSSAngle angleObj(degree, false);
+            CGNSSAngle angleObj(radian, false);
             degree = angleObj.GetDeg();
             return RETURN_SUCCESS;
         }
