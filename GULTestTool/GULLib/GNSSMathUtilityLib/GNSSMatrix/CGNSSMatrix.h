@@ -11,7 +11,7 @@
 #ifndef _GNSS_MATRIX_H
 #define _GNSS_MATRIX_H
 
-#include "../GNSSCommonStruct.h"
+#include "../DllMain/GNSSCommonStruct.h"
 
 namespace sixents
 {
@@ -77,7 +77,18 @@ namespace sixents
              */
             virtual ~CGNSSMatrix();
 
+            /**
+             * @brief       设置矩阵
+             * @author      pengshupan@sixents.com
+             * @param[in]   matrix 设置的矩阵
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        N/A
+             */
             void SetMatrix(const SGNSSMatrix& matrix);
+
             /**
              * @brief       获取矩阵数据
              * @author      pengshupan@sixents.com
@@ -93,7 +104,7 @@ namespace sixents
             /**
              * @brief       矩阵加法运算符重载
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix 矩阵加数
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -104,7 +115,7 @@ namespace sixents
             /**
              * @brief       矩阵减法运算符重载
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix 矩阵减数
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -115,7 +126,7 @@ namespace sixents
             /**
              * @brief       矩阵乘法运算符重载
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix 矩阵乘数
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -127,7 +138,7 @@ namespace sixents
             /**
              * @brief       矩阵转置运算
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix 待转置的矩阵
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -138,7 +149,7 @@ namespace sixents
             /**
              * @brief       矩阵求逆运算
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix 待求逆的矩阵
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -149,7 +160,7 @@ namespace sixents
             /**
              * @brief       矩阵添加行列运算
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   addNum 矩阵增加行列数
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -160,7 +171,7 @@ namespace sixents
             /**
              * @brief       矩阵删除行列
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   subNum 矩阵删除行列数
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
@@ -172,7 +183,7 @@ namespace sixents
         private:
             SGNSSMatrix m_matrix;
         };
-    }  // end namespace GNSSMathUtilityLib
-}  // end namespace sixents
+    } // end namespace GNSSMathUtilityLib
+} // end namespace sixents
 
 #endif

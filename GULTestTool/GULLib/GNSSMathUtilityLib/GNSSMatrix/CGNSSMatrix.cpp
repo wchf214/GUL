@@ -63,8 +63,7 @@ namespace sixents
             {
                 for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    matrix.GetMatrix().matrixNum[i][j] =
-                            m_matrix.matrixNum[i][j]+ matrix.GetMatrix().matrixNum[i][j];
+                    matrix.GetMatrix().matrixNum[i][j] = m_matrix.matrixNum[i][j] + matrix.GetMatrix().matrixNum[i][j];
                 }
             }
             return matrix;
@@ -80,8 +79,7 @@ namespace sixents
             {
                 for (int j = 0; j < matrix.GetMatrix().col; j++)
                 {
-                    matrix.GetMatrix().matrixNum[i][j] =
-                            m_matrix.matrixNum[i][j] - matrix.GetMatrix().matrixNum[i][j];
+                    matrix.GetMatrix().matrixNum[i][j] = m_matrix.matrixNum[i][j] - matrix.GetMatrix().matrixNum[i][j];
                 }
             }
             return matrix;
