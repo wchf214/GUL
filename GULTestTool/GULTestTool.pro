@@ -18,8 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     CGNSSJsonFile.cpp \
     CGNSSTextFile.cpp \
+    GULLib/GNSSMathUtilityLib/AppIFs/MathAppInterface.cpp \
     GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.cpp \
-    GULLib/GNSSMathUtilityLib/AppIFs/GULMathAppIFs.cpp \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.cpp \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.cpp \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.cpp \
@@ -52,6 +52,7 @@ HEADERS += \
     CGNSSTextFile.h \
     ConstantDef.h \
     GULLib/GNSSMathInterface.h \
+    GULLib/GNSSMathUtilityLib/AppIFs/MathAppInterface.h \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/Cholesky \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/CholmodSupport \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/Core \
@@ -353,11 +354,9 @@ HEADERS += \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/CommonCwiseUnaryOps.h \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
-    GULLib/GNSSMathUtilityLib/GNSSCommonStruct.h \
+    GULLib/GNSSMathUtilityLib/DllMain/GNSSCommonStruct.h \
     GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.h \
-    GULLib/GNSSMathUtilityLib/AppIFs/GULMathAppIFs.h \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.h \
-    GULLib/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.h \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.h \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.h \

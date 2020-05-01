@@ -7,8 +7,8 @@
  *  @note          暂无
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
-#ifndef _APP_INTERFACE_H_
-#define _APP_INTERFACE_H_
+#ifndef APP_INTERFACE_H_
+#define APP_INTERFACE_H_
 
 #include "../DllMain/GNSSDataStruct.h"
 

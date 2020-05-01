@@ -1,4 +1,4 @@
-#include "GULMathAppIFs.h"
+#include "MathAppInterface.h"
 //#include "../GNSSMatrix/CGNSSMatrix.h"
 
 namespace sixents

@@ -8,8 +8,8 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef GNSS_MATH_UTILITY_INTERFACE_H_
-#define GNSS_MATH_UTILITY_INTERFACE_H_
+#ifndef MATH_APP_INTERFACE_H_
+#define MATH_APP_INTERFACE_H_
 
 #include "../DllMain/GNSSCommonStruct.h"
 
