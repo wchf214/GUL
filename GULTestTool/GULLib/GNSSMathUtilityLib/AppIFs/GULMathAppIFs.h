@@ -1,5 +1,15 @@
-#ifndef _GNSS_MATH_UTILITY_INTERFACE_H_
-#define _GNSS_MATH_UTILITY_INTERFACE_H_
+/** @file          CMathAppInterface.h
+ *  @brief         矩阵运算接口类
+ *  @details       N/A
+ *  @author        pengshupan@sixens.com
+ *  @date          2020/04/24
+ *  @version       1.0
+ *  @note          N/A
+ *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
+ */
+
+#ifndef GNSS_MATH_UTILITY_INTERFACE_H_
+#define GNSS_MATH_UTILITY_INTERFACE_H_
 
 #include "../DllMain/GNSSCommonStruct.h"
 
@@ -7,6 +17,12 @@ namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
+        /**
+         *  @class       CMathAppInterface
+         *  @brief       CMathAppInterface接口实现类
+         *  @author      pengshupan@sixents.com
+         *  @note        用于接口算法实现
+         */
         class CMathAppInterface
         {
         public:

@@ -1,15 +1,15 @@
-/**@file             文件名
- *  @brief          项目简述
- *  @details       项目细节
- *  @author       作者
- *  @date          日期
- *  @version      版本
- *  @note          注解
- *  @copyright   版权
+/** @file          CGNSSMatrix.h
+ *  @brief         矩阵运算类
+ *  @details       N/A
+ *  @author        pengshupan@sixens.com
+ *  @date          2020/04/24
+ *  @version       1.0
+ *  @note          N/A
+ *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _GNSS_MATRIX_H
-#define _GNSS_MATRIX_H
+#ifndef GNSS_MATRIX_H
+#define GNSS_MATRIX_H
 
 #include "../DllMain/GNSSCommonStruct.h"
 
@@ -17,6 +17,12 @@ namespace sixents
 {
     namespace GNSSMathUtilityLib
     {
+        /**
+         *  @class       CGNSSMatrix
+         *  @brief       矩阵算法类
+         *  @author      pengshupan@sixents.com
+         *  @note
+         */
         class CGNSSMatrix
         {
         public:
@@ -27,29 +33,29 @@ namespace sixents
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
             explicit CGNSSMatrix();
+
             /**
              * @brief       参数为行和列的构造函数
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   row         矩阵行
+             * @param[in]   col         矩阵列
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
-            explicit CGNSSMatrix(int row, int col);
+            CGNSSMatrix(UINT32 row, UINT32 col);
+
             /**
              * @brief       参数为矩阵类型的构造函数
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrix          矩阵结构
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
             explicit CGNSSMatrix(const SGNSSMatrix& matrix);
@@ -57,14 +63,14 @@ namespace sixents
             /**
              * @brief       拷贝构造函数
              * @author      pengshupan@sixents.com
-             * @param[in]   N/A
+             * @param[in]   matrixObj       被拷贝对象
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
             CGNSSMatrix(const CGNSSMatrix& matrixObj);
+
             /**
              * @brief       析构函数
              * @author      pengshupan@sixents.com
@@ -72,10 +78,20 @@ namespace sixents
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
             virtual ~CGNSSMatrix();
+
+            /**
+             * @brief       设置矩阵
+             * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @note        N/A
+             */
+            BOOL_T InitMatrixObj();
 
             /**
              * @brief       设置矩阵
@@ -84,10 +100,22 @@ namespace sixents
              * @param[out]  N/A
              * @exception   N/A
              * @return      N/A
-             * @retval      N/A
              * @note        N/A
              */
             void SetMatrix(const SGNSSMatrix& matrix);
+
+            /**
+             * @brief       设置矩阵
+             * @author      pengshupan@sixents.com
+             * @param[in]   matrixData      矩阵数据
+             * @param[in]   row             当前矩阵的行
+             * @param[in]   col             当前矩阵的列
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @note        N/A
+             */
+            void SetMatrix(const DOUBLE* matrixData, const UINT32 row, const UINT32 col);
 
             /**
              * @brief       获取矩阵数据
@@ -167,7 +195,7 @@ namespace sixents
              * @retval      N/A
              * @note        N/A
              */
-            CGNSSMatrix MatrixAdd(int addNum);
+            CGNSSMatrix MatrixAdd(UINT32 addNum);
             /**
              * @brief       矩阵删除行列
              * @author      pengshupan@sixents.com
@@ -178,7 +206,7 @@ namespace sixents
              * @retval      N/A
              * @note        N/A
              */
-            CGNSSMatrix MatrixSub(int subNum);
+            CGNSSMatrix MatrixSub(UINT32 subNum);
 
         private:
             SGNSSMatrix m_matrix;

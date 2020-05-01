@@ -1,6 +1,5 @@
-#define DLL_EXPORT
 #include "GULMathAppIFs.h"
-#include "../GNSSMatrix/CGNSSMatrix.h"
+//#include "../GNSSMatrix/CGNSSMatrix.h"
 
 namespace sixents
 {
@@ -19,17 +18,26 @@ namespace sixents
             INT32 ret = RETURN_FAIL;
             do
             {
-                if ((inLeftMatrix.matrixNum == nullptr || *(inLeftMatrix.matrixNum) == nullptr)
-                    || (inRightMatrix.matrixNum == nullptr || *(inRightMatrix.matrixNum) == nullptr)
-                    || (outMatrix.matrixNum == nullptr || *(outMatrix.matrixNum) == nullptr))
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr
+                    || outMatrixData == nullptr)
                 {
                     ret = RETURN_NULL_PTR;
+                    break;
+                }
+                if (leftRow == 0 || leftCol == 0 ||
+                    rightRow == 0 || rightCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
                 }
 
-                CGNSSMatrix mat1(inLeftMatrix);
-                CGNSSMatrix mat2(inRightMatrix);
-                CGNSSMatrix mat3(outMatrix);
-                mat3 = mat1 + mat2;
+//                CGNSSMatrix leftMatrix;
+//                CGNSSMatrix rightMatrix;
+//                CGNSSMatrix outMatrix;
+//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
+//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                outMatrix = leftMatrix + rightMatrix;
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -49,21 +57,30 @@ namespace sixents
             INT32 ret = RETURN_FAIL;
             do
             {
-                if ((inLeftMatrix.matrixNum == nullptr || *(inLeftMatrix.matrixNum) == nullptr)
-                    || (inRightMatrix.matrixNum == nullptr || *(inRightMatrix.matrixNum) == nullptr)
-                    || (outMatrix.matrixNum == nullptr || *(outMatrix.matrixNum) == nullptr))
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr
+                    || outMatrixData == nullptr)
                 {
                     ret = RETURN_NULL_PTR;
+                    break;
+                }
+                if (leftRow == 0 || leftCol == 0 ||
+                    rightRow == 0 || rightCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
                 }
 
-                CGNSSMatrix mat1(inLeftMatrix);
-                CGNSSMatrix mat2(inRightMatrix);
-                CGNSSMatrix mat3(outMatrix);
-                mat3 = mat1 - mat2;
+//                CGNSSMatrix leftMatrix;
+//                CGNSSMatrix rightMatrix;
+//                CGNSSMatrix outMatrix;
+//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
+//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                outMatrix = leftMatrix + rightMatrix;
                 ret = RETURN_SUCCESS;
             } while (false);
 
-            return 0;
+            return ret;
         }
 
         INT32 CMathAppInterface::MatrixMul(const DOUBLE* leftMatrixData,
@@ -76,23 +93,33 @@ namespace sixents
                                            UINT32& outRow,
                                            UINT32& outCol)
         {
-            if (outMatrix.row != inLeftMatrix.row || outMatrix.col != inLeftMatrix.col)
+            INT32 ret = RETURN_FAIL;
+            do
             {
-                return RETURN_ERROR_PARAMETER;
-            }
-
-            CGNSSMatrix mat1(inLeftMatrix);
-            CGNSSMatrix mat2(inRightMatrix);
-            CGNSSMatrix mat3(inLeftMatrix.row, inRightMatrix.col);
-            mat3 = mat1 * mat2;
-            for (int i = 0; i < outMatrix.row; ++i)
-            {
-                for (int j = 0; j < outMatrix.col; ++j)
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr
+                    || outMatrixData == nullptr)
                 {
-                    outPutMatrix.matrixNum[i][j] = mat3.GetMatrix().matrixNum[i][j];
+                    ret = RETURN_NULL_PTR;
+                    break;
                 }
-            }
-            return 0;
+                if (leftRow == 0 || leftCol == 0 ||
+                    rightRow == 0 || rightCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+//                CGNSSMatrix leftMatrix;
+//                CGNSSMatrix rightMatrix;
+//                CGNSSMatrix outMatrix;
+//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
+//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                outMatrix = leftMatrix + rightMatrix;
+                ret = RETURN_SUCCESS;
+            } while (false);
+
+            return ret;
         }
 
         INT32 CMathAppInterface::MatrixTransposition(const DOUBLE* inMatrixData,
@@ -102,17 +129,29 @@ namespace sixents
                                                      UINT32& outRow,
                                                      UINT32& outCol)
         {
-            CGNSSMatrix mat1(matrix);
-            CGNSSMatrix mat2(matrix.col, matrix.row);
-            mat2 = mat1.MatrixTransposition(matrix);
-            for (int i = 0; i < outPutMatrix.row; i++)
+            INT32 ret = RETURN_FAIL;
+            do
             {
-                for (int j = 0; j < outPutMatrix.col; j++)
+                if (inMatrixData == nullptr || outMatrixData == nullptr)
                 {
-                    outPutMatrix.matrixNum[i][j] = mat2.GetMatrix().matrixNum[i][j];
+                    ret = RETURN_NULL_PTR;
+                    break;
                 }
-            }
-            return 0;
+                if (inRow == 0 || inCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+//                CGNSSMatrix inMatrix;
+//                CGNSSMatrix outMatrix;
+//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                inMatrix.MatrixTransposition(outMatrix);
+                ret = RETURN_SUCCESS;
+            } while (false);
+
+            return ret;
         }
 
         INT32 CMathAppInterface::MatrixInverse(const DOUBLE* inMatrixData,
@@ -122,9 +161,29 @@ namespace sixents
                                                UINT32& outRow,
                                                UINT32& outCol)
         {
-            CGNSSMatrix mat1(matrix);
-            mat1.MatrixInverse(matrix);
-            return 0;
+            INT32 ret = RETURN_FAIL;
+            do
+            {
+                if (inMatrixData == nullptr || outMatrixData == nullptr)
+                {
+                    ret = RETURN_NULL_PTR;
+                    break;
+                }
+                if (inRow == 0 || inCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+//                CGNSSMatrix inMatrix;
+//                CGNSSMatrix outMatrix;
+//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                inMatrix.MatrixInverse(outMatrix);
+                ret = RETURN_SUCCESS;
+            } while (false);
+
+            return ret;
         }
 
         INT32 CMathAppInterface::MatrixAddRowCol(const DOUBLE* inMatrixData,
@@ -134,17 +193,29 @@ namespace sixents
                                                  UINT32& outRow,
                                                  UINT32& outCol)
         {
-            CGNSSMatrix mat1(matrix);
-            CGNSSMatrix mat2(matrix.row + row, matrix.col + col);
-            mat2 = mat1.MatrixAdd(row);
-            for (int i = 0; i < outPutMatrix.row; i++)
+            INT32 ret = RETURN_FAIL;
+            do
             {
-                for (int j = 0; j < outPutMatrix.col; j++)
+                if (inMatrixData == nullptr || outMatrixData == nullptr)
                 {
-                    outPutMatrix.matrixNum[i][j] = mat2.GetMatrix().matrixNum[i][j];
+                    ret = RETURN_NULL_PTR;
+                    break;
                 }
-            }
-            return 0;
+                if (inRow == 0 || inCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+//                CGNSSMatrix inMatrix;
+//                CGNSSMatrix outMatrix;
+//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                inMatrix.MatrixInverse(outMatrix);
+                ret = RETURN_SUCCESS;
+            } while (false);
+
+            return ret;
         }
 
         INT32 CMathAppInterface::MatrixSubRowCol(const DOUBLE* inMatrixData,
@@ -154,17 +225,29 @@ namespace sixents
                                                  UINT32& outRow,
                                                  UINT32& outCol)
         {
-            CGNSSMatrix mat1(matrix);
-            CGNSSMatrix mat2(matrix.row + row, matrix.col + col);
-            mat2 = mat1.MatrixAdd(row);
-            for (int i = 0; i < outPutMatrix.row; i++)
+            INT32 ret = RETURN_FAIL;
+            do
             {
-                for (int j = 0; j < outPutMatrix.col; j++)
+                if (inMatrixData == nullptr || outMatrixData == nullptr)
                 {
-                    outPutMatrix.matrixNum[i][j] = mat2.GetMatrix().matrixNum[i][j];
+                    ret = RETURN_NULL_PTR;
+                    break;
                 }
-            }
-            return 0;
+                if (inRow == 0 || inCol == 0 ||
+                    outRow == 0 || outCol == 0) {
+                    ret = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+//                CGNSSMatrix inMatrix;
+//                CGNSSMatrix outMatrix;
+//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
+//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
+//                inMatrix.MatrixInverse(outMatrix);
+                ret = RETURN_SUCCESS;
+            } while (false);
+
+            return ret;
         }
     } // namespace GNSSMathUtilityLib
 } // namespace sixents

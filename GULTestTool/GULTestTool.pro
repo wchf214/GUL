@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     CGNSSJsonFile.cpp \
     CGNSSTextFile.cpp \
-    GULLib/GNSSMathUtilityLib/GNSSMathInterface.cpp \
+    GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.cpp \
+    GULLib/GNSSMathUtilityLib/AppIFs/GULMathAppIFs.cpp \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.cpp \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.cpp \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.cpp \
@@ -353,7 +354,8 @@ HEADERS += \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/MatrixCwiseBinaryOps.h \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
     GULLib/GNSSMathUtilityLib/GNSSCommonStruct.h \
-    GULLib/GNSSMathUtilityLib/GNSSMathInterface.h \
+    GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.h \
+    GULLib/GNSSMathUtilityLib/AppIFs/GULMathAppIFs.h \
     GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.h \
     GULLib/GNSSUtilityInterface.h \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.h \

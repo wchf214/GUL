@@ -53,8 +53,7 @@ namespace sixents
         {
             DOUBLE** m_matrixNum; // 二维数组用于存放矩阵数据
             UINT32 m_row;         // 行数
-            UINT32 m_col;         // 列数
-            UINT32 m_size;        // 二维数组大小
+            UINT32 m_col;         // 列
         };
     } // end namespace GNSSMathUtilityLib
 } // end namespace sixents

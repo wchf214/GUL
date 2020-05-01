@@ -1,5 +1,15 @@
-#ifndef _GNSS_MATH_UTILITY_INTERFACE_H_
-#define _GNSS_MATH_UTILITY_INTERFACE_H_
+/** @file          GNSSMathInterface.h
+ *  @brief         矩阵运算接口
+ *  @details       N/A
+ *  @author        pengshupan@sixens.com
+ *  @date          2020/04/24
+ *  @version       1.0
+ *  @note          N/A
+ *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
+ */
+
+#ifndef GNSS_MATH_UTILITY_INTERFACE_H_
+#define GNSS_MATH_UTILITY_INTERFACE_H_
 
 namespace sixents
 {
@@ -16,7 +26,6 @@ namespace sixents
 #define DLL_API __attribute__((visibility("default")))
 #define STD_CALL
 #endif
-#define UNREFERENCED_PARAMETER(P) (P)
 
 #ifdef __cplusplus
         extern "C" {
@@ -34,14 +43,14 @@ namespace sixents
          * @note            N/A
          */
         DLL_API int STD_CALL MatrixAdd(const double* leftMatrixData,
-                                       const int leftRow,
-                                       const int leftCol,
+                                       const unsigned int leftRow,
+                                       const unsigned int leftCol,
                                        const double* rightMatrixData,
-                                       const int rightRow,
-                                       const int rightCol,
+                                       const unsigned int rightRow,
+                                       const unsigned int rightCol,
                                        double* outMatrixData,
-                                       int& outRow,
-                                       int& outCol);
+                                       unsigned int& outRow,
+                                       unsigned int& outCol);
 
         /**
          * @brief           矩阵减法
@@ -150,7 +159,7 @@ namespace sixents
                                              int& outCol);
 
 #ifdef __cplusplus
-        }
+        }  // extern "C"
 #endif
     } // end namespace GNSSMathUtilityLib
 } // end namespace sixents

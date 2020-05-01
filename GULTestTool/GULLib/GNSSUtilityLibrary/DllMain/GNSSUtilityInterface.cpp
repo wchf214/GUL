@@ -2,7 +2,6 @@
 
 #include "GNSSUtilityInterface.h"
 #include "../AppIFs/AppInterface.h"
-#include "GNSSCommonDef.h"
 
 namespace sixents
 {
@@ -15,7 +14,7 @@ namespace sixents
                                                           char* formatString,
                                                           unsigned int& len)
         {
-            return CAppInterface::FormatWeekSecTime(static_cast<INT64>(week), sec, timeType, formatString, len);
+            return CAppInterface::FormatWeekSecTime(week, sec, timeType, formatString, len);
         }
 
         // GUL_UC_002
@@ -164,7 +163,7 @@ namespace sixents
         {
             UINT64 temp = 0;
             int ret = CAppInterface::GlonassTimeToGPSTime(year, month, day, hour, minute, second, temp, sec);
-            week = static_cast<int>(temp);
+            week = static_cast<unsigned int>(temp);
             return ret;
         }
 
