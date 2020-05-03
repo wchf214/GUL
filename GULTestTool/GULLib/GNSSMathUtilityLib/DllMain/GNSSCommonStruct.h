@@ -38,7 +38,7 @@ namespace sixents
         static const INT32 RETURN_PTR_LENGTH_ERROR = -4; // 指针长度不正确
         static const INT32 RETURN_TIME_TYPE_ERROR = -5;  // 时间类型错误
         static const INT32 RETURN_ERROR_PARAMETER = -6;  //输入的参数有误
-
+        static const INT32 RETURN_IS_NOT_SQUARE_MATRIX = -7; // 非方阵
         /**
          * @brief       矩阵结构体
          * @author      pengshupan@sixents.com

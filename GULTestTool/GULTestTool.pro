@@ -20,7 +20,6 @@ SOURCES += \
     CGNSSTextFile.cpp \
     GULLib/GNSSMathUtilityLib/AppIFs/MathAppInterface.cpp \
     GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.cpp \
-    GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.cpp \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.cpp \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.cpp \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
@@ -51,7 +50,6 @@ HEADERS += \
     CGNSSJsonFile.h \
     CGNSSTextFile.h \
     ConstantDef.h \
-    GULLib/GNSSMathInterface.h \
     GULLib/GNSSMathUtilityLib/AppIFs/MathAppInterface.h \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/Cholesky \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/CholmodSupport \
@@ -356,7 +354,6 @@ HEADERS += \
     GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/src/plugins/MatrixCwiseUnaryOps.h \
     GULLib/GNSSMathUtilityLib/DllMain/GNSSCommonStruct.h \
     GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.h \
-    GULLib/GNSSMathUtilityLib/GNSSMatrix/CGNSSMatrix.h \
     GULLib/GNSSUtilityLibrary/Angle/CGNSSAngle.h \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.h \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.h \

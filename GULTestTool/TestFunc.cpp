@@ -1821,43 +1821,48 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = srcRow;
-    srcMatrix.m_col = srcCol;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(srcRow)];    //初始化Q矩阵
-    for(int i = 0; i < srcRow; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(srcCol)]();
-    }
-    dataIdx = 0;
+    QString gulRet("GUL Result\n");
+    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+    dataIdx = 1;
+    int srcIdx = 0;
     for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+        QStringList colData = srcData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
-            srcMatrix. m_matrixNum[rowIdx][colIdx] = srcMatrixData[dataIdx];
-            ++dataIdx;
+            leftMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
+        ++dataIdx;
     }
 
-    sixents::GNSSMathUtilityLib::SGNSSMatrix destMatrix;
-    destMatrix.m_row = destRow;
-    destMatrix.m_col = destCol;
-    destMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(destRow)];    //初始化Q矩阵
-    for(int i = 0; i < destRow; ++i) {
-        destMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
-    }
-    dataIdx = 0;
+    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+    dataIdx = 1;
+    srcIdx = 0;
     for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+        QStringList colData = destData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            destMatrix.m_matrixNum[rowIdx][colIdx] = destMatrixData[dataIdx];
-            ++dataIdx;
+            rightMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
+        ++dataIdx;
     }
-//    sixents::GNSSMathUtilityLib::MatrixAdd(srcMatrix, destMatrix);
-    QString gulRet("GUL Result\n");
-    gulRet += QString::number(destMatrix.m_row) + "," + QString::number(destMatrix.m_col) + "\n";
+
+    unsigned int outRow = static_cast<unsigned int>(srcRow);
+    unsigned int outCol = static_cast<unsigned int>(destCol);
+    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+
+    sixents::GNSSMathUtilityLib::MatrixAdd(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                           outMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < destMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < destMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(destMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != destMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
                 gulRet += ",";
             }
         }
@@ -1949,44 +1954,48 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = srcRow;
-    srcMatrix.m_col = srcCol;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(srcRow)];    //初始化Q矩阵
-    for(int i = 0; i < srcRow; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(srcCol)]();
-    }
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
-        for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
-            srcMatrix. m_matrixNum[rowIdx][colIdx] = srcMatrixData[dataIdx];
-            ++dataIdx;
-        }
-    }
-
-    sixents::GNSSMathUtilityLib::SGNSSMatrix destMatrix;
-    destMatrix.m_row = destRow;
-    destMatrix.m_col = destCol;
-    destMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(destRow)];    //初始化Q矩阵
-    for(int i = 0; i < destRow; ++i) {
-        destMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
-    }
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
-        for (int colIdx = 0; colIdx < destCol; ++colIdx) {
-            destMatrix.m_matrixNum[rowIdx][colIdx] = destMatrixData[dataIdx];
-            ++dataIdx;
-        }
-    }
-//    sixents::GNSSMathUtilityLib::MatrixSub(srcMatrix, destMatrix);
     QString gulRet("GUL Result\n");
-    gulRet += QString::number(destMatrix.m_row) + "," + QString::number(destMatrix.m_col) + "\n";
+    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+    dataIdx = 1;
+    int srcIdx = 0;
+    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+        QStringList colData = srcData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+            leftMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
+        }
+        ++dataIdx;
+    }
+
+    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+    dataIdx = 1;
+    srcIdx = 0;
+    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+        QStringList colData = destData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+            rightMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
+        }
+        ++dataIdx;
+    }
+
+    unsigned int outRow = static_cast<unsigned int>(srcRow);
+    unsigned int outCol = static_cast<unsigned int>(destCol);
+    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+
+    sixents::GNSSMathUtilityLib::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                           outMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < destMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < destMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(destMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != destMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
                 gulRet += ",";
             }
         }
@@ -2034,7 +2043,7 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
         return false;
     }
     int srcRow = srcRowAndCol[0].toInt();
-    const int srcCol = srcRowAndCol[1].toInt();
+    int srcCol = srcRowAndCol[1].toInt();
 
     QStringList destData = allData[1].split("\n");
     if (destData.count() < 3) {
@@ -2048,7 +2057,7 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
         return false;
     }
     int destRow = destRowAndCol[0].toInt();
-    const int destCol = destRowAndCol[1].toInt();
+    int destCol = destRowAndCol[1].toInt();
     if (srcCol != destRow) {
         return false;
     }
@@ -2096,65 +2105,54 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
         rtkRet = rtkRet + "\n";
     }
     // 执行GUL接口
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = srcRow;
-    srcMatrix.m_col = srcCol;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(srcRow)];    //初始化Q矩阵
-    for(int i = 0; i < srcRow; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(srcCol)]();
-    }
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
-            srcMatrix.m_matrixNum[rowIdx][colIdx] = srcMatrixData[dataIdx];
-            ++dataIdx;
-        }
-    }
-
-    sixents::GNSSMathUtilityLib::SGNSSMatrix destMatrix;
-    destMatrix.m_row = destRow;
-    destMatrix.m_col = destCol;
-    destMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(destRow)];    //初始化Q矩阵
-    for(int i = 0; i < destRow; ++i) {
-        destMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
-    }
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            destMatrix.m_matrixNum[rowIdx][colIdx] = destMatrixData[dataIdx];
-            ++dataIdx;
-        }
-    }
-
-    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.m_row = srcRow;
-    outPutMatrix.m_col = destCol;
-    outPutMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(srcRow)];    //初始化Q矩阵
-    for(int i = 0; i < srcRow; ++i) {
-        outPutMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(destCol)]();
-    }
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            outPutMatrix.m_matrixNum[rowIdx][colIdx] = 0;
-
-        }
-    }
-
-//    sixents::GNSSMathUtilityLib::MatrixMul(srcMatrix, destMatrix, outPutMatrix);
-
     QString gulRet("GUL Result\n");
-    gulRet += QString::number(outPutMatrix.m_row) + "," + QString::number(outPutMatrix.m_col) + "\n";
+    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+    dataIdx = 1;
+    int srcIdx = 0;
+    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+        QStringList colData = srcData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+            leftMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
+        }
+        ++dataIdx;
+    }
+
+    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+    dataIdx = 1;
+    srcIdx = 0;
+    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+        QStringList colData = destData[dataIdx].split(",");
+        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+            rightMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
+        }
+        ++dataIdx;
+    }
+
+    unsigned int outRow = static_cast<unsigned int>(srcRow);
+    unsigned int outCol = static_cast<unsigned int>(destCol);
+    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+
+    sixents::GNSSMathUtilityLib::MatrixMul(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                           outMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < outPutMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < outPutMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(outPutMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != outPutMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
                 gulRet += ",";
             }
         }
         gulRet = gulRet + "\n";
     }
+
     // 写文件
     result = rtkRet + "\n" + gulRet;
     QDateTime curDateTime =QDateTime::currentDateTime();
@@ -2196,46 +2194,35 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = row;
-    srcMatrix.m_col = col;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
-    for(int i = 0; i < row; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
-    }
+    QString gulRet("GUL Result\n");
+    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
 
     int dataIdx = 1;
+    int srcIdx = 0;
     for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
         QStringList colData = allData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix.m_matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+            srcMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
         ++dataIdx;
     }
 
-    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.m_row = col;
-    outPutMatrix.m_col = row;
-    outPutMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(col)];    //初始化Q矩阵
-    for(int i = 0; i < col; ++i) {
-        outPutMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(row)]();
-    }
+    unsigned int outRow = static_cast<unsigned int>(col);
+    unsigned int outCol = static_cast<unsigned int>(row);
+    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
+    sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                                     destMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < col; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < row; ++ colIdx) {
-            outPutMatrix.m_matrixNum[rowIdx][colIdx] = 0;
-        }
-    }
-
-    QString gulRet("GUL Result\n");
-//    sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix,outPutMatrix);
-    gulRet += QString::number(outPutMatrix.m_row) + "," + QString::number(outPutMatrix.m_col) + "\n";
-    dataIdx = 0;
-    for (int rIdx = 0; rIdx < outPutMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < outPutMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(outPutMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != outPutMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
                 gulRet += ",";
             }
         }
@@ -2311,31 +2298,33 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     }
     // 执行GUL接口
     QString gulRet("GUL Result\n");
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = row;
-    srcMatrix.m_col = col;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
-    for(int i = 0; i < row; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
-    }
-
+    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
 
     dataIdx = 1;
+    int srcIdx = 0;
     for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
         QStringList colData = allData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix.m_matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+            srcMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
         ++dataIdx;
     }
 
-//    sixents::GNSSMathUtilityLib::MatrixInverse(srcMatrix);
-    gulRet += QString::number(srcMatrix.m_row) + "," + QString::number(srcMatrix.m_col) + "\n";
+    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+    memset(destMatrix, 0, static_cast<unsigned long long>(row*col));
+    unsigned int outRow = static_cast<unsigned int>(row);
+    unsigned int outCol = static_cast<unsigned int>(col);
+    sixents::GNSSMathUtilityLib::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                               destMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < srcMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < srcMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(srcMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != srcMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != outCol - 1) {
                 gulRet += ",";
             }
         }
@@ -2396,45 +2385,34 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
     QString gulRet("GUL Result\n");
-
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = row;
-    srcMatrix.m_col = col;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
-    for(int i = 0; i < row; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
-    }
+    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
 
     int dataIdx = 1;
+    int srcIdx = 0;
     for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
         QStringList colData = allData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix.m_matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+            srcMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
         ++dataIdx;
     }
-    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.m_row = srcMatrix.m_row + addRow;
-    outPutMatrix.m_col = srcMatrix.m_col + addCol;
-    outPutMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.m_row)];    //初始化Q矩阵
-    for(int i = 0; i < outPutMatrix.m_row; ++i) {
-        outPutMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.m_col)]();
-    }
 
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < outPutMatrix.m_row; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < outPutMatrix.m_col; ++ colIdx) {
-            outPutMatrix.m_matrixNum[rowIdx][colIdx] = 0;
-        }
-    }
+    unsigned int outRow = static_cast<unsigned int>(row + addRow);
+    unsigned int outCol = static_cast<unsigned int>(col + addCol);
+    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-//    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix, addRow, addCol, outPutMatrix);
-    gulRet += QString::number(outPutMatrix.m_row) + "," + QString::number(outPutMatrix.m_col) + "\n";
+    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                                 destMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rIdx = 0; rIdx < outPutMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < outPutMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(outPutMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != outPutMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != outCol - 1) {
                 gulRet += ",";
             }
         }
@@ -2489,51 +2467,39 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
         return false;
     }
     int row = rowAndCol[0].toInt();
-    const int col = rowAndCol[1].toInt();
+    int col = rowAndCol[1].toInt();
 
     // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
     // 执行GUL接口
     QString gulRet("GUL Result\n");
-    sixents::GNSSMathUtilityLib::SGNSSMatrix srcMatrix;
-    srcMatrix.m_row = row;
-    srcMatrix.m_col = col;
-    srcMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(row)];    //初始化Q矩阵
-    for(int i = 0; i < row; ++i) {
-        srcMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(col)]();
-    }
-
+    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
 
     int dataIdx = 1;
+    int srcIdx = 0;
     for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
         QStringList colData = allData[dataIdx].split(",");
         for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix.m_matrixNum[rowIdx][colIdx] = colData[colIdx].toDouble();
+            srcMatrix[srcIdx] = colData[colIdx].toDouble();
+            ++ srcIdx;
         }
         ++dataIdx;
     }
+    unsigned int outRow = static_cast<unsigned int>(row - subRow);
+    unsigned int outCol = static_cast<unsigned int>(col - subCol);
+    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::SGNSSMatrix outPutMatrix;
-    outPutMatrix.m_row = srcMatrix.m_row - subRow;
-    outPutMatrix.m_col = srcMatrix.m_col - subCol;
-    outPutMatrix.m_matrixNum = new double*[static_cast<unsigned long long>(outPutMatrix.m_row)];    //初始化Q矩阵
-    for(int i = 0; i < outPutMatrix.m_row; ++i) {
-        outPutMatrix.m_matrixNum[i] = new double[static_cast<unsigned long long>(outPutMatrix.m_col)]();
-    }
+    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                                 destMatrix, outRow, outCol);
+    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < outPutMatrix.m_row; ++ rowIdx) {
-        for (int colIdx = 0; colIdx < outPutMatrix.m_col; ++ colIdx) {
-            outPutMatrix.m_matrixNum[rowIdx][colIdx] = 0;
-        }
-    }
-
-//    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix, subRow, subCol, outPutMatrix);
-    gulRet += QString::number(outPutMatrix.m_row) + "," + QString::number(outPutMatrix.m_col) + "\n";
-    dataIdx = 0;
-    for (int rIdx = 0; rIdx < outPutMatrix.m_row; ++rIdx) {
-        for (int cIdx = 0; cIdx < outPutMatrix.m_col; ++cIdx) {
-            gulRet += QString::number(outPutMatrix.m_matrixNum[rIdx][cIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != outPutMatrix.m_col - 1) {
+    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+            ++dataIdx;
+            if (cIdx != outCol - 1) {
                 gulRet += ",";
             }
         }

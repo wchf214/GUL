@@ -8,6 +8,7 @@ namespace sixents
     {
         CGNSSCoord::CGNSSCoord(const DOUBLE x, const DOUBLE y, const DOUBLE z, const INT32 coordType)
         {
+            UNREFERENCED_PARAMETER(coordType);
             m_geoCoord.m_lon = x;
             m_geoCoord.m_lat = y;
             m_geoCoord.m_height = z;

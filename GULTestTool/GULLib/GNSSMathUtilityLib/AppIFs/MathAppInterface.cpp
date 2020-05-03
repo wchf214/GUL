@@ -1,5 +1,5 @@
 #include "MathAppInterface.h"
-//#include "../GNSSMatrix/CGNSSMatrix.h"
+#include "../Eigen/eigen-eigen-323c052e1731/Eigen/Dense"
 
 namespace sixents
 {
@@ -26,18 +26,20 @@ namespace sixents
                 }
                 if (leftRow == 0 || leftCol == 0 ||
                     rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    leftRow != rightRow || leftCol != rightCol ||
+                    outRow != leftRow || outCol != leftCol)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-//                CGNSSMatrix leftMatrix;
-//                CGNSSMatrix rightMatrix;
-//                CGNSSMatrix outMatrix;
-//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
-//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                outMatrix = leftMatrix + rightMatrix;
+                outRow = leftRow;
+                outCol = leftCol;
+                for (UINT32 dataIdx = 0; dataIdx < leftRow * leftCol; ++dataIdx)
+                {
+                    outMatrixData[dataIdx] = leftMatrixData[dataIdx] + rightMatrixData[dataIdx];
+                }
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -65,18 +67,18 @@ namespace sixents
                 }
                 if (leftRow == 0 || leftCol == 0 ||
                     rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    leftRow != rightRow || leftCol != rightCol)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
-
-//                CGNSSMatrix leftMatrix;
-//                CGNSSMatrix rightMatrix;
-//                CGNSSMatrix outMatrix;
-//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
-//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                outMatrix = leftMatrix + rightMatrix;
+                outRow = leftRow;
+                outCol = leftCol;
+                for (UINT32 dataIdx = 0; dataIdx < leftRow * leftCol; ++dataIdx)
+                {
+                    outMatrixData[dataIdx] = leftMatrixData[dataIdx] - rightMatrixData[dataIdx];
+                }
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -102,20 +104,28 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
+
                 if (leftRow == 0 || leftCol == 0 ||
                     rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    leftCol != rightRow || outRow != leftRow ||
+                    outCol != rightCol)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-//                CGNSSMatrix leftMatrix;
-//                CGNSSMatrix rightMatrix;
-//                CGNSSMatrix outMatrix;
-//                leftMatrix.setMatrix(leftMatrixData, leftRow, leftCol);
-//                rightMatrix.setMatrix(rightMatrixData, rightRow, rightCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                outMatrix = leftMatrix + rightMatrix;
+                // 分配被乘数
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        leftMtx(const_cast<DOUBLE*>(leftMatrixData), leftRow, leftCol);
+                // 分配乘数
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        rightMtx(const_cast<DOUBLE*>(rightMatrixData), rightRow, rightCol);
+                // 分配结果
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        retMtx(outMatrixData, outRow, outCol);
+                retMtx = leftMtx * rightMtx;
+
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -138,16 +148,19 @@ namespace sixents
                     break;
                 }
                 if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    inRow != outCol || inCol != outRow)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-//                CGNSSMatrix inMatrix;
-//                CGNSSMatrix outMatrix;
-//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                inMatrix.MatrixTransposition(outMatrix);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        outMtx(outMatrixData, outRow, outCol);
+                outMtx = inMtx.transpose();
+
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -169,17 +182,26 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
+                if (inRow != inCol || outRow != outCol)
+                {
+                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
+                    break;
+                }
                 if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    inRow != outRow || inCol != outCol)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
+                // 判断行列式是否为0，是为0就返回
 
-//                CGNSSMatrix inMatrix;
-//                CGNSSMatrix outMatrix;
-//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                inMatrix.MatrixInverse(outMatrix);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        outMtx(outMatrixData, outRow, outCol);
+                outMtx = inMtx.inverse();
+
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -201,17 +223,41 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
+
+                // 根据需求，当前仅支持方阵
+                if (inRow != inCol || outRow != outCol)
+                {
+                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
+                    break;
+                }
+
                 if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    outRow - inRow <= 0 || outCol - inCol <= 0)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-//                CGNSSMatrix inMatrix;
-//                CGNSSMatrix outMatrix;
-//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                inMatrix.MatrixInverse(outMatrix);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        outMtx(outMatrixData, outRow, outCol);
+
+                for (UINT32 rowIdx = 0; rowIdx < outRow; ++rowIdx)
+                {
+                    for (UINT32 colIdx = 0; colIdx < outCol; ++colIdx)
+                    {
+                        if (colIdx < inCol && rowIdx < inRow)
+                        {
+                            outMtx.row(rowIdx).col(colIdx) << inMtx.row(rowIdx).col(colIdx);
+                        }
+                        else
+                        {
+                            outMtx.row(rowIdx).col(colIdx) << 0;
+                        }
+                    }
+                }
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -233,17 +279,25 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
+
+                // 根据需求，当前仅支持方阵
+                if (inRow != inCol || outRow != outCol) {
+                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
+                    break;
+                }
+
                 if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0) {
+                    outRow == 0 || outCol == 0 ||
+                    outRow > inRow || outCol > inCol) {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-//                CGNSSMatrix inMatrix;
-//                CGNSSMatrix outMatrix;
-//                inMatrix.setMatrix(inMatrixData, inRow, inCol);
-//                outMatrix.setMatrix(outMatrixData, outRow, outCol);
-//                inMatrix.MatrixInverse(outMatrix);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                        outMtx(outMatrixData, outRow, outCol);
+                outMtx = inMtx.block(0, 0, outRow, outCol);
                 ret = RETURN_SUCCESS;
             } while (false);
 
