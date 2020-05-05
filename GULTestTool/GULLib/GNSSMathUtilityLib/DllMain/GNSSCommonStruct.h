@@ -39,21 +39,6 @@ namespace sixents
         static const INT32 RETURN_TIME_TYPE_ERROR = -5;  // 时间类型错误
         static const INT32 RETURN_ERROR_PARAMETER = -6;  //输入的参数有误
         static const INT32 RETURN_IS_NOT_SQUARE_MATRIX = -7; // 非方阵
-        /**
-         * @brief       矩阵结构体
-         * @author      pengshupan@sixents.com
-         * @param[in]   N/A
-         * @param[out]  N/A
-         * @exception   N/A
-         * @return      N/A
-         * @retval      N/A
-         * @note        N/A
-         */
-        struct SGNSSMatrix
-        {
-            DOUBLE** m_matrixNum; // 二维数组用于存放矩阵数据
-            UINT32 m_row;         // 行数
-            UINT32 m_col;         // 列
-        };
+
     } // end namespace GNSSMathUtilityLib
 } // end namespace sixents

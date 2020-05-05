@@ -9,8 +9,8 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _IGNSS_TIME_H
-#define _IGNSS_TIME_H
+#ifndef IGNSS_TIME_H
+#define IGNSS_TIME_H
 
 #include <string>
 
