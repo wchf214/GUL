@@ -15,7 +15,7 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
 
         CGlonassTime::CGlonassTime(const TIME_TYPE timeType)
@@ -82,5 +82,5 @@ namespace sixents
             time = std::move(m_time);
         }
 
-    } // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents

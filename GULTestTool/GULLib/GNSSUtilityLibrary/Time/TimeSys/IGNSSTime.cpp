@@ -2,7 +2,7 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         IGNSSTime::IGNSSTime(const TIME_TYPE timeType)
         {
@@ -148,5 +148,5 @@ namespace sixents
             stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week) * WEEK_SEC;
             return RETURN_SUCCESS;
         }
-    } // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents

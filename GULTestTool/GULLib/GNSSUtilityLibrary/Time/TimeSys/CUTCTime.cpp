@@ -14,7 +14,7 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         CUTCTime::CUTCTime(const TIME_TYPE timeType)
             :IGNSSTime(timeType)
@@ -80,5 +80,5 @@ namespace sixents
         }
 
         // end class IGNSSTime
-    } // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents

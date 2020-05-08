@@ -8,14 +8,14 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _CTIME_FACTORY_H
-#define _CTIME_FACTORY_H
+#ifndef CTIME_FACTORY_H
+#define CTIME_FACTORY_H
 
 #include "IGNSSTime.h"
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         /**
          *  @class       CTimeFactory
@@ -29,7 +29,7 @@ namespace sixents
             /**
              * @brief          创建时间对象函数
              * @author         wuchuanfei@sixents.com
-             * @param[in]      timeType: 时间类型
+             * @param[in]      timeType             时间类型
              * @param[out]     N/A
              * @exception      N/A
              * @return         创建成功的时间对象指针
@@ -37,7 +37,7 @@ namespace sixents
              */
             static IGNSSTime* CreateTimeObj(const TIME_TYPE timeType);
         };
-    } // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents
 
 #endif

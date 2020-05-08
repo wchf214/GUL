@@ -2,10 +2,11 @@
 
 #include "GNSSUtilityInterface.h"
 #include "../AppIFs/AppInterface.h"
+#include "GNSSCommonDef.h"
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         // GUL_UC_001 GUL_UC_003 GUL_UC_004
         extern "C" DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
@@ -14,7 +15,7 @@ namespace sixents
                                                           char* formatString,
                                                           unsigned int& len)
         {
-            return CAppInterface::FormatWeekSecTime(week, sec, timeType, formatString, len);
+            return CAppInterface::FormatWeekSecTime(static_cast<UINT64>(week), sec, timeType, formatString, len);
         }
 
         // GUL_UC_002
@@ -41,7 +42,8 @@ namespace sixents
                                                           unsigned int& minute,
                                                           double& second)
         {
-            return CAppInterface::GNSSTimeToUTCTime(week, sec, timeType, year, month, day, hour, minute, second);
+            return CAppInterface::GNSSTimeToStandardTime(
+                static_cast<UINT64>(week), sec, timeType, UTC, year, month, day, hour, minute, second);
         }
 
         // GUL_UC_006
@@ -58,18 +60,20 @@ namespace sixents
                                                              unsigned int& utcMinute,
                                                              double& utcSecond)
         {
-            return CAppInterface::GlonassTimeToUTCTime(gloYear,
-                                                       gloMonth,
-                                                       gloDay,
-                                                       gloHour,
-                                                       gloMinute,
-                                                       gloSecond,
-                                                       utcYear,
-                                                       utcMonth,
-                                                       utcDay,
-                                                       utcHour,
-                                                       utcMinute,
-                                                       utcSecond);
+            return CAppInterface::StandardTimeConvert(gloYear,
+                                                      gloMonth,
+                                                      gloDay,
+                                                      gloHour,
+                                                      gloMinute,
+                                                      gloSecond,
+                                                      GLONASS,
+                                                      UTC,
+                                                      utcYear,
+                                                      utcMonth,
+                                                      utcDay,
+                                                      utcHour,
+                                                      utcMinute,
+                                                      utcSecond);
         }
 
         // GUL_UC_009 GUL_UC_011 GUL_UC_012
@@ -84,21 +88,10 @@ namespace sixents
                                                           double& sec)
         {
             UINT64 weekNum = 0;
-            int ret = CAppInterface::UTCTimeToGNSSTime(year, month, day, hour, minute, second, timeType, weekNum, sec);
+            int ret = CAppInterface::StandardTimeToGNSSTime(
+                year, month, day, hour, minute, second, timeType, UTC, weekNum, sec);
             week = static_cast<unsigned int>(weekNum);
             return ret;
-        }
-
-        extern "C" DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
-                                                             const unsigned int month,
-                                                             const unsigned int day,
-                                                             const unsigned int hour,
-                                                             const unsigned int minute,
-                                                             const double second,
-                                                             const unsigned int timeType,
-                                                             double& sec)
-        {
-            return CAppInterface::UTCTimeToGNSSSecTime(year, month, day, hour, minute, second, timeType, sec);
         }
 
         extern "C" int STD_CALL WeekSecToSec(const unsigned int week,
@@ -106,7 +99,7 @@ namespace sixents
                                              const unsigned int timeType,
                                              double& sec)
         {
-            return CAppInterface::WeekSecToSec(week, second, timeType, sec);
+            return CAppInterface::WeekSecToSec(static_cast<UINT64>(week), second, timeType, sec);
         }
 
         // GUL_UC_010
@@ -123,18 +116,20 @@ namespace sixents
                                                              unsigned int& gloMinute,
                                                              double& gloSecond)
         {
-            return CAppInterface::UTCTimeToGlonassTime(utcYear,
-                                                       utcMonth,
-                                                       utcDay,
-                                                       utcHour,
-                                                       utcMinute,
-                                                       utcSecond,
-                                                       gloYear,
-                                                       gloMonth,
-                                                       gloDay,
-                                                       gloHour,
-                                                       gloMinute,
-                                                       gloSecond);
+            return CAppInterface::StandardTimeConvert(utcYear,
+                                                      utcMonth,
+                                                      utcDay,
+                                                      utcHour,
+                                                      utcMinute,
+                                                      utcSecond,
+                                                      UTC,
+                                                      GLONASS,
+                                                      gloYear,
+                                                      gloMonth,
+                                                      gloDay,
+                                                      gloHour,
+                                                      gloMinute,
+                                                      gloSecond);
         }
 
         // GUL_UC_013  GUL_UC_015 GUL_UC_016  GUL_UC_018
@@ -146,7 +141,8 @@ namespace sixents
                                                         const unsigned int destTimeType)
         {
             UINT64 temp = 0;
-            int ret = CAppInterface::GNSSTimeConvert(srcWeek, srcSec, srcTimeType, temp, destSec, destTimeType);
+            int ret = CAppInterface::GNSSTimeConvert(
+                static_cast<UINT64>(srcWeek), srcSec, srcTimeType, temp, destSec, destTimeType);
             destWeek = static_cast<unsigned int>(temp);
             return ret;
         }
@@ -162,7 +158,8 @@ namespace sixents
                                                              double& sec)
         {
             UINT64 temp = 0;
-            int ret = CAppInterface::GlonassTimeToGPSTime(year, month, day, hour, minute, second, temp, sec);
+            int ret =
+                CAppInterface::StandardTimeToGNSSTime(year, month, day, hour, minute, second, GPS, GLONASS, temp, sec);
             week = static_cast<unsigned int>(temp);
             return ret;
         }
@@ -177,7 +174,8 @@ namespace sixents
                                                              unsigned int& minute,
                                                              double& sec)
         {
-            return CAppInterface::GPSTimeToGlonassTime(week, second, year, month, day, hour, minute, sec);
+            return CAppInterface::GNSSTimeToStandardTime(
+                static_cast<UINT64>(week), second, GPS, GLONASS, year, month, day, hour, minute, sec);
         }
 
         extern "C" DLL_API int STD_CALL
@@ -251,7 +249,7 @@ namespace sixents
         }
 
         extern "C" DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                                         const int minute,
+                                                         const unsigned int minute,
                                                          const double sec,
                                                          char* formatString,
                                                          unsigned int& len,
@@ -265,7 +263,10 @@ namespace sixents
             return CAppInterface::Deg2Rad(degree, radian);
         }
 
-        extern "C" DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian)
+        extern "C" DLL_API int STD_CALL DMS2Rad(const int degree,
+                                                const unsigned int minute,
+                                                const double sec,
+                                                double& radian)
         {
             return CAppInterface::DMS2Rad(degree, minute, sec, radian);
         }
@@ -275,9 +276,9 @@ namespace sixents
             return CAppInterface::Rad2Deg(radian, degree);
         }
 
-        extern "C" DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec)
+        extern "C" DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, unsigned int& minute, double& sec)
         {
             return CAppInterface::Rad2DMS(radian, degree, minute, sec);
         }
-    } // namespace GNSSUtilityLib
+    } // namespace Math
 } // namespace sixents

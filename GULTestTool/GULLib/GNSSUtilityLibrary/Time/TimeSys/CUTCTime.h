@@ -8,14 +8,14 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _CUTC_TIME_H
-#define _CUTC_TIME_H
+#ifndef CUTC_TIME_H
+#define CUTC_TIME_H
 
 #include "IGNSSTime.h"
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         /**
          *  @class       CUTCTime
@@ -29,7 +29,7 @@ namespace sixents
             /**
              * @brief          构造函数
              * @author         wuchuanfei@sixents.com
-             * @param[in]      timeType: 时间类型,UTC
+             * @param[in]      timeType         时间类型,UTC
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -52,7 +52,7 @@ namespace sixents
              * @brief          以年月日时分秒格式对时间进行格式化的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     formatString: 格式化后的字符串
+             * @param[out]     formatString         格式化后的字符串
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -74,7 +74,7 @@ namespace sixents
              * @brief          当前时间转为小数形式的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -85,7 +85,7 @@ namespace sixents
              * @brief          把时间转为标准时间结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -106,7 +106,7 @@ namespace sixents
             /**
              * @brief          设置小数形式的时间到对象的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 时间数据
+             * @param[in]      time         时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -118,7 +118,7 @@ namespace sixents
              * @brief          从对象中获取小数形式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 小数形式的时间数据
+             * @param[out]     time         小数形式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -128,7 +128,7 @@ namespace sixents
             /**
              * @brief          以标准时间格式设置时间的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 标准时间格式的时间数据
+             * @param[in]      time         标准时间格式的时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -140,7 +140,7 @@ namespace sixents
              * @brief          从对象中获取标准时间格式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 标准时间格式的时间数据
+             * @param[out]     time         标准时间格式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -148,10 +148,10 @@ namespace sixents
             virtual void GetTime(SStandardTime& time) override;
 
         private:
-            SStandardTime m_time; /*以年月日时分秒格式表示的时间，与m_sec的数值可互转*/
-            DOUBLE m_sec;         /* 以秒格式表示的时间 */
+            SStandardTime m_time; ///< 以年月日时分秒格式表示的时间，与m_sec的数值可互转
+            DOUBLE m_sec;         ///< 以秒格式表示的时间
         };                        // end class CUTCTime
-    }                             // end namespace GNSSUtilityLib
+    }                             // end namespace Math
 } // end namespace sixents
 
 #endif

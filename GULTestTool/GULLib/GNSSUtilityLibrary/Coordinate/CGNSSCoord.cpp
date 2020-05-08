@@ -4,194 +4,253 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
-        CGNSSCoord::CGNSSCoord(const DOUBLE x, const DOUBLE y, const DOUBLE z, const INT32 coordType)
+        CGNSSCoordinate::CGNSSCoordinate(const DOUBLE x,
+                                         const DOUBLE y,
+                                         const DOUBLE z,
+                                         const COORDINATE_TYPE coordinateType)
         {
-            UNREFERENCED_PARAMETER(coordType);
-            m_geoCoord.m_lon = x;
-            m_geoCoord.m_lat = y;
-            m_geoCoord.m_height = z;
-        }
-
-        void CGNSSCoord::SetCoordData()
-        {
-            m_CoordData.insert(std::make_pair(WGS84, WGS84_DATA));
-            m_CoordData.insert(std::make_pair(PZ90, PZ90_DATA));
-            m_CoordData.insert(std::make_pair(ITRF96, ITRF96_DATA));
-            m_CoordData.insert(std::make_pair(CGCS2000, CGCS2000_DATA));
-        }
-
-        void CGNSSCoord::SetXYZ(const SXYZ& coord)
-        {
-            m_spaceCoord.m_x = coord.m_x;
-            m_spaceCoord.m_y = coord.m_y;
-            m_spaceCoord.m_z = coord.m_z;
-        }
-
-        SXYZ CGNSSCoord::GetXYZ()
-        {
-            return m_spaceCoord;
-        }
-
-        void CGNSSCoord::SetBLH(const SBLH& coord)
-        {
-            m_geoCoord.m_lat = coord.m_lat;
-            m_geoCoord.m_lon = coord.m_lon;
-            m_geoCoord.m_height = coord.m_height;
-        }
-
-        SBLH CGNSSCoord::GetBLH()
-        {
-            return m_geoCoord;
-        }
-
-        void CGNSSCoord::SetENU(const SENU& coord)
-        {
-            m_stationCoord.m_east = coord.m_east;
-            m_stationCoord.m_north = coord.m_north;
-            m_stationCoord.m_up = coord.m_up;
-        }
-
-        SENU CGNSSCoord::GetENU()
-        {
-            return m_stationCoord;
-        }
-
-        DOUBLE CGNSSCoord::CalcLat(DOUBLE X, DOUBLE Y, DOUBLE Z)
-        {
-            DOUBLE b1, b2, N;
-            b2 = atan(Z / sqrt(X * X + Y * Y));
-            while (1)
+            if (coordinateType == BLH)
             {
-                b1 = b2;
-                N = EARTH_LONG_RADIUS / sqrt(1 - E2 * sin(b1) * sin(b1));
-                b2 = atan((Z + N * E2 * sin(b1)) / sqrt(X * X + Y * Y));
-                if (fabs(b2 - b1) < LAT_ACCURACY)
-                    break;
+                m_geoCoordinate.m_lat = x;
+                m_geoCoordinate.m_lon = y;
+                m_geoCoordinate.m_height = z;
+                BLH2XYZ(m_geoCoordinate.m_lat,
+                        m_geoCoordinate.m_lon,
+                        m_geoCoordinate.m_height,
+                        m_spaceCoordinate.m_x,
+                        m_spaceCoordinate.m_y,
+                        m_spaceCoordinate.m_z,
+                        WGS84);
             }
-            return b2;
+            else if (coordinateType == XYZ)
+            {
+                m_spaceCoordinate.m_x = x;
+                m_spaceCoordinate.m_y = y;
+                m_spaceCoordinate.m_z = z;
+                XYZ2BLH(m_spaceCoordinate.m_x,
+                        m_spaceCoordinate.m_y,
+                        m_spaceCoordinate.m_z,
+                        m_geoCoordinate.m_lat,
+                        m_geoCoordinate.m_lon,
+                        m_geoCoordinate.m_height,
+                        WGS84);
+            }
+            else
+            {
+                m_geoCoordinate.m_lat = 0;
+                m_geoCoordinate.m_lon = 0;
+                m_geoCoordinate.m_height = 0;
+                m_spaceCoordinate.m_x = 0;
+                m_spaceCoordinate.m_y = 0;
+                m_spaceCoordinate.m_z = 0;
+            }
+            m_stationCoordinate.m_east = 0;
+            m_stationCoordinate.m_north = 0;
+            m_stationCoordinate.m_up = 0;
+            InitCoordinateData();
         }
 
-        INT32 CGNSSCoord::BLH2XYZ(
-            const DOUBLE lat, const DOUBLE lon, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z, INT32 i)
+        void CGNSSCoordinate::InitCoordinateData()
         {
-            DOUBLE RE_WGS84 = 6378137.0;             /* earth semimajor axis (WGS84) (m) */
-            DOUBLE FE_WGS84 = (1.0 / 298.257223563); /* earth flattening (WGS84) */
-            CGNSSAngle c(0, true);
-            DOUBLE latrad = 0;
-            c.DegToRad(lat, latrad);
-            DOUBLE lonrad = 0;
-            c.DegToRad(lon, lonrad);
-            do
+            m_CoordinateData.clear();
+            m_CoordinateData.insert(std::make_pair(WGS84, WGS84_DATA));
+            m_CoordinateData.insert(std::make_pair(PZ90, PZ90_DATA));
+            m_CoordinateData.insert(std::make_pair(ITRF96, ITRF96_DATA));
+            m_CoordinateData.insert(std::make_pair(CGCS2000, CGCS2000_DATA));
+        }
+
+        void CGNSSCoordinate::SetXYZ(const SXYZ& coordinate)
+        {
+            m_spaceCoordinate.m_x = coordinate.m_x;
+            m_spaceCoordinate.m_y = coordinate.m_y;
+            m_spaceCoordinate.m_z = coordinate.m_z;
+            XYZ2BLH(m_spaceCoordinate.m_x,
+                    m_spaceCoordinate.m_y,
+                    m_spaceCoordinate.m_z,
+                    m_geoCoordinate.m_lat,
+                    m_geoCoordinate.m_lon,
+                    m_geoCoordinate.m_height,
+                    WGS84);
+        }
+
+        SXYZ CGNSSCoordinate::GetXYZ() const
+        {
+            return m_spaceCoordinate;
+        }
+
+        void CGNSSCoordinate::SetBLH(const SBLH& coordinate)
+        {
+            m_geoCoordinate.m_lat = coordinate.m_lat;
+            m_geoCoordinate.m_lon = coordinate.m_lon;
+            m_geoCoordinate.m_height = coordinate.m_height;
+            BLH2XYZ(m_geoCoordinate.m_lat,
+                    m_geoCoordinate.m_lon,
+                    m_geoCoordinate.m_height,
+                    m_spaceCoordinate.m_x,
+                    m_spaceCoordinate.m_y,
+                    m_spaceCoordinate.m_z,
+                    WGS84);
+        }
+
+        SBLH CGNSSCoordinate::GetBLH() const
+        {
+            return m_geoCoordinate;
+        }
+
+        //形参
+        DOUBLE CGNSSCoordinate::CalcLat(DOUBLE x, DOUBLE y, DOUBLE z, const COORDINATE_SYS_TYPE coordinateFrame) const
+        {
+            //利用迭代法计算纬度
+            DOUBLE tempLat1 = 0;
+            DOUBLE tempLat2 = 0;
+
+            //计算第一偏心率e2，公式 2 * f - f * f
+            DOUBLE e2 = m_CoordinateData.at(coordinateFrame).m_f * (NUM_TWO - m_CoordinateData.at(coordinateFrame).m_f);
+
+            //卯酉圈曲率半径N
+            DOUBLE N = 0;
+
+            tempLat2 = atan(z / sqrt(x * x + y * y));
+            //不断的迭代，直到计算出的纬度的精度达到要求退出循环
+            while (true)
             {
-                DOUBLE sinLat = sin(latrad);
-                DOUBLE cosLat = cos(latrad);
-                DOUBLE sinLon = sin(lonrad);
-                DOUBLE cosLon = cos(lonrad);
-                DOUBLE e2 = FE_WGS84 * (2.0 - FE_WGS84);
-                DOUBLE N = RE_WGS84 / sqrt(1.0 - e2 * sinLat * sinLat);
-                x = (N + height) * cosLat * cosLon;
-                y = (N + height) * cosLat * sinLon;
-                z = (N * (1.0 - e2) + height) * sinLat;
-            } while (false);
+                tempLat1 = tempLat2;
+                //计算代表卯酉圈曲率半径N，公式 a / Sqrt(1 - e2 * sinB * sinB)
+                // m_a代表不同坐标框架下的长半轴a
+                N = m_CoordinateData.at(coordinateFrame).m_a / sqrt(NUM_ONE - e2 * sin(tempLat1) * sin(tempLat1));
+                tempLat2 = atan((z + N * e2 * sin(tempLat1)) / sqrt(x * x + y * y));
+                if (fabs(tempLat2 - tempLat1) < LAT_ACCURACY)
+                {
+                    break;
+                }
+            }
+            return tempLat2;
+        }
+
+        INT32 CGNSSCoordinate::BLH2XYZ(const DOUBLE lat,
+                                       const DOUBLE lon,
+                                       const DOUBLE height,
+                                       DOUBLE& x,
+                                       DOUBLE& y,
+                                       DOUBLE& z,
+                                       const COORDINATE_SYS_TYPE coordinateFrame)
+        {
+            //数据转换
+            const DOUBLE sinLat = sin(lat * D2R);
+            const DOUBLE cosLat = cos(lat * D2R);
+            const DOUBLE sinLon = sin(lon * D2R);
+            const DOUBLE cosLon = cos(lon * D2R);
+
+            //计算第一偏心率e2，公式 2 * f - f * f
+            DOUBLE e2 = m_CoordinateData.at(coordinateFrame).m_f * (NUM_TWO - m_CoordinateData.at(coordinateFrame).m_f);
+
+            //计算代表卯酉圈曲率半径N，公式 a / Sqrt(1 - e2 * sinB * sinB)
+            DOUBLE N = m_CoordinateData.at(coordinateFrame).m_a / sqrt(NUM_ONE - e2 * sinLat * sinLat);
+
+            x = (N + height) * cosLat * cosLon;
+            y = (N + height) * cosLat * sinLon;
+            z = (N * (NUM_ONE - e2) + height) * sinLat;
             return RETURN_SUCCESS;
         }
 
-        INT32 CGNSSCoord::XYZ2BLH(
-            const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lat, DOUBLE& lon, DOUBLE& height, INT32 i)
+        INT32 CGNSSCoordinate::XYZ2BLH(const DOUBLE x,
+                                       const DOUBLE y,
+                                       const DOUBLE z,
+                                       DOUBLE& lat,
+                                       DOUBLE& lon,
+                                       DOUBLE& height,
+                                       const COORDINATE_SYS_TYPE coordinateFrame)
         {
-            UNREFERENCED_PARAMETER(i);
-            do
+            //计算第一偏心率e2，公式 2 * f - f * f
+            DOUBLE e2 = m_CoordinateData.at(coordinateFrame).m_f * (NUM_TWO - m_CoordinateData.at(coordinateFrame).m_f);
+
+            //计算经度，单位弧度
+            lon = atan(y / x);
+            //计算纬度，单位弧度
+            lat = CalcLat(x, y, z, coordinateFrame);
+            //计算代表卯酉圈曲率半径N，公式 a / Sqrt(1 - e2 * sinB * sinB)
+            DOUBLE N = m_CoordinateData.at(coordinateFrame).m_a / sqrt(NUM_ONE - e2 * sin(lat) * sin(lat));
+            //计算高程
+            height = sqrt(x * x + y * y) / cos(lat) - N;
+            //弧度转换为角度
+            lon = lon * R2D;
+            lat = lat * R2D;
+            if (lat < 0)
             {
-                DOUBLE N = 0;
-                lon = atan(y / x);
-                lat = CalcLat(x, y, z);
-                N = 6378137 / sqrt(1 - E2 * sin(lat) * sin(lat));
-                height = sqrt(x * x + y * y) / cos(lat) - N;
-                //弧度转换为角度
-                lon = lon * D2R;
-                lat = lat * D2R;
-                if (lat < 0)
-                    lat += 180;
-            } while (false);
-            return 1;
+                lat += LONGITUDE_UPPER_LIMIT;
+            }
+            return RETURN_SUCCESS;
         }
 
-        INT32 CGNSSCoord::XYZ2ENU(const DOUBLE refX,
-                                  const DOUBLE refY,
-                                  const DOUBLE refZ,
-                                  const DOUBLE curX,
-                                  const DOUBLE curY,
-                                  const DOUBLE curZ,
-                                  DOUBLE& curEast,
-                                  DOUBLE& curNorth,
-                                  DOUBLE& curUp)
+        INT32 CGNSSCoordinate::XYZ2ENU(const DOUBLE curX,
+                                       const DOUBLE curY,
+                                       const DOUBLE curZ,
+                                       const DOUBLE refX,
+                                       const DOUBLE refY,
+                                       const DOUBLE refZ,
+                                       DOUBLE& curEast,
+                                       DOUBLE& curNorth,
+                                       DOUBLE& curUp,
+                                       const COORDINATE_SYS_TYPE coordinateFrame)
         {
-            do
-            {
-                //首先把目标点的xyz转为blh
-                DOUBLE curB = 0;
-                DOUBLE curL = 0;
-                DOUBLE curH = 0;
-                XYZ2BLH(curX, curY, curZ, curB, curL, curH, 1);
+            //首先把目标点的xyz转为blh
+            DOUBLE curB = 0;
+            DOUBLE curL = 0;
+            DOUBLE curH = 0;
+            XYZ2BLH(curX, curY, curZ, curB, curL, curH, coordinateFrame);
+            //定义向量
+            SXYZ tmpXYZ;
+            tmpXYZ.m_x = refX - curX;
+            tmpXYZ.m_y = refY - curY;
+            tmpXYZ.m_z = refZ - curZ;
 
-                //定义向量
-                SXYZ tmpXYZ;
-                tmpXYZ.m_x = refX - curX;
-                tmpXYZ.m_y = refY - curY;
-                tmpXYZ.m_z = refZ - curZ;
+            DOUBLE lon = curL * D2R;
+            DOUBLE lat = curB * D2R;
 
-                //度转弧度
-                DOUBLE degtoRad = PI / 180;
-                curEast = -sin(curL * degtoRad) * tmpXYZ.m_x + cos(curL * degtoRad) * tmpXYZ.m_y;
-                curNorth = -sin(curB * degtoRad) * cos(curL * degtoRad) * tmpXYZ.m_x
-                           - sin(curB * degtoRad) * sin(curL * degtoRad) * tmpXYZ.m_y
-                           + cos(curB * degtoRad) * tmpXYZ.m_z;
-                curUp = cos(curB * degtoRad) * cos(curL * degtoRad) * tmpXYZ.m_x
-                        + cos(curB * degtoRad) * sin(curL * degtoRad) * tmpXYZ.m_y + sin(curB * degtoRad) * tmpXYZ.m_z;
-            } while (false);
-            return 1;
+            curEast = -sin(lon) * tmpXYZ.m_x + cos(lon) * tmpXYZ.m_y;
+            curNorth = -sin(lat) * cos(lon) * tmpXYZ.m_x - sin(lat) * sin(lon) * tmpXYZ.m_y + cos(lat) * tmpXYZ.m_z;
+            curUp = cos(lat) * cos(lon) * tmpXYZ.m_x + cos(lat) * sin(lon) * tmpXYZ.m_y + sin(lat) * tmpXYZ.m_z;
+            return RETURN_SUCCESS;
         }
 
-        INT32 CGNSSCoord::ENU2XYZ(const DOUBLE curEast,
-                                  const DOUBLE curNorth,
-                                  const DOUBLE curUp,
-                                  const DOUBLE refX,
-                                  const DOUBLE refY,
-                                  const DOUBLE refZ,
-                                  DOUBLE& curX,
-                                  DOUBLE& curY,
-                                  DOUBLE& curZ)
+        INT32 CGNSSCoordinate::ENU2XYZ(const DOUBLE curEast,
+                                       const DOUBLE curNorth,
+                                       const DOUBLE curUp,
+                                       const DOUBLE refX,
+                                       const DOUBLE refY,
+                                       const DOUBLE refZ,
+                                       DOUBLE& curX,
+                                       DOUBLE& curY,
+                                       DOUBLE& curZ,
+                                       const COORDINATE_SYS_TYPE coordinateFrame)
         {
-            do
-            {
-                DOUBLE refB = 0;
-                DOUBLE refL = 0;
-                DOUBLE refH = 0;
-                XYZ2BLH(refX, refY, refZ, refB, refL, refH, 1);
-                DOUBLE a = 6378137;      // a为椭球的长半轴:a=6378.137km
-                DOUBLE b = 6356752.3141; // b为椭球的短半轴:a=6356.7523141km
-                DOUBLE H0 = refH;
-                DOUBLE e = sqrt(1 - pow(b, 2) / pow(a, 2)); // e为椭球的第一偏心率
-                // DOUBLE e=sqrt(0.006693421622966); //克拉索夫斯基椭球
-                // DOUBLE e=sqrt(0.006694384999588); //1975年国际椭球
-                // DOUBLE e=sqrt(0.0066943799013); //WGS-84椭球
-                DOUBLE m = 3.1415926 / 180; //经度维度需要转换成弧度.
-                DOUBLE B0 = refB * m;
-                DOUBLE L0 = refL * m;
-                DOUBLE W = sqrt(1 - pow(e, 2) * pow(sin(B0), 2));
-                DOUBLE N0 = a / W; // N为椭球的卯酉圈曲率半径
-                curX = (N0 + H0) * cos(B0) * cos(L0) - sin(B0) * cos(L0) * curEast - sin(L0) * curNorth
-                       + cos(B0) * cos(L0) * curUp;
-                curY = (N0 + H0) * cos(B0) * sin(L0) - sin(B0) * sin(L0) * curEast + cos(L0) * curNorth
-                       + cos(B0) * sin(L0) * curUp;
-                curZ = (N0 * (1 - pow(e, 2)) + H0) * sin(B0) + cos(B0) * curEast + sin(B0) * curUp;
-            } while (false);
-            return 1;
+            //参数判断
+            //数据转换
+            //把空间直角坐标转换角度
+            DOUBLE refB = 0;
+            DOUBLE refL = 0;
+            DOUBLE refH = 0;
+            XYZ2BLH(refX, refY, refZ, refB, refL, refH, coordinateFrame);
+
+            DOUBLE lat = refB * D2R;
+            DOUBLE lon = refL * D2R;
+            DOUBLE height = refH;
+
+            DOUBLE e2 = m_CoordinateData.at(coordinateFrame).m_f * (NUM_TWO - m_CoordinateData.at(coordinateFrame).m_f);
+            //计算代表卯酉圈曲率半径N，公式 a / Sqrt(1 - e2 * sinB * sinB)
+            DOUBLE N0 = m_CoordinateData.at(coordinateFrame).m_a / sqrt(NUM_ONE - e2 * sin(lat) * sin(lat));
+
+            curX = (N0 + height) * cos(lat) * cos(lon) - sin(lat) * cos(lon) * curEast - sin(lon) * curNorth
+                   + cos(lat) * cos(lon) * curUp;
+            curY = (N0 + height) * cos(lat) * sin(lon) - sin(lat) * sin(lon) * curEast + cos(lon) * curNorth
+                   + cos(lat) * sin(lon) * curUp;
+            curZ = (N0 * (NUM_ONE - e2) + height) * sin(lat) + cos(lat) * curEast + sin(lat) * curUp;
+            return RETURN_SUCCESS;
         }
 
-        CGNSSCoord::~CGNSSCoord()
+        CGNSSCoordinate::~CGNSSCoordinate()
         {}
-    } // namespace GNSSUtilityLib
+    } // namespace Math
 } // namespace sixents

@@ -3,7 +3,7 @@
 
 namespace sixents
 {
-    namespace GNSSMathUtilityLib
+    namespace Math
     {
         INT32 CMathAppInterface::MatrixAdd(const DOUBLE* leftMatrixData,
                                            const UINT32 leftRow,
@@ -11,31 +11,25 @@ namespace sixents
                                            const DOUBLE* rightMatrixData,
                                            const UINT32 rightRow,
                                            const UINT32 rightCol,
-                                           DOUBLE* outMatrixData,
-                                           UINT32& outRow,
-                                           UINT32& outCol)
+                                           const UINT32 outRow,
+                                           const UINT32 outCol,
+                                           DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
             {
-                if (leftMatrixData == nullptr || rightMatrixData == nullptr
-                    || outMatrixData == nullptr)
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr || outMatrixData == nullptr)
                 {
                     ret = RETURN_NULL_PTR;
                     break;
                 }
-                if (leftRow == 0 || leftCol == 0 ||
-                    rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    leftRow != rightRow || leftCol != rightCol ||
-                    outRow != leftRow || outCol != leftCol)
+                if ((leftRow == 0 || leftCol == 0) || (rightRow == 0 || rightCol == 0) || (outRow == 0 || outCol == 0)
+                    || (leftRow != rightRow || leftCol != rightCol) || (outRow != leftRow || outCol != leftCol))
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-                outRow = leftRow;
-                outCol = leftCol;
                 for (UINT32 dataIdx = 0; dataIdx < leftRow * leftCol; ++dataIdx)
                 {
                     outMatrixData[dataIdx] = leftMatrixData[dataIdx] + rightMatrixData[dataIdx];
@@ -52,29 +46,25 @@ namespace sixents
                                            const DOUBLE* rightMatrixData,
                                            const UINT32 rightRow,
                                            const UINT32 rightCol,
-                                           DOUBLE* outMatrixData,
-                                           UINT32& outRow,
-                                           UINT32& outCol)
+                                           const UINT32 outRow,
+                                           const UINT32 outCol,
+                                           DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
             {
-                if (leftMatrixData == nullptr || rightMatrixData == nullptr
-                    || outMatrixData == nullptr)
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr || outMatrixData == nullptr)
                 {
                     ret = RETURN_NULL_PTR;
                     break;
                 }
-                if (leftRow == 0 || leftCol == 0 ||
-                    rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    leftRow != rightRow || leftCol != rightCol)
+                if ((leftRow == 0 || leftCol == 0) || (rightRow == 0 || rightCol == 0) || (outRow == 0 || outCol == 0)
+                    || (leftRow != rightRow || leftCol != rightCol) || (outRow != leftRow || outCol != leftCol))
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
-                outRow = leftRow;
-                outCol = leftCol;
+
                 for (UINT32 dataIdx = 0; dataIdx < leftRow * leftCol; ++dataIdx)
                 {
                     outMatrixData[dataIdx] = leftMatrixData[dataIdx] - rightMatrixData[dataIdx];
@@ -91,41 +81,36 @@ namespace sixents
                                            const DOUBLE* rightMatrixData,
                                            const UINT32 rightRow,
                                            const UINT32 rightCol,
-                                           DOUBLE* outMatrixData,
-                                           UINT32& outRow,
-                                           UINT32& outCol)
+                                           const UINT32 outRow,
+                                           const UINT32 outCol,
+                                           DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
             {
-                if (leftMatrixData == nullptr || rightMatrixData == nullptr
-                    || outMatrixData == nullptr)
+                if (leftMatrixData == nullptr || rightMatrixData == nullptr || outMatrixData == nullptr)
                 {
                     ret = RETURN_NULL_PTR;
                     break;
                 }
 
-                if (leftRow == 0 || leftCol == 0 ||
-                    rightRow == 0 || rightCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    leftCol != rightRow || outRow != leftRow ||
-                    outCol != rightCol)
+                if (leftRow == 0 || leftCol == 0 || rightRow == 0 || rightCol == 0 || outRow == 0 || outCol == 0
+                    || leftCol != rightRow || outRow != leftRow || outCol != rightCol)
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
                 // 分配被乘数
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        leftMtx(const_cast<DOUBLE*>(leftMatrixData), leftRow, leftCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> leftMtx(
+                    const_cast<DOUBLE*>(leftMatrixData), leftRow, leftCol);
                 // 分配乘数
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        rightMtx(const_cast<DOUBLE*>(rightMatrixData), rightRow, rightCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> rightMtx(
+                    const_cast<DOUBLE*>(rightMatrixData), rightRow, rightCol);
                 // 分配结果
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        retMtx(outMatrixData, outRow, outCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> retMtx(
+                    outMatrixData, outRow, outCol);
                 retMtx = leftMtx * rightMtx;
-
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -135,9 +120,9 @@ namespace sixents
         INT32 CMathAppInterface::MatrixTransposition(const DOUBLE* inMatrixData,
                                                      const UINT32 inRow,
                                                      const UINT32 inCol,
-                                                     DOUBLE* outMatrixData,
-                                                     UINT32& outRow,
-                                                     UINT32& outCol)
+                                                     const UINT32 outRow,
+                                                     const UINT32 outCol,
+                                                     DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
@@ -147,18 +132,17 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
-                if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    inRow != outCol || inCol != outRow)
+
+                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || inRow != outCol || inCol != outRow)
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        outMtx(outMatrixData, outRow, outCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
+                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
+                    outMatrixData, outRow, outCol);
                 outMtx = inMtx.transpose();
 
                 ret = RETURN_SUCCESS;
@@ -170,9 +154,9 @@ namespace sixents
         INT32 CMathAppInterface::MatrixInverse(const DOUBLE* inMatrixData,
                                                const UINT32 inRow,
                                                const UINT32 inCol,
-                                               DOUBLE* outMatrixData,
-                                               UINT32& outRow,
-                                               UINT32& outCol)
+                                               const UINT32 outRow,
+                                               const UINT32 outCol,
+                                               DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
@@ -182,24 +166,31 @@ namespace sixents
                     ret = RETURN_NULL_PTR;
                     break;
                 }
-                if (inRow != inCol || outRow != outCol)
-                {
-                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
-                    break;
-                }
-                if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    inRow != outRow || inCol != outCol)
+
+                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || inRow != outRow || inCol != outCol)
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
-                // 判断行列式是否为0，是为0就返回
 
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        outMtx(outMatrixData, outRow, outCol);
+                if (inRow != inCol)
+                {
+                    ret = RETURN_NOT_SQUARE_MATRIX;
+                    break;
+                }
+
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
+                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+
+                //行列式不能为0 并且必须是满秩矩阵
+                if (inMtx.determinant() == 0)
+                {
+                    ret = RETURN_ZERO_DETERMINANT;
+                    break;
+                }
+
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
+                    outMatrixData, outRow, outCol);
                 outMtx = inMtx.inverse();
 
                 ret = RETURN_SUCCESS;
@@ -211,9 +202,9 @@ namespace sixents
         INT32 CMathAppInterface::MatrixAddRowCol(const DOUBLE* inMatrixData,
                                                  const UINT32 inRow,
                                                  const UINT32 inCol,
-                                                 DOUBLE* outMatrixData,
-                                                 UINT32& outRow,
-                                                 UINT32& outCol)
+                                                 const UINT32 outRow,
+                                                 const UINT32 outCol,
+                                                 DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
@@ -224,25 +215,23 @@ namespace sixents
                     break;
                 }
 
-                // 根据需求，当前仅支持方阵
-                if (inRow != inCol || outRow != outCol)
-                {
-                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
-                    break;
-                }
-
-                if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    outRow - inRow <= 0 || outCol - inCol <= 0)
+                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || outRow < inRow || outCol < inCol)
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        outMtx(outMatrixData, outRow, outCol);
+                // 根据需求，当前仅支持方阵
+                if (inRow != inCol || outRow != outCol)
+                {
+                    ret = RETURN_NOT_SQUARE_MATRIX;
+                    break;
+                }
+
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
+                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
+                    outMatrixData, outRow, outCol);
 
                 for (UINT32 rowIdx = 0; rowIdx < outRow; ++rowIdx)
                 {
@@ -267,9 +256,9 @@ namespace sixents
         INT32 CMathAppInterface::MatrixSubRowCol(const DOUBLE* inMatrixData,
                                                  const UINT32 inRow,
                                                  const UINT32 inCol,
-                                                 DOUBLE* outMatrixData,
-                                                 UINT32& outRow,
-                                                 UINT32& outCol)
+                                                 const UINT32 outRow,
+                                                 const UINT32 outCol,
+                                                 DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
@@ -280,28 +269,28 @@ namespace sixents
                     break;
                 }
 
-                // 根据需求，当前仅支持方阵
-                if (inRow != inCol || outRow != outCol) {
-                    ret = RETURN_IS_NOT_SQUARE_MATRIX;
-                    break;
-                }
-
-                if (inRow == 0 || inCol == 0 ||
-                    outRow == 0 || outCol == 0 ||
-                    outRow > inRow || outCol > inCol) {
+                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || outRow >= inRow || outCol >= inCol)
+                {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
                 }
 
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        inMtx(const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                        outMtx(outMatrixData, outRow, outCol);
+                // 根据需求，当前仅支持方阵
+                if (inRow != inCol || outRow != outCol)
+                {
+                    ret = RETURN_NOT_SQUARE_MATRIX;
+                    break;
+                }
+
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
+                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
+                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
+                    outMatrixData, outRow, outCol);
                 outMtx = inMtx.block(0, 0, outRow, outCol);
                 ret = RETURN_SUCCESS;
             } while (false);
 
             return ret;
         }
-    } // namespace GNSSMathUtilityLib
+    } // namespace Math
 } // namespace sixents

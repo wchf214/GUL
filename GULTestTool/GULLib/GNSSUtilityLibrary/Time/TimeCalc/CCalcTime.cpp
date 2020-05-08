@@ -1,144 +1,148 @@
 #include "CCalcTime.h"
-//#include "CTimeLeapFactory.h"
 #include "../TimeSys/CTimeFactory.h"
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
-
-//        DOUBLE CCalcTime::TimeConvert(const DOUBLE srcSec, const TIME_TYPE srctimeType, const TIME_TYPE destTimeType)
-//        {
-////            DOUBLE leapSec = GetLeapTime(srctimeType);
-//            ITimeLeap* timeLeapObj = nullptr;
-//            if (srctimeType == UTC || destTimeType == UTC)
-//            {
-//                timeLeapObj = CTimeLeapFactory::Create
-//            }
-//            else if (srctimeType == GPS || destTimeType == GPS)
-//            {
-
-//            }
-//            else
-//            {
-//                // 1、 ToUTC
-//                // 2、 ToOther
-//            }
-//            DOUBLE leapSec = 0.0;
-//            if (srctimeType == destTimeType)
-//            {
-//                return srcSec;
-//            }
-//            else if (srctimeType > destTimeType)
-//            {
-//                return srcSec - leapSec;
-//            }
-//            else
-//            {
-//                return srcSec + leapSec;
-//            }
-//        }
-        DOUBLE CCalcTime::TimeConvert(const DOUBLE srcSec, const TIME_TYPE srctimeType, const TIME_TYPE destTimeType)
+        DOUBLE CCalcTime::TimeConvert(const DOUBLE srcSec, const TIME_TYPE srcTimeType, const TIME_TYPE destTimeType)
         {
-            // UTC 与 其它时间互转
-            DOUBLE retLeap = 0.0;
-            if (srctimeType == GPS && destTimeType == UTC) {  // GPS 转 UTC
-                retLeap = GPST2UTC(srcSec, true);
-            } else if (srctimeType == GLONASS && destTimeType == UTC) {  // GLONASS 转 UTC
-                retLeap = GLOT2UTC(srcSec, true);
-            } else if (srctimeType == BDS && destTimeType == UTC) {  // BDS 转 UTC
-                retLeap = BDT2UTC(srcSec, true);
-            } else if (srctimeType == GALILEO && destTimeType == UTC) {  // GALILEO 转 UTC
-                retLeap = GST2UTC(srcSec, true);
-            } else if (srctimeType == UTC && destTimeType == GPS) {  // UTC 转 GPS
-                retLeap = GPST2UTC(srcSec, false);
-            } else if (srctimeType == UTC && destTimeType == GLONASS) {  // GPS 转 UTC
-                retLeap = GLOT2UTC(srcSec, false);
-            } else if (srctimeType == UTC && destTimeType == BDS) {  // GPS 转 UTC
-                retLeap = BDT2UTC(srcSec, false);
-            } else if (srctimeType == UTC && destTimeType == GALILEO) {  // GPS 转 UTC
-                retLeap = GST2UTC(srcSec, false);
-            } else if (srctimeType == GLONASS && destTimeType == GPS) {  // GPS 转 UTC
-                retLeap = GLOT2GPST(srcSec, true);
-            } else if (srctimeType == BDS && destTimeType == GPS) {  // GPS 转 UTC
-                retLeap = BDT2GPST(srcSec, true);
-            } else if (srctimeType == GALILEO && destTimeType == GPS) {  // GPS 转 UTC
-                retLeap = GST2GPST(srcSec, true);
-            } else if (srctimeType == GPS && destTimeType == GLONASS) {  // GPS 转 UTC
-                retLeap = GLOT2GPST(srcSec, false);
-            } else if (srctimeType == GPS && destTimeType == BDS) {  // GPS 转 UTC
-                retLeap = BDT2GPST(srcSec, false);
-            } else if (srctimeType == GPS && destTimeType == GALILEO) {  // GPS 转 UTC
-                retLeap = GST2GPST(srcSec, false);
+            // UTC与其它时间互转
+            DOUBLE retTime = 0.0;
+            if (srcTimeType == GPS && destTimeType == UTC)
+            { // GPS 转 UTC
+                retTime = GPSTUTCConvert(srcSec, true);
             }
-            return retLeap;
+            else if (srcTimeType == GLONASS && destTimeType == UTC)
+            { // GLONASS 转 UTC
+                retTime = GLOTUTCConvert(srcSec, true);
+            }
+            else if (srcTimeType == GALILEO && destTimeType == UTC)
+            { // GALILEO 转 UTC
+                retTime = GSTUTCConvert(srcSec, true);
+            }
+            else if (srcTimeType == BDS && destTimeType == UTC)
+            { // BDS 转 UTC
+                retTime = BDTUTCConvert(srcSec, true);
+            }
+
+            else if (srcTimeType == UTC && destTimeType == GPS)
+            { // UTC 转 GPS
+                retTime = GPSTUTCConvert(srcSec, false);
+            }
+            else if (srcTimeType == UTC && destTimeType == GLONASS)
+            { // GPS 转 UTC
+                retTime = GLOTUTCConvert(srcSec, false);
+            }
+            else if (srcTimeType == UTC && destTimeType == GALILEO)
+            { // GPS 转 UTC
+                retTime = GSTUTCConvert(srcSec, false);
+            }
+            else if (srcTimeType == UTC && destTimeType == BDS)
+            { // GPS 转 UTC
+                retTime = BDTUTCConvert(srcSec, false);
+            }
+
+            else if (srcTimeType == GLONASS && destTimeType == GPS)
+            { // GPS 转 UTC
+                retTime = GLOTGPSTConvert(srcSec, true);
+            }
+            else if (srcTimeType == GALILEO && destTimeType == GPS)
+            { // GPS 转 UTC
+                retTime = GSTGPSTConvert(srcSec, true);
+            }
+            else if (srcTimeType == BDS && destTimeType == GPS)
+            { // GPS 转 UTC
+                retTime = BDTGPSTConvert(srcSec, true);
+            }
+
+            else if (srcTimeType == GPS && destTimeType == GLONASS)
+            { // GPS 转 UTC
+                retTime = GLOTGPSTConvert(srcSec, false);
+            }
+            else if (srcTimeType == GPS && destTimeType == GALILEO)
+            { // GPS 转 UTC
+                retTime = GSTGPSTConvert(srcSec, false);
+            }
+            else if (srcTimeType == GPS && destTimeType == BDS)
+            { // GPS 转 UTC
+                retTime = BDTGPSTConvert(srcSec, false);
+            }
+            return retTime;
         }
 
-        DOUBLE CCalcTime::GPST2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
+        DOUBLE CCalcTime::GPSTUTCConvert(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
             INT64 retTimeSec = 0;
-            DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
-            for (int i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
+            const DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
+            for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
                 //依次加入不同的跳秒信息
-                if (!isUtc) {  // UTC to GPS
+                if (!isUtc)
+                { // UTC to GPS
                     retTimeSec = static_cast<INT64>(srcTime) - static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {  // GPS to UTC
+                }
+                else
+                { // GPS to UTC
                     retTimeSec = static_cast<INT64>(srcTime) + static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
-
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
-                UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
-                UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
-                UINT32 hour = 0;
-                UINT32 min = 0;
-                DOUBLE sec = 0.0;
+                const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
+                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
+                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
+                const UINT32 hour = 0;
+                const UINT32 min = 0;
+                const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
-                DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
+                const DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0) // 如果差大于等于0则表示为当前时间
                 {
                     retTime = static_cast<DOUBLE>(retTimeSec) + timeMSec;
                     break;
                 }
             }
-
             return retTime;
         }
 
-        DOUBLE CCalcTime::GLOT2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
+        DOUBLE CCalcTime::GLOTUTCConvert(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
-            if (!isUtc) {  // UTC to Glonass
+            if (!isUtc)
+            { // UTC to Glonass
                 retTime = srcTime + static_cast<DOUBLE>(SEC_OF_3HOUR);
-            } else {  // Glonass to UTC
+            }
+            else
+            { // Glonass to UTC
                 retTime = srcTime - static_cast<DOUBLE>(SEC_OF_3HOUR);
             }
             return retTime;
         }
 
-        DOUBLE CCalcTime::GST2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
+        DOUBLE CCalcTime::GSTUTCConvert(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
             INT32 retTimeSec = 0;
-            DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
-            for (int i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
+            const DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
+            for (INT32 i = 0; GPS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
                 //依次加入不同的跳秒信息
-                if (!isUtc) {  // UTC to Galileo
+                if (!isUtc)
+                { // UTC to Galileo
                     retTimeSec = static_cast<INT32>(srcTime) - static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {   // Galileo to UTC
+                }
+                else
+                { // Galileo to UTC
                     retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
-                UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
-                UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
-                UINT32 hour = 0;
-                UINT32 min = 0;
-                DOUBLE sec = 0.0;
+                const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
+                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
+                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
+                const UINT32 hour = 0;
+                const UINT32 min = 0;
+                const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
                 DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0) // 如果差大于等于0则表示为当前时间
@@ -147,30 +151,32 @@ namespace sixents
                     break;
                 }
             }
-
             return retTime;
         }
 
-        DOUBLE CCalcTime::BDT2UTC(const DOUBLE srcTime, const BOOL_T isUtc)
+        DOUBLE CCalcTime::BDTUTCConvert(const DOUBLE srcTime, const BOOL_T isUtc)
         {
             DOUBLE retTime = 0.0;
             INT32 retTimeSec = 0;
-            DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
-            for (int i = 0; BDS_LEAPSEC_INFO[i][0] > 0; ++i)
+            const DOUBLE timeMSec = srcTime - static_cast<DOUBLE>(floor(srcTime));
+            for (INT32 i = 0; BDS_LEAPSEC_INFO[i][0] > 0; ++i)
             {
-                if (!isUtc) {  // UTC to BDS
+                if (!isUtc)
+                { // UTC to BDS
                     retTimeSec = static_cast<INT32>(srcTime) - static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
-                } else {  // BDS to UTC
+                }
+                else
+                { // BDS to UTC
                     retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                UINT32 year = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][0]);
-                UINT32 month = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][1]);
-                UINT32 day = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][2]);
-                UINT32 hour = 0;
-                UINT32 min = 0;
-                DOUBLE sec = 0.0;
+                const UINT32 year = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][0]);
+                const UINT32 month = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][1]);
+                const UINT32 day = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][2]);
+                const UINT32 hour = 0;
+                const UINT32 min = 0;
+                const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
                 DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0)
@@ -179,36 +185,42 @@ namespace sixents
                     break;
                 }
             }
-            return  retTime;
+            return retTime;
         }
 
-        DOUBLE CCalcTime::BDT2GPST(const DOUBLE srcTime, const BOOL_T isGps)
+        DOUBLE CCalcTime::BDTGPSTConvert(const DOUBLE srcTime, const BOOL_T isGps)
         {
             DOUBLE retTime = 0.0;
-            if (!isGps) {  // GPS To BDS
+            if (!isGps)
+            { // GPS To BDS
                 retTime = srcTime - SEC_BETWEEN_GPS_BDS;
-            } else { // BDS To GPS
+            }
+            else
+            { // BDS To GPS
                 retTime = srcTime + SEC_BETWEEN_GPS_BDS;
             }
             return retTime;
         }
 
-        DOUBLE CCalcTime::GLOT2GPST(const DOUBLE srcTime, const BOOL_T isGps)
+        DOUBLE CCalcTime::GLOTGPSTConvert(const DOUBLE srcTime, const BOOL_T isGps)
         {
             DOUBLE retTime = 0.0;
-            if (!isGps) { // GPS To Glonass
-                retTime = GPST2UTC(srcTime, !isGps);
-                retTime = GLOT2UTC(retTime, isGps);
-            } else { // Glonass To GPS
-                retTime = GLOT2UTC(srcTime, isGps);
-                retTime = GPST2UTC(retTime, !isGps);
+            if (!isGps)
+            { // GPS To Glonass
+                retTime = GPSTUTCConvert(srcTime, !isGps);
+                retTime = GLOTUTCConvert(retTime, isGps);
             }
-            return  retTime;
+            else
+            { // Glonass To GPS
+                retTime = GLOTUTCConvert(srcTime, isGps);
+                retTime = GPSTUTCConvert(retTime, !isGps);
+            }
+            return retTime;
         }
 
-        DOUBLE CCalcTime::GST2GPST(const DOUBLE srcTime, const BOOL_T isGps)
+        DOUBLE CCalcTime::GSTGPSTConvert(const DOUBLE srcTime, const BOOL_T isGps)
         {
             return srcTime;
         }
-    }      // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents

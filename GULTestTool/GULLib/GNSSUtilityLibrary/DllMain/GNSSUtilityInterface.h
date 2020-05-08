@@ -14,7 +14,7 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
 #ifdef _WIN32
 #define STD_CALL _stdcall
@@ -171,22 +171,6 @@ namespace sixents
                                                double& second);
 
         /**
-         * @brief           GNSS时间转UTC时间，以小数秒表示转换后的UTC时间
-         * @author          wuchuanfei@sixents.com
-         * @param[in]       week        周
-         * @param[in]       sec         秒，精确到毫秒
-         * @param[in]       timeType    时间类型
-         * @param[out]      sec         秒，精确到毫秒
-         * @exception       N/A
-         * @return          函数执行是否成功
-         * @note            2020.04.17新增
-         */
-        DLL_API int STD_CALL GNSSTimeToUTCSecTime(const unsigned int week,
-                                                  const double second,
-                                                  const unsigned int timeType,
-                                                  double& sec);
-
-        /**
          * @brief           UTC时间转GNSS时间
          * @author          wuchuanfei@sixents.com
          * @param[in]       year        年
@@ -211,30 +195,6 @@ namespace sixents
                                                const unsigned int timeType,
                                                unsigned int& week,
                                                double& sec);
-
-        /**
-         * @brief           UTC时间转GNSS时间，以小数秒表示转换后的GNSS时间
-         * @author          wuchuanfei@sixents.com
-         * @param[in]       year        年
-         * @param[in]       month       月
-         * @param[in]       day         日
-         * @param[in]       hour        时
-         * @param[in]       minute      分
-         * @param[in]       second      秒，精确到毫秒
-         * @param[in]       timeType    时间类型
-         * @param[out]      sec         秒，精确到毫秒
-         * @exception       N/A
-         * @return          函数执行是否成功
-         * @note            2020.04.17新增
-         */
-        DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
-                                                  const unsigned int month,
-                                                  const unsigned int day,
-                                                  const unsigned int hour,
-                                                  const unsigned int minute,
-                                                  const double second,
-                                                  const unsigned int timeType,
-                                                  double& sec);
 
         /**
          * @brief           BD、Glonass、Galileo时间类型与GPS时间互转
@@ -329,37 +289,37 @@ namespace sixents
         /**
          * @brief           空间直角坐标转大地坐标
          * @author          wuchuanfei@sixents.com
-         * @param[in]       x,y,z: 空间直角坐标，精确到小数点后9位
-         * @param[out]      lon: 经度，精确到小数点后11位
-                            lat: 纬度，精确到小数点后11位
-                            height: 高程，精确到小数点后9位
+         * @param[in]       x,y,z       空间直角坐标，精确到小数点后9位，单位为米
+         * @param[out]      lat         纬度，精确到小数点后11位，单位为度
+         * @param[out]      lon         经度，精确到小数点后11位，单位为度
+         * @param[out]      height      高程，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
         DLL_API int STD_CALL
-        XYZ2BLH(const double x, const double y, const double z, double& lon, double& lat, double& height);
+        XYZ2BLH(const double x, const double y, const double z, double& lat, double& lon, double& height);
 
         /**
          * @brief           大地坐标转空间直角坐标
          * @author          wuchuanfei@sixents.com
-         * @param[in]       lon: 经度，精确到小数点后11位
-                            lat: 纬度，精确到小数点后11位
-                            height: 高程，精确到小数点后9位
-         * @param[out]      x,y,z: 空间直角坐标，精确到小数点后9位
+         * @param[in]       lat         纬度，精确到小数点后11位，单位为度
+         * @param[in]       lon         经度，精确到小数点后11位，单位为度
+         * @param[in]       height      高程，精确到小数点后9位，单位为米
+         * @param[out]      x,y,z       空间直角坐标，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
         DLL_API int STD_CALL
-        BLH2XYZ(const double lon, const double lat, const double height, double& x, double& y, double& z);
+        BLH2XYZ(const double lat, const double lon, const double height, double& x, double& y, double& z);
 
         /**
          * @brief           空间直角坐标转站心坐标
          * @author          wuchuanfei@sixents.com
-         * @param[in]       curX,curY,curZ: 当前站的空间直角坐标，精确到小数点后9位
-                            refX,refY,refZ: 参考站空间直角坐标，精确到小数点后9位
-         * @param[out]      east,north,up: 当前站的站心坐标，精确到小数点后9位
+         * @param[in]       curX,curY,curZ      当前站的空间直角坐标，精确到小数点后9位，单位为米
+         * @param[in]       refX,refY,refZ      参考站空间直角坐标，精确到小数点后9位，单位为米
+         * @param[out]      east,north,up       当前站的站心坐标，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -378,9 +338,9 @@ namespace sixents
         /**
          * @brief           空间直角坐标转站心坐标
          * @author          wuchuanfei@sixents.com
-         * @param[in]       east,north,up: 当前站的站心坐标，精确到小数点后9位
-                            refX,refY,refZ: 参考站空间直角坐标，精确到小数点后9位
-         * @param[out]      curX,curY,curZ: 当前站的空间直角坐标，精确到小数点后9位
+         * @param[in]       east,north,up       当前站的站心坐标，精确到小数点后9位，单位为米
+         * @param[in]       refX,refY,refZ      参考站空间直角坐标，精确到小数点后9位，单位为米
+         * @param[out]      curX,curY,curZ      当前站的空间直角坐标，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -400,9 +360,9 @@ namespace sixents
         /**
          * @brief           计算Glonass钟差
          * @author          wuchuanfei@sixents.com
-         * @param[in]       sec: 指定时间，秒，精确到毫秒
-                            ephObj: Glonass星历数据
-         * @param[out]      clockVal: 计算出来的钟差值，精确到小数点后9位
+         * @param[in]       sec             指定时间，秒，精确到毫秒
+         * @param[in]       ephObj          Glonass星历数据
+         * @param[out]      clockVal        计算出来的钟差值，精确到小数点后9位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -414,9 +374,9 @@ namespace sixents
         /**
          * @brief           计算钟差
          * @author          wuchuanfei@sixents.com
-         * @param[in]       sec: 指定时间，秒，精确到毫秒
-                            ephObj: 星历数据
-         * @param[out]      clockVal: 计算出来的钟差值，精确到小数点后9位
+         * @param[in]       sec             指定时间，秒，精确到毫秒
+         * @param[in]       ephObj          星历数据
+         * @param[out]      clockVal        计算出来的钟差值，精确到小数点后9位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -426,9 +386,9 @@ namespace sixents
         /**
          * @brief           计算Glonass位置
          * @author          wuchuanfei@sixents.com
-         * @param[in]       sec: 指定时间，秒，精确到毫秒
-                            ephObj: Glonass星历数据
-         * @param[out]      x,y,z: 计算出来的空间位置值，精确到小数点后9位
+         * @param[in]       sec         指定时间，秒，精确到毫秒
+         * @param[in]       ephObj      Glonass星历数据
+         * @param[out]      x,y,z       计算出来的空间位置值，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -439,9 +399,9 @@ namespace sixents
         /**
          * @brief           计算位置
          * @author          wuchuanfei@sixents.com
-         * @param[in]       sec: 指定时间，秒，精确到毫秒
-                            ephObj: 星历数据
-         * @param[out]      x,y,z: 计算出来的空间位置值，精确到小数点后9位
+         * @param[in]       sec         指定时间，秒，精确到毫秒
+         * @param[in]       ephObj      星历数据
+         * @param[out]      x,y,z       计算出来的空间位置值，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -452,10 +412,10 @@ namespace sixents
         /**
          * @brief           将小数形式的角度进行格式化
          * @author          wuchuanfei@sixents.com
-         * @param[in]       degree: 小数形式的度，精确到小数点后9位
-                            formatType: 格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
-         * @param[out]      formatString: 格式化后的字符串
-                            len: formatString的长度
+         * @param[in]       degree              小数形式的度，精确到小数点后11位
+         * @param[in]       formatType          格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
+         * @param[out]      formatString        格式化后的字符串
+         * @param[out]      len                 formatString的长度
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -468,18 +428,18 @@ namespace sixents
         /**
          * @brief           将度分秒形式的角度格式化
          * @author          wuchuanfei@sixents.com
-         * @param[in]       degree: 度
-                            minute: 分
-                            sec: 秒，精确到毫秒
-                            formatType: 格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
-         * @param[out]      formatString: 输出参数，格式化后的字符串
-                            len: formatString的长度
+         * @param[in]       degree              度
+         * @param[in]       minute              分
+         * @param[in]       sec                 秒，精确到小数点后5位
+         * @param[in]       formatType          格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
+         * @param[out]      formatString        输出参数，格式化后的字符串
+         * @param[out]      len                 formatString的长度
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
         DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                              const int minute,
+                                              const unsigned int minute,
                                               const double sec,
                                               char* formatString,
                                               unsigned int& len,
@@ -488,8 +448,8 @@ namespace sixents
         /**
          * @brief           度转弧度
          * @author          wuchuanfei@sixents.com
-         * @param[in]       degree: 小数形式的度，精确到小数点后9位
-         * @param[out]      radian: 弧度，精确到小数点后9位
+         * @param[in]       degree      小数形式的度，精确到小数点后11位
+         * @param[out]      radian      弧度，精确到小数点后9位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -499,21 +459,21 @@ namespace sixents
         /**
          * @brief           度分秒转弧度
          * @author          wuchuanfei@sixents.com
-         * @param[in]       degree: 度
-                            minute: 分
-                            sec: 秒，精确到毫秒
-         * @param[out]      radian: 弧度，精确到小数点后9位
+         * @param[in]       degree      度
+         * @param[in]       minute      分
+         * @param[in]       sec         秒，精确到小数点后5位
+         * @param[out]      radian      弧度，精确到小数点后9位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
+        DLL_API int STD_CALL DMS2Rad(const int degree, const unsigned int minute, const double sec, double& radian);
 
         /**
          * @brief           弧度转度
          * @author          wuchuanfei@sixents.com
-         * @param[in]       radian: 弧度，精确到小数点后9位
-         * @param[out]      degree: 小数形式的度，精确到小数点后9位
+         * @param[in]       radian      弧度，精确到小数点后9位
+         * @param[out]      degree      小数形式的度，精确到小数点后11位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -523,20 +483,20 @@ namespace sixents
         /**
          * @brief           弧度转度分秒
          * @author          wuchuanfei@sixents.com
-         * @param[in]       radian: 弧度，精确到小数点后9位
-         * @param[out]      degree: 度
-                            minute: 分
-                            sec: 秒，精确到毫秒
+         * @param[in]       radian      弧度，精确到小数点后9位
+         * @param[out]      degree      度
+         * @param[out]      minute      分
+         * @param[out]      sec         秒，精确到小数点后5位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
+        DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, unsigned int& minute, double& sec);
 
 #ifdef __cplusplus
         } // end extern "C"
 #endif
-    } // end namespace GNSSUtilityLib
+    } // end namespace Math
 } // end namespace sixents
 
 #endif

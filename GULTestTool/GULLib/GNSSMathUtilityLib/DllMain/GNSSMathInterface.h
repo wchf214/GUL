@@ -13,7 +13,7 @@
 
 namespace sixents
 {
-    namespace GNSSMathUtilityLib
+    namespace Math
     {
 #ifdef _WIN32
 #define STD_CALL _stdcall
@@ -35,9 +35,15 @@ namespace sixents
         /**
          * @brief           矩阵加法
          * @author          pengshupan@sixents.com
-         * @param[in]       inLeftMatrix            运算符左边的矩阵
-         * @param[in]       inRightMatrix           运算符左边的矩阵
-         * @param[out]      outMatrix               输出矩阵
+         * @param[in]       leftMatrixData      运算符左边的矩阵数据
+         * @param[in]       leftRow             运算符左边的矩阵行
+         * @param[in]       leftCol             运算符左边的矩阵列
+         * @param[in]       rightMatrixData     运算符右边的矩阵数据
+         * @param[in]       rightRow            运算符右边的矩阵行
+         * @param[in]       rightCol            运算符右边的矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -48,16 +54,22 @@ namespace sixents
                                        const double* rightMatrixData,
                                        const unsigned int rightRow,
                                        const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
+                                       const unsigned int outRow,
+                                       const unsigned int outCol,
+                                       double* outMatrixData);
 
         /**
          * @brief           矩阵减法
          * @author          pengshupan@sixents.com
-         * @param[in]       inLeftMatrix            运算符左边的矩阵
-         * @param[in]       inRightMatrix           运算符左边的矩阵
-         * @param[out]      outMatrix               输出矩阵
+         * @param[in]       leftMatrixData      运算符左边的矩阵数据
+         * @param[in]       leftRow             运算符左边的矩阵行
+         * @param[in]       leftCol             运算符左边的矩阵列
+         * @param[in]       rightMatrixData     运算符右边的矩阵数据
+         * @param[in]       rightRow            运算符右边的矩阵行
+         * @param[in]       rightCol            运算符右边的矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -68,16 +80,22 @@ namespace sixents
                                        const double* rightMatrixData,
                                        const unsigned int rightRow,
                                        const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
+                                       const unsigned int outRow,
+                                       const unsigned int outCol,
+                                       double* outMatrixData);
 
         /**
          * @brief           矩阵乘法
          * @author          pengshupan@sixents.com
-         * @param[in]       inLeftMatrix            运算符左边的矩阵
-         * @param[in]       inRightMatrix           运算符左边的矩阵
-         * @param[out]      outMatrix               输出矩阵
+         * @param[in]       leftMatrixData      运算符左边的矩阵数据
+         * @param[in]       leftRow             运算符左边的矩阵行
+         * @param[in]       leftCol             运算符左边的矩阵列
+         * @param[in]       rightMatrixData     运算符右边的矩阵数据
+         * @param[in]       rightRow            运算符右边的矩阵行
+         * @param[in]       rightCol            运算符右边的矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -88,15 +106,19 @@ namespace sixents
                                        const double* rightMatrixData,
                                        const unsigned int rightRow,
                                        const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
+                                       const unsigned int outRow,
+                                       const unsigned int outCol,
+                                       double* outMatrixData);
 
         /**
          * @brief           矩阵转置
          * @author          pengshupan@sixents.com
-         * @param[in]       inMatrix                转置前的矩阵
-         * @param[out]      outMatrix               输出矩阵
+         * @param[in]       inMatrixData        输入矩阵数据
+         * @param[in]       inRow               输入矩阵行
+         * @param[in]       inCol               输入矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -104,15 +126,19 @@ namespace sixents
         DLL_API int STD_CALL MatrixTransposition(const double* inMatrixData,
                                                  const unsigned int inRow,
                                                  const unsigned int inCol,
-                                                 double* outMatrixData,
-                                                 unsigned int& outRow,
-                                                 unsigned int& outCol);
+                                                 const unsigned int outRow,
+                                                 const unsigned int outCol,
+                                                 double* outMatrixData);
 
         /**
          * @brief           矩阵求逆
          * @author          pengshupan@sixents.com
-         * @param[in]       inMatrix                待求逆矩阵
-         * @param[out]      outMatrix               输出矩阵
+         * @param[in]       inMatrixData        输入矩阵数据
+         * @param[in]       inRow               输入矩阵行
+         * @param[in]       inCol               输入矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -120,16 +146,19 @@ namespace sixents
         DLL_API int STD_CALL MatrixInverse(const double* inMatrixData,
                                            const unsigned int inRow,
                                            const unsigned int inCol,
-                                           double* outMatrixData,
-                                           unsigned int& outRow,
-                                           unsigned int& outCol);
+                                           const unsigned int outRow,
+                                           const unsigned int outCol,
+                                           double* outMatrixData);
 
         /**
          * @brief           矩阵增加行列
          * @author          pengshupan@sixents.com
-         * @param[in]       inMatrix            待增加行列的矩阵
-         * @param[in]       row                 指定增加的行
-         * @param[out]      col                 指定增加的列
+         * @param[in]       inMatrixData        输入矩阵数据
+         * @param[in]       inRow               输入矩阵行
+         * @param[in]       inCol               输入矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -137,16 +166,19 @@ namespace sixents
         DLL_API int STD_CALL MatrixAddRowCol(const double* inMatrixData,
                                              const unsigned int inRow,
                                              const unsigned int inCol,
-                                             double* outMatrixData,
-                                             unsigned int& outRow,
-                                             unsigned int& outCol);
+                                             const unsigned int outRow,
+                                             const unsigned int outCol,
+                                             double* outMatrixData);
 
         /**
          * @brief           矩阵减少行列
          * @author          pengshupan@sixents.com
-         * @param[in]       inMatrix            待减少行列的矩阵
-         * @param[in]       row                 指定减少的行
-         * @param[out]      col                 指定减少的列
+         * @param[in]       inMatrixData        输入矩阵数据
+         * @param[in]       inRow               输入矩阵行
+         * @param[in]       inCol               输入矩阵列
+         * @param[in]       outRow              输出矩阵行
+         * @param[in]       outCol              输出矩阵列
+         * @param[out]      outMatrixData       输出矩阵数据
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
@@ -154,14 +186,14 @@ namespace sixents
         DLL_API int STD_CALL MatrixSubRowCol(const double* inMatrixData,
                                              const unsigned int inRow,
                                              const unsigned int inCol,
-                                             double* outMatrixData,
-                                             unsigned int& outRow,
-                                             unsigned int& outCol);
+                                             const unsigned int outRow,
+                                             const unsigned int outCol,
+                                             double* outMatrixData);
 
 #ifdef __cplusplus
-        }  // extern "C"
+        } // extern "C"
 #endif
-    } // end namespace GNSSMathUtilityLib
+    } // namespace Math
 } // end namespace sixents
 
 #endif

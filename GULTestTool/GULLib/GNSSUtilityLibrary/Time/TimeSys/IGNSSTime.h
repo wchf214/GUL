@@ -1,5 +1,4 @@
-﻿/**
- * @file          IGNSSTime.h
+/** @file          IGNSSTime.h
  *  @brief         时间父类
  *  @details       时间对象的基类
  *  @author        wuchuanfei@sixens.com
@@ -19,7 +18,7 @@
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         /**
          *  @class       IGNSSTime
@@ -33,7 +32,7 @@ namespace sixents
             /**
              * @brief          构造函数
              * @author         wuchuanfei@sixents.com
-             * @param[in]      timeType: 时间类型，目前仅支持TIME_TYPE中定义的几种时间类型
+             * @param[in]      timeType             时间类型，目前仅支持TIME_TYPE中定义的几种时间类型
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -55,7 +54,7 @@ namespace sixents
             /**
              * @brief          设置小数形式的时间到对象的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 时间数据
+             * @param[in]      time         时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -67,7 +66,7 @@ namespace sixents
              * @brief          从对象中获取小数形式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 小数形式的时间数据
+             * @param[out]     time         小数形式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -77,7 +76,7 @@ namespace sixents
             /**
              * @brief          以标准时间格式设置时间的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 标准时间格式的时间数据
+             * @param[in]      time         标准时间格式的时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -89,7 +88,7 @@ namespace sixents
              * @brief          从对象中获取标准时间格式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 标准时间格式的时间数据
+             * @param[out]     time         标准时间格式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -99,7 +98,7 @@ namespace sixents
             /**
              * @brief          以周内秒时间格式设置时间的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 周内秒格式的时间数据
+             * @param[in]      time         周内秒格式的时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -111,7 +110,7 @@ namespace sixents
              * @brief          从对象中获取周内秒格式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 周内秒格式的时间数据
+             * @param[out]     time         周内秒格式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -144,7 +143,7 @@ namespace sixents
              * @brief          当前时间转为小数形式的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -155,7 +154,7 @@ namespace sixents
              * @brief          把时间转为标准时间结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -177,7 +176,7 @@ namespace sixents
              * @brief          把时间转为周内秒结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           只有支持周内秒格式的时间才需要用到此函数
@@ -198,7 +197,7 @@ namespace sixents
             /**
              * @brief          标准时间转秒
              * @author         wuchuanfei@sixents.com
-             * @param[in]      stdTime: 标准时间格式的时间数据
+             * @param[in]      stdTime          标准时间格式的时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         与标准时间同一标准下的小数秒
@@ -209,8 +208,8 @@ namespace sixents
             /**
              * @brief          秒转标准时间
              * @author         wuchuanfei@sixents.com
-             * @param[in]      sec: 小数秒格式的时间
-             * @param[out]     stdTime: 标准时间格式的时间
+             * @param[in]      sec          小数秒格式的时间
+             * @param[out]     stdTime      标准时间格式的时间
              * @exception      N/A
              * @return         当前函数执行是否成功
              * @note           N/A
@@ -220,8 +219,8 @@ namespace sixents
             /**
              * @brief          周内秒时间转秒
              * @author         wuchuanfei@sixents.com
-             * @param[in]      stdTime: 周内秒格式的时间
-                               startTime: 当前时间系统的起算时间
+             * @param[in]      stdTime      周内秒格式的时间
+             * @param[in]      startTime    当前时间系统的起算时间
              * @param[out]     N/A
              * @exception      N/A
              * @return         转换后的小数秒时间
@@ -232,9 +231,9 @@ namespace sixents
             /**
              * @brief          秒转周内秒
              * @author         wuchuanfei@sixents.com
-             * @param[in]      sec: 小数秒时间
-                               startTime: 当前时间系统的起算时间
-             * @param[out]     stdTime: 转换后的周内秒时间
+             * @param[in]      sec              小数秒时间
+             * @param[in]      startTime        当前时间系统的起算时间
+             * @param[out]     stdTime          转换后的周内秒时间
              * @exception      N/A
              * @return         当前函数执行是否成功
              * @note           N/A
@@ -242,9 +241,9 @@ namespace sixents
             INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
 
         private:
-            UINT32 m_timeType; /* 存放时间,便于直接使用父类指针直接获取对象类型 */
+            UINT32 m_timeType; ///< 存放时间,便于直接使用父类指针直接获取对象类型
         };                     // end class IGNSSTime
-    }                          // end namespace GNSSUtilityLib
+    }                          // end namespace Math
 } // end namespace sixents
 
 #endif

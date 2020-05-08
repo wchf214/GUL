@@ -8,14 +8,14 @@
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 
-#ifndef _CGPS_TIME_H
-#define _CGPS_TIME_H
+#ifndef CGPS_TIME_H
+#define CGPS_TIME_H
 
 #include "IGNSSTime.h"
 
 namespace sixents
 {
-    namespace GNSSUtilityLib
+    namespace Math
     {
         /**
          *  @class       CGPSTime
@@ -29,7 +29,7 @@ namespace sixents
             /**
              * @brief          构造函数
              * @author         wuchuanfei@sixents.com
-             * @param[in]      timeType: 时间类型，目前仅支持TIME_TYPE中定义的几种时间类型
+             * @param[in]      timeType         时间类型，目前仅支持TIME_TYPE中定义的几种时间类型
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -52,7 +52,7 @@ namespace sixents
              * @brief          以年月日时分秒格式对时间进行格式化的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     formatString: 格式化后的字符串
+             * @param[out]     formatString         格式化后的字符串
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -74,7 +74,7 @@ namespace sixents
              * @brief          当前时间转为小数形式的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time      转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -96,7 +96,7 @@ namespace sixents
              * @brief          把时间转为标准时间结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -107,7 +107,7 @@ namespace sixents
              * @brief          把时间转为周内秒结构的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 转换后的时间
+             * @param[out]     time         转换后的时间
              * @exception      N/A
              * @return         N/A
              * @note           只有支持周内秒格式的时间才需要用到此函数
@@ -117,7 +117,7 @@ namespace sixents
             /**
              * @brief          设置小数形式的时间到对象的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 时间数据
+             * @param[in]      time         时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -129,7 +129,7 @@ namespace sixents
              * @brief          从对象中获取小数形式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 小数形式的时间数据
+             * @param[out]     time         小数形式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -139,7 +139,7 @@ namespace sixents
             /**
              * @brief          以周内秒时间格式设置时间的接口
              * @author         wuchuanfei@sixents.com
-             * @param[in]      time: 周内秒格式的时间数据
+             * @param[in]      time         周内秒格式的时间数据
              * @param[out]     N/A
              * @exception      N/A
              * @return         N/A
@@ -151,7 +151,7 @@ namespace sixents
              * @brief          从对象中获取周内秒格式的时间的接口
              * @author         wuchuanfei@sixents.com
              * @param[in]      N/A
-             * @param[out]     time: 周内秒格式的时间数据
+             * @param[out]     time         周内秒格式的时间数据
              * @exception      N/A
              * @return         N/A
              * @note           N/A
@@ -159,10 +159,10 @@ namespace sixents
             virtual void GetTime(SGNSSTime& time) override;
 
         private:
-            SGNSSTime m_time; /*以周内秒格式表示的时间，与m_sec之间可互转*/
-            DOUBLE m_sec;     /* 以秒格式表示的时间 */
+            SGNSSTime m_time; ///< 以周内秒格式表示的时间，与m_sec之间可互转
+            DOUBLE m_sec;     ///< 以秒格式表示的时间
         };                    // end class CGPSTime
-    }                         // end namespace GNSSUtilityLib
+    }                         // end namespace Math
 } // end namespace sixents
 
 #endif

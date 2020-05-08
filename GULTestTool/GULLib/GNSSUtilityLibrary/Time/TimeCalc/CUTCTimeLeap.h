@@ -1,4 +1,0 @@
-#ifndef CUTCTIMELEAP_H
-#define CUTCTIMELEAP_H
-
-#endif // CUTCTIMELEAP_H
