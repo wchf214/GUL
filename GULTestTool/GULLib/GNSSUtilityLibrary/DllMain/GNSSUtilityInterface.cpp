@@ -142,7 +142,7 @@ namespace sixents
         {
             UINT64 temp = 0;
             int ret = CAppInterface::GNSSTimeConvert(
-                static_cast<UINT64>(srcWeek), srcSec, srcTimeType, temp, destSec, destTimeType);
+                static_cast<UINT64>(srcWeek), srcSec, srcTimeType, destTimeType, temp, destSec);
             destWeek = static_cast<unsigned int>(temp);
             return ret;
         }
@@ -179,15 +179,15 @@ namespace sixents
         }
 
         extern "C" DLL_API int STD_CALL
-        XYZ2BLH(const double x, const double y, const double z, double& lon, double& lat, double& height)
+        XYZ2BLH(const double x, const double y, const double z, double& lat, double& lon, double& height)
         {
-            return CAppInterface::XYZ2BLH(x, y, z, lon, lat, height);
+            return CAppInterface::XYZ2BLH(x, y, z, lat, lon, height);
         }
 
         extern "C" DLL_API int STD_CALL
-        BLH2XYZ(const double lon, const double lat, const double height, double& x, double& y, double& z)
+        BLH2XYZ(const double lat, const double lon, const double height, double& x, double& y, double& z)
         {
-            return CAppInterface::BLH2XYZ(lon, lat, height, x, y, z);
+            return CAppInterface::BLH2XYZ(lat, lon, height, x, y, z);
         }
 
         extern "C" DLL_API int STD_CALL XYZ2ENU(const double curX,

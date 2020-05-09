@@ -31,6 +31,18 @@ namespace sixents
             /**
              * @brief       坐标转换类构造函数
              * @author      pengshupan@sixents.com
+             * @param[in]   N/A
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        坐标系类型为1代表地理坐标，坐标系类型为2代表空间直角坐标
+             */
+            CGNSSCoordinate();
+
+            /**
+             * @brief       坐标转换类构造函数
+             * @author      pengshupan@sixents.com
              * @param[in]   x                   输入数据x
              * @param[in]   y                   输入数据y
              * @param[in]   z                   输入数据z
@@ -123,8 +135,7 @@ namespace sixents
                     const DOUBLE height,
                     DOUBLE& x,
                     DOUBLE& y,
-                    DOUBLE& z,
-                    COORDINATE_SYS_TYPE coordinateFrame);
+                    DOUBLE& z);
 
             /**
              * @brief       空间直角坐标转大地坐标
@@ -146,18 +157,17 @@ namespace sixents
                     const DOUBLE z,
                     DOUBLE& lat,
                     DOUBLE& lon,
-                    DOUBLE& height,
-                    COORDINATE_SYS_TYPE coordinateFrame);
+                    DOUBLE& height);
 
             /**
              * @brief       空间直角坐标转站心坐标
              * @author      pengshupan@sixents.com
-             * @param[in]   refX            参考点空间之角坐标x
-             * @param[in]   refY            参考点空间之角坐标y
-             * @param[in]   refZ            参考点空间之角坐标z
              * @param[in]   curX            目标点空间之角坐标x
              * @param[in]   curY            目标点空间之角坐标y
              * @param[in]   curZ            目标点空间之角坐标z
+             * @param[in]   refX            参考点空间之角坐标x
+             * @param[in]   refY            参考点空间之角坐标y
+             * @param[in]   refZ            参考点空间之角坐标z
              * @param[out]  curEast         目标点站心坐标east
              * @param[out]  curNorth        目标点站心坐标north
              * @param[out]  curUp           目标点站心坐标up
@@ -174,8 +184,7 @@ namespace sixents
                           const DOUBLE refZ,
                           DOUBLE& curEast,
                           DOUBLE& curNorth,
-                          DOUBLE& curUp,
-                          COORDINATE_SYS_TYPE coordinateFrame);
+                          DOUBLE& curUp);
 
             /**
              * @brief       站心坐标转空间直角坐标
@@ -202,8 +211,7 @@ namespace sixents
                           const DOUBLE refZ,
                           DOUBLE& curX,
                           DOUBLE& curY,
-                          DOUBLE& curZ,
-                          COORDINATE_SYS_TYPE coordinateFrame);
+                          DOUBLE& curZ);
 
         private:
             /**
@@ -231,7 +239,7 @@ namespace sixents
              * @retval      N/A
              * @note        N/A
              */
-            DOUBLE CalcLat(DOUBLE x, DOUBLE y, DOUBLE z, COORDINATE_SYS_TYPE coordinateFrame) const;
+            INT32 CalcLat(DOUBLE x, DOUBLE y, DOUBLE z, DOUBLE& lat) const;
 
         private:
             SXYZ m_spaceCoordinate;

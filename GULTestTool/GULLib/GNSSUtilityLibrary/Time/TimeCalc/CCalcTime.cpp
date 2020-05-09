@@ -89,8 +89,8 @@ namespace sixents
                 }
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
                 const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
-                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
-                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
+                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_ONE]);
+                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_TWO]);
                 const UINT32 hour = 0;
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;

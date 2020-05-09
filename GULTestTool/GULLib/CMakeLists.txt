@@ -16,12 +16,6 @@ set(gul_VERSION_1.0)
 # 添加编译选项
 add_compile_options(-g)
 
-# 头文件包含目录
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# 附加库包含目录
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
-
 # 添加子目录
 add_subdirectory(GNSSMathUtilityLib)
-
+add_subdirectory(GNSSUtilityLibrary)

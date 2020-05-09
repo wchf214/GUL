@@ -1,11 +1,11 @@
 #include "AppInterface.h"
+#include <cstring>
 #include "../Angle/CGNSSAngle.h"
 #include "../Coordinate/CGNSSCoord.h"
 #include "../DllMain/GNSSCommonDef.h"
 #include "../Ephemeris/CGNSSEphemeris.h"
 #include "../Time/TimeCalc/CCalcTime.h"
 #include "../Time/TimeSys/CTimeFactory.h"
-
 namespace sixents
 {
     namespace Math
@@ -23,7 +23,7 @@ namespace sixents
                     break;
                 }
 
-                if (timeType != GPS || timeType != BDS || timeType != GALILEO)
+                if (timeType != GPS && timeType != BDS && timeType != GALILEO)
                 {
                     retVal = RETURN_TIME_TYPE_ERROR;
                     break;
@@ -55,7 +55,7 @@ namespace sixents
                     break;
                 }
 
-                memcpy_s(formatString, static_cast<rsize_t>(len), timeStr.c_str(), static_cast<rsize_t>(len));
+                memcpy(formatString, timeStr.c_str(), static_cast<size_t>(len));
                 retVal = RETURN_SUCCESS;
             } while (false);
             return retVal;
@@ -108,7 +108,7 @@ namespace sixents
                     retVal = RETURN_NULL_PTR;
                     break;
                 }
-                memcpy_s(formatString, static_cast<rsize_t>(len), timeStr.c_str(), static_cast<rsize_t>(len));
+                memcpy(formatString, timeStr.c_str(), static_cast<size_t>(len));
                 retVal = RETURN_SUCCESS;
             } while (false);
             return retVal;
@@ -133,11 +133,30 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
+                // srcTimeType, destTimeType,判断
                 if ((srcMonth <= 0 || srcMonth > MONTH_IN_YEAR) || (srcDay <= 0 || srcDay > MAX_DAY_IN_MONTH)
                     || (srcHour < 0 || srcHour >= MAX_HOUR_IN_DAY) || (srcMinute < 0 || srcMinute >= BASE_60)
                     || (srcSecond < 0 || srcSecond > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
+                    break;
+                }
+
+                if (srcTimeType != UTC && srcTimeType != GLONASS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
+                if (destTimeType != UTC && destTimeType != GLONASS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
+                if (srcTimeType == destTimeType)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
                     break;
                 }
 
@@ -190,9 +209,22 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
+                // srcTimeType, destTimeType,判断
                 if (sec < 0 || sec >= WEEK_SEC)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+                if (gnssTimeType != GPS && gnssTimeType != GALILEO && gnssTimeType != BDS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
+                if (standardTimeType != UTC && standardTimeType != GLONASS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
                     break;
                 }
 
@@ -235,14 +267,15 @@ namespace sixents
                                                     const UINT32 hour,
                                                     const UINT32 minute,
                                                     const DOUBLE second,
-                                                    const UINT32 gnssTimeType,
                                                     const UINT32 standardTimeType,
+                                                    const UINT32 gnssTimeType,
                                                     UINT64& week,
                                                     DOUBLE& sec)
         {
             INT32 retVal = RETURN_FAIL;
             do
             {
+                // srcTimeType, destTimeType,判断
                 if ((month <= 0 || month > MONTH_IN_YEAR) || (day <= 0 || day > MAX_DAY_IN_MONTH)
                     || (hour < 0 || hour >= MAX_HOUR_IN_DAY) || (minute < 0 || minute >= BASE_60)
                     || (second < 0 || second > BASE_60))
@@ -250,6 +283,19 @@ namespace sixents
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
                 }
+
+                if (standardTimeType != UTC && standardTimeType != GLONASS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
+                if (gnssTimeType != GPS && gnssTimeType != GALILEO && gnssTimeType != BDS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
                 SStandardTime srcTimeData = {year, month, day, hour, minute, second, standardTimeType};
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
                 if (srcTime == nullptr)
@@ -262,6 +308,8 @@ namespace sixents
                 srcTime->GetTime(curSec);
                 DOUBLE retSec = CCalcTime::TimeConvert(
                     curSec, static_cast<TIME_TYPE>(standardTimeType), static_cast<TIME_TYPE>(gnssTimeType));
+
+                // retSec <0判断
                 IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(gnssTimeType));
                 if (destTime == nullptr)
                 {
@@ -273,6 +321,7 @@ namespace sixents
                 destTime->GetTime(destTimeData);
                 week = destTimeData.m_week;
                 sec = destTimeData.m_secAndMsec;
+
                 retVal = RETURN_SUCCESS;
             } while (false);
             return retVal;
@@ -282,55 +331,86 @@ namespace sixents
         INT32 CAppInterface::GNSSTimeConvert(const UINT64 srcWeek,
                                              const DOUBLE srcSec,
                                              const UINT32 srcTimeType,
+                                             const UINT32 destTimeType,
                                              UINT64& destWeek,
-                                             DOUBLE& destSec,
-                                             const UINT32 destTimeType)
+                                             DOUBLE& destSec)
         {
-            if (srcSec < 0 || srcSec > WEEK_SEC)
+            INT32 retVal = RETURN_FAIL;
+            do
             {
-                return RETURN_ERROR_PARAMETER;
-            }
+                if (srcSec < 0 || srcSec >= WEEK_SEC)
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
 
-            SGNSSTime srcTimeData = {srcWeek, srcSec, srcTimeType};
-            IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
-            if (srcTime == nullptr)
-            {
-                return RETURN_NEW_PTR_FAILED;
-            }
-            srcTime->SetTime(srcTimeData);
-            DOUBLE curSec = 0.0;
-            srcTime->GetTime(curSec);
-            DOUBLE retSec = CCalcTime::TimeConvert(
-                curSec, static_cast<TIME_TYPE>(srcTimeType), static_cast<TIME_TYPE>(destTimeType));
-            IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
-            if (destTime == nullptr)
-            {
-                return RETURN_NEW_PTR_FAILED;
-            }
-            destTime->SetTime(retSec);
-            SGNSSTime destTimeData;
-            destTime->GetTime(destTimeData);
-            destWeek = destTimeData.m_week;
-            destSec = destTimeData.m_secAndMsec;
-            if (destWeek < 0 || destSec < 0)
-            {
-                return RETURN_ERROR_PARAMETER;
-            }
-            return RETURN_SUCCESS;
+                if (srcTimeType != GPS && srcTimeType != GALILEO && srcTimeType != BDS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+                if (destTimeType != GPS && destTimeType != GALILEO && destTimeType != BDS)
+                {
+                    retVal = RETURN_TIME_TYPE_ERROR;
+                    break;
+                }
+
+                SGNSSTime srcTimeData = {srcWeek, srcSec, srcTimeType};
+                IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
+                if (srcTime == nullptr)
+                {
+                    retVal = RETURN_NEW_PTR_FAILED;
+                    break;
+                }
+                srcTime->SetTime(srcTimeData);
+                DOUBLE curSec = 0.0;
+                srcTime->GetTime(curSec);
+                DOUBLE retSec = CCalcTime::TimeConvert(
+                    curSec, static_cast<TIME_TYPE>(srcTimeType), static_cast<TIME_TYPE>(destTimeType));
+
+                if (retSec < 0)
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
+                if (destTime == nullptr)
+                {
+                    return RETURN_NEW_PTR_FAILED;
+                }
+                destTime->SetTime(retSec);
+
+                SGNSSTime destTimeData;
+                destTime->GetTime(destTimeData);
+                destWeek = destTimeData.m_week;
+                destSec = destTimeData.m_secAndMsec;
+                if (destWeek < 0 || destSec < 0)
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                }
+                retVal = RETURN_SUCCESS;
+            } while (false);
+            return retVal;
         }
 
         INT32 CAppInterface::WeekSecToSec(const UINT64 week, const DOUBLE second, const UINT32 timeType, DOUBLE& sec)
         {
-            if (week < 0 || second < 0 || second > WEEK_SEC)
+            INT32 retVal = RETURN_FAIL;
+            do
             {
-                return RETURN_ERROR_PARAMETER;
-            }
+                if (week < 0 || second < 0 || second >= WEEK_SEC)
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                }
 
-            IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
-            SGNSSTime timeData = {week, second, timeType};
-            timeObj->SetTime(timeData);
-            timeObj->GetTime(sec);
-            return RETURN_SUCCESS;
+                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
+                SGNSSTime timeData = {week, second, timeType};
+                timeObj->SetTime(timeData);
+                timeObj->GetTime(sec);
+                retVal = RETURN_SUCCESS;
+            } while (false);
+            return retVal;
         }
 
         INT32 CAppInterface::StandardTimeToSec(const UINT32 year,
@@ -342,40 +422,43 @@ namespace sixents
                                                const UINT32 timeType,
                                                DOUBLE& sec)
         {
-            if (year < 0 || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 24 || minute < 0
-                || minute > 60 || second < 0 || second > 60)
+            INT32 retVal = RETURN_FAIL;
+            do
             {
-                return RETURN_ERROR_STANDARDTIME;
-            }
-            IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
-            SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
-            sec = timeObj->StandTimeToSec(timeData);
+                if ((month <= 0 || month > MONTH_IN_YEAR) || (day <= 0 || day > MAX_DAY_IN_MONTH)
+                    || (hour < 0 || hour >= MAX_HOUR_IN_DAY) || (minute < 0 || minute >= BASE_60)
+                    || (second < 0 || second > BASE_60))
+                {
+                    retVal = RETURN_ERROR_STANDARDTIME;
+                }
+                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
+                SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
+                sec = timeObj->StandTimeToSec(timeData);
+                retVal = RETURN_SUCCESS;
+            } while (false);
+            return retVal;
+        }
+
+        INT32
+        CAppInterface::XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lat, DOUBLE& lon, DOUBLE& height)
+        {
+            CGNSSCoordinate coordinate;
+            coordinate.XYZ2BLH(x, y, z, lat, lon, height);
             return RETURN_SUCCESS;
         }
 
         INT32
-        CAppInterface::XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lon, DOUBLE& lat, DOUBLE& height)
+        CAppInterface::BLH2XYZ(const DOUBLE lat, const DOUBLE lon, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z)
         {
-            CGNSSCoordinate coord(x, y, z, XYZ);
-            coord.XYZ2BLH(x, y, z, lon, lat, height, WGS84);
-            return RETURN_SUCCESS;
-        }
+            //纬度超限-90~90 经度超限-180~180
+            if (lat > LATITUDE_UPPER_LIMIT || lat < LATITUDE_LOWER_LIMIT || lon > LONGITUDE_UPPER_LIMIT
+                || lon < LONGITUDE_LOWER_LIMIT)
+            {
+                return RETURN_ERROR_PARAMETER;
+            }
 
-        INT32
-        CAppInterface::BLH2XYZ(const DOUBLE lon, const DOUBLE lat, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z)
-        {
-            //经度超限-180~180
-            if (lon > LONGITUDE_UPPER_LIMIT || lon < LONGITUDE_LOWER_LIMIT)
-            {
-                return RETURN_ERROR_PARAMETER;
-            }
-            //纬度超限-90~90
-            if (lat > LATITUDE_UPPER_LIMIT || lat < LATITUDE_LOWER_LIMIT)
-            {
-                return RETURN_ERROR_PARAMETER;
-            }
-            CGNSSCoordinate coordinate(lon, lat, height, BLH);
-            coordinate.BLH2XYZ(lon, lat, height, x, y, z, WGS84);
+            CGNSSCoordinate coordinate;
+            coordinate.BLH2XYZ(lat, lon, height, x, y, z);
             return RETURN_SUCCESS;
         }
 
@@ -389,8 +472,8 @@ namespace sixents
                                      DOUBLE& north,
                                      DOUBLE& up)
         {
-            CGNSSCoordinate coord(curX, curY, curZ, XYZ);
-            coord.XYZ2ENU(curX, curY, curZ, refX, refY, refZ, east, north, up, WGS84);
+            CGNSSCoordinate coordinate;
+            coordinate.XYZ2ENU(curX, curY, curZ, refX, refY, refZ, east, north, up);
             return RETURN_SUCCESS;
         }
 
@@ -404,22 +487,22 @@ namespace sixents
                                      DOUBLE& curY,
                                      DOUBLE& curZ)
         {
-            CGNSSCoordinate coord(curX, curY, curZ, XYZ);
-            coord.ENU2XYZ(east, north, up, refX, refY, refZ, curX, curY, curZ, WGS84);
+            CGNSSCoordinate coordinate;
+            coordinate.ENU2XYZ(east, north, up, refX, refY, refZ, curX, curY, curZ);
             return RETURN_SUCCESS;
         }
 
         INT32
         CAppInterface::CalcGlonassEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal)
         {
-            CGNSSEphemeris gloGNSSEphemeris(ephObj);
+            CGNSSEphemeris gloGNSSEphemeris;
             gloGNSSEphemeris.CalcGloEphSatClock(sec, ephObj, clockVal);
             return RETURN_SUCCESS;
         }
 
         INT32 CAppInterface::CalcEphSatClock(const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& clockVal)
         {
-            CGNSSEphemeris gnssEphemeris(ephObj);
+            CGNSSEphemeris gnssEphemeris;
             gnssEphemeris.CalcEphSatClock(sec, ephObj, clockVal);
             return RETURN_SUCCESS;
         }
@@ -427,14 +510,14 @@ namespace sixents
         INT32 CAppInterface::CalcGlonassEphSatPos(
             const DOUBLE sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z)
         {
-            CGNSSEphemeris gloGNSSEphemeris(ephObj);
+            CGNSSEphemeris gloGNSSEphemeris;
             gloGNSSEphemeris.CalcGloEphSatPos(sec, ephObj, x, y, z);
             return RETURN_SUCCESS;
         }
 
         INT32 CAppInterface::CalcEphSatPos(const DOUBLE sec, const SEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z)
         {
-            CGNSSEphemeris gnssEphemeris(ephObj);
+            CGNSSEphemeris gnssEphemeris;
             gnssEphemeris.CalcEphSatPos(sec, ephObj, x, y, z);
             return RETURN_SUCCESS;
         }
@@ -445,14 +528,14 @@ namespace sixents
                                            UINT32& len,
                                            const BOOL_T formatType)
         {
-            if (nullptr != formatString)
-            {
-                formatString = nullptr;
-            }
-
             CGNSSAngle angleObj(degree);
             UINT32 length = angleObj.GetLength(true);
-            formatString = new CHAR[length + 1];
+
+            if (len != length || formatString == nullptr)
+            {
+                len = length;
+                return RETURN_ERROR_PARAMETER;
+            }
             angleObj.ToDegString(formatString, length, formatType);
             return RETURN_SUCCESS;
         }
@@ -464,14 +547,13 @@ namespace sixents
                                               UINT32& len,
                                               const BOOL_T formatType)
         {
-            if (nullptr != formatString)
-            {
-                formatString = nullptr;
-            }
-
             CGNSSAngle angleObj(degree, minute, sec);
             UINT32 length = angleObj.GetLength(false);
-            formatString = new CHAR[length + 1];
+            if (len != length || formatString == nullptr)
+            {
+                len = length;
+                return RETURN_ERROR_PARAMETER;
+            }
             angleObj.ToDegString(formatString, length, formatType);
             return RETURN_SUCCESS;
         }
@@ -487,7 +569,7 @@ namespace sixents
         {
             DOUBLE DegToRad = 0;
             CGNSSAngle angleObj(degree, minute, sec);
-            angleObj.DMSToDeg(degree, minute, sec, DegToRad);
+            // angleObj.DMSToDeg(degree, minute, sec, DegToRad);
             angleObj.DegToRad(DegToRad, radian);
             return RETURN_SUCCESS;
         }
@@ -503,8 +585,8 @@ namespace sixents
         {
             DOUBLE RadToDeg = 0;
             CGNSSAngle angleObj(radian, false);
-            angleObj.RadToDeg(radian, RadToDeg);
-            angleObj.DegToDMS(RadToDeg, degree, minute, sec);
+            //   angleObj.RadToDeg(radian, RadToDeg);
+            // angleObj.DegToDMS(RadToDeg, degree, minute, sec);
             return RETURN_SUCCESS;
         }
     } // namespace Math

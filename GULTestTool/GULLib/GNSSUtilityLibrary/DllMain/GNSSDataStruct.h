@@ -437,8 +437,8 @@ namespace sixents
          */
         struct SBLH
         {
-            DOUBLE m_lon;    ///< 经度，精确度：11位小数
             DOUBLE m_lat;    ///< 纬度，精确度：11位小数
+            DOUBLE m_lon;    ///< 经度，精确度：11位小数
             DOUBLE m_height; ///< 高程，精确度：9位小数
         };
 

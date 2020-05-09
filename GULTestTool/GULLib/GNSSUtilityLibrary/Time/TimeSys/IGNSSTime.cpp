@@ -144,8 +144,16 @@ namespace sixents
         INT32 IGNSSTime::SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime)
         {
             DOUBLE curSec = sec - static_cast<DOUBLE>(startTime);
-            stdTime.m_week = static_cast<INT64>(curSec) / WEEK_SEC;
-            stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week) * WEEK_SEC;
+            if (curSec <= 0)
+            {
+                stdTime.m_week = 0;
+                stdTime.m_secAndMsec = 0;
+            }
+            else
+            {
+                stdTime.m_week = static_cast<INT64>(curSec) / WEEK_SEC;
+                stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week) * WEEK_SEC;
+            }
             return RETURN_SUCCESS;
         }
     } // end namespace Math

@@ -27,6 +27,12 @@ namespace sixents
         class CGNSSAngle
         {
         public:
+            struct DMS
+            {
+                INT32 m_degree;
+                UINT32 m_minute;
+                DOUBLE m_second;
+            };
             /**
              * @brief       角度构造函数
              * @author      pengshupan@sixents.com
@@ -176,31 +182,31 @@ namespace sixents
              */
             INT32 RadToDeg();
 
-            /**
-             * @brief       弧度形式转化为角度形式
-             * @author      pengshupan@sixents.com
-             * @param[in]   radian      角度弧度形式
-             * @param[out]  degree      角度角度形式
-             * @exception   N/A
-             * @return      函数执行情况
-             * @retval      N/A
-             * @note        N/A
-             */
-            INT32 RadToDeg(const DOUBLE radian, DOUBLE& degree);
+            ///**
+            // * @brief       弧度形式转化为角度形式
+            // * @author      pengshupan@sixents.com
+            // * @param[in]   radian      角度弧度形式
+            // * @param[out]  degree      角度角度形式
+            // * @exception   N/A
+            // * @return      函数执行情况
+            // * @retval      N/A
+            // * @note        N/A
+            // */
+            // INT32 RadToDeg(const DOUBLE radian, DOUBLE& degree);
 
-            /**
-             * @brief       角度形式转化为度分秒形式
-             * @author      pengshupan@sixents.com
-             * @param[in]   deg         角度度形式
-             * @param[out]  degree      度
-             * @param[out]  minute      分
-             * @param[out]  second      秒
-             * @exception   N/A
-             * @return      函数执行情况
-             * @retval      N/A
-             * @note        N/A
-             */
-            INT32 DegToDMS(const DOUBLE deg, INT32& degree, UINT32& minute, DOUBLE& second);
+            ///**
+            // * @brief       角度形式转化为度分秒形式
+            // * @author      pengshupan@sixents.com
+            // * @param[in]   deg         角度度形式
+            // * @param[out]  degree      度
+            // * @param[out]  minute      分
+            // * @param[out]  second      秒
+            // * @exception   N/A
+            // * @return      函数执行情况
+            // * @retval      N/A
+            // * @note        N/A
+            // */
+            // INT32 DegToDMS(const DOUBLE deg, INT32& degree, UINT32& minute, DOUBLE& second);
 
             /**
              * @brief       角度形式转化为度分秒形式
@@ -214,19 +220,19 @@ namespace sixents
              */
             INT32 DegToDMS();
 
-            /**
-             * @brief       度分秒形式转化为角度形式
-             * @author      pengshupan@sixents.com
-             * @param[in]   degree      角度度
-             * @param[in]   minute      角度分
-             * @param[in]   second      角度秒
-             * @param[out]  deg         角度度形式
-             * @exception   N/A
-             * @return      函数执行情况
-             * @retval      N/A
-             * @note        N/A
-             */
-            INT32 DMSToDeg(const INT32 degree, const UINT32 minute, const DOUBLE second, DOUBLE& deg);
+            ///**
+            // * @brief       度分秒形式转化为角度形式
+            // * @author      pengshupan@sixents.com
+            // * @param[in]   degree      角度度
+            // * @param[in]   minute      角度分
+            // * @param[in]   second      角度秒
+            // * @param[out]  deg         角度度形式
+            // * @exception   N/A
+            // * @return      函数执行情况
+            // * @retval      N/A
+            // * @note        N/A
+            // */
+            // INT32 DMSToDeg(const INT32 degree, const UINT32 minute, const DOUBLE second, DOUBLE& deg);
 
             /**
              * @brief       度分秒形式转化为角度形式
@@ -241,9 +247,7 @@ namespace sixents
             INT32 DMSToDeg();
 
         private:
-            INT32 m_degree;
-            UINT32 m_minute;
-            DOUBLE m_second;
+            DMS m_dms;
             DOUBLE m_decimalDegree; // degree of decimal form
             DOUBLE m_radian;        // radian
             std::string m_formatString;

@@ -29,26 +29,14 @@ namespace sixents
             /**
              * @brief       GPS,GALILEO,BDS卫星系统的构造函数
              * @author      pengshupan@sixents.com
-             * @param[in]   ephObj          GPS,GALILEO,BDS卫星系统的星历结构体
+             * @param[in]   N/A
              * @param[out]  N/A
              * @exception   N/A
              * @return      函数的执行结果
              * @retval      N/A
              * @note        N/A
              */
-            explicit CGNSSEphemeris(const SEphemeris& ephObj);
-
-            /**
-             * @brief       GLONASS卫星系统的构造函数
-             * @author      pengshupan@sixents.com
-             * @param[in]   ephObj          GLONASS卫星系统的星历结构体
-             * @param[out]  N/A
-             * @exception   N/A
-             * @return      函数的执行结果
-             * @retval      N/A
-             * @note        N/A
-             */
-            explicit CGNSSEphemeris(const SGlonassEphemeris& ephObj);
+            explicit CGNSSEphemeris();
 
             /**
              * @brief       析构函数
@@ -61,30 +49,6 @@ namespace sixents
              * @note        N/A
              */
             virtual ~CGNSSEphemeris();
-
-            /**
-             * @brief       获取GPS,GALILEO,BDS卫星系统星历对象
-             * @author      pengshupan@sixents.com
-             * @param[in]   N/A
-             * @param[out]  N/A
-             * @exception   N/A
-             * @return      函数的执行结果
-             * @retval      N/A
-             * @note        N/A
-             */
-            SEphemeris GetEph();
-
-            /**
-             * @brief       获取GLONASS卫星系统星历对象
-             * @author      pengshupan@sixents.com
-             * @param[in]   N/A
-             * @param[out]  N/A
-             * @exception   N/A
-             * @return      函数的执行结果
-             * @retval      N/A
-             * @note        N/A
-             */
-            SGlonassEphemeris GetGloEph();
 
             /**
              * @brief       计算GPS,GALILEO,BDS卫星系统的钟差
@@ -103,13 +67,12 @@ namespace sixents
              * @brief       计算GPS,GALILEO,BDS卫星系统的位置
              * @author      pengshupan@sixents.com
              * @param[in]   sec         接收机获取星历文件的时间(s)
-             * @param[in]   ephObj      jGPS,GALILEO,BDS星历文件
+             * @param[in]   ephObj      GPS,GALILEO,BDS星历文件
              * @param[out]  x           GPS,GALILEO,BDS卫星系统位置x
              * @param[out]  y           GPS,GALILEO,BDS卫星系统位置y
              * @param[out]  z           GPS,GALILEO,BDS卫星系统位置z
              * @exception   N/A
              * @return      函数的执行结果
-             * @retval      N/A
              * @note        N/A
              */
             INT32 CalcEphSatPos(const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
@@ -122,7 +85,6 @@ namespace sixents
              * @param[out]  clockVal        GLONASS卫星系统的钟差
              * @exception   N/A
              * @return      函数的执行结果
-             * @retval      N/A
              * @note        N/A
              */
             INT32 CalcGloEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal);
@@ -137,19 +99,15 @@ namespace sixents
              * @param[out]  z           GLONASS卫星系统位置z
              * @exception   N/A
              * @return      函数的执行结果
-             * @retval      N/A
              * @note        N/A
              */
             INT32 CalcGloEphSatPos(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
         private:
+            
             DOUBLE VectorDot(const DOUBLE* a, const DOUBLE* b, INT32 n);
             void OrbitDifferentialEquations(const DOUBLE* x, DOUBLE* xdot, const DOUBLE* acc);
             void Glorbit(DOUBLE t, DOUBLE* x, const DOUBLE* acc);
-
-        private:
-            SEphemeris m_ephObj;
-            SGlonassEphemeris m_gloEphObj;
         };
     } // end namespace Math
 } // end namespace sixents

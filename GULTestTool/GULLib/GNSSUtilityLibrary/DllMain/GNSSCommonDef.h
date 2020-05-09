@@ -168,28 +168,34 @@ namespace sixents
         const INT32 MSEC_ACCURACY = 3;       ///< 秒的精确度(精确到毫秒)
         const INT32 MATRIX_ACCURACY = 6;     ///< 矩阵中DOUBLE数据与角分秒格式中的秒的精确度
         const INT32 DEGREE_ACCURACY = 11;    ///< 大地坐标中经纬度与小数度的精确度(小数后11位)
-        const DOUBLE LAT_ACCURACY = 1.0e-08; ///< 计算大地纬度B时的精度
+        const DOUBLE LAT_ACCURACY = 1.0e-11; ///< 计算大地纬度B时的精度
 
-        const INT32 LONGITUDE_LOWER_LIMIT = -180; ///< 经度下限
-        const INT32 LONGITUDE_UPPER_LIMIT = 180;  ///< 经度上限
-        const INT32 LATITUDE_LOWER_LIMIT = -90;   ///< 纬度下限
-        const INT32 LATITUDE_UPPER_LIMIT = 90;    ///< 纬度上限
+        const DOUBLE LONGITUDE_LOWER_LIMIT = -180; ///< 经度下限
+        const DOUBLE LONGITUDE_UPPER_LIMIT = 180;  ///< 经度上限
+        const DOUBLE LATITUDE_LOWER_LIMIT = -90;   ///< 纬度下限
+        const DOUBLE LATITUDE_UPPER_LIMIT = 90;    ///< 纬度上限
 
         //地球的长半轴
-        const DOUBLE EARTH_LONG_RADIUS = 6378137.0;      ///< 除pz90外的长半轴  earth semimajor axis (WGS84) (m)
-        const DOUBLE EARTH_LONG_RADIUS_PZ90 = 6378136.0; ///< pz90的 长半轴
 
+        const DOUBLE WGS84_EARTH_LONG_RADIUS = 6378137.0;     ///< WGS84长半轴
+        const DOUBLE WGS84_EARTH_SHORT_RADIUS = 6356752.3142; ///< WGS84短半轴
+        const DOUBLE WGS84_EARTH_OBLATEO = 1 / 298.257223563; ///< WGS84扁率
+        const DOUBLE WGS84_FIRST_E2 = 0.00669437999013;       ///< WGS84第一偏心率的平方
+        const DOUBLE WGS84_SECOND_E2 = 0.006739496742227;     ///< WGS84第二偏心率的平方
+
+        const DOUBLE EARTH_LONG_RADIUS_PZ90 = 6378136.0; ///< pz90的 长半轴
         //地球的扁率
         const DOUBLE EARTH_OBLATEO_CGCS2000 = 1 / 298.257222101; ///< cgcs2000 扁率
-        const DOUBLE EARTH_OBLATEO_WGS84 = 1 / 298.257223563;    ///< WGS84、itrf96 扁率
-        const DOUBLE EARTH_OBLATEO_PZ90 = 1 / 298.257839303;     ///< PZ90 扁率
 
-        const DOUBLE EARTH_SHORT_RADIUS = EARTH_LONG_RADIUS - EARTH_OBLATEO_WGS84 * EARTH_LONG_RADIUS; //短半径
+        const DOUBLE EARTH_OBLATEO_PZ90 = 1 / 298.257839303; ///< PZ90 扁率
 
-        const SCoordData WGS84_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_WGS84};
+        const DOUBLE EARTH_SHORT_RADIUS =
+            WGS84_EARTH_LONG_RADIUS - WGS84_EARTH_OBLATEO * WGS84_EARTH_LONG_RADIUS; //短半径
+
+        /*const SCoordData WGS84_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_WGS84};
         const SCoordData PZ90_DATA = {EARTH_LONG_RADIUS_PZ90, EARTH_OBLATEO_PZ90};
         const SCoordData ITRF96_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_WGS84};
-        const SCoordData CGCS2000_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_CGCS2000};
+        const SCoordData CGCS2000_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_CGCS2000};*/
 
         // 角度模块常量定义
         const static DOUBLE PI = 3.1415926535897932; ///< pi值

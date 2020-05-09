@@ -1,14 +1,13 @@
+#include "CBDSTime.h"
 #include <iomanip>
 #include <sstream>
-#include "CBDSTime.h"
 
 namespace sixents
 {
     namespace Math
     {
-
         CBDSTime::CBDSTime(const TIME_TYPE timeType)
-            :IGNSSTime(timeType)
+            : IGNSSTime(timeType)
         {
             m_time.m_timeType = timeType;
             m_sec = 0.0;
@@ -24,8 +23,8 @@ namespace sixents
             SStandardTime curTime;
             ToStandTime(curTime);
             formatStream << curTime.m_year << DAY_INTERVAL << curTime.m_month << DAY_INTERVAL << curTime.m_day << " "
-                         << curTime.m_hour << TIME_INTERVAL << curTime.m_minute << TIME_INTERVAL
-                         << std::fixed << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
+                         << curTime.m_hour << TIME_INTERVAL << curTime.m_minute << TIME_INTERVAL << std::fixed
+                         << std::setprecision(MSEC_ACCURACY) << curTime.m_second;
             formatString = formatStream.str();
             formatStream.str(""); // 清空缓存
             return RETURN_SUCCESS;
@@ -36,19 +35,18 @@ namespace sixents
             m_sec = WeekSecToSec(m_time, EPOCH_TO_BDT0);
         }
 
-        void CBDSTime::ToSec(DOUBLE &time)
+        void CBDSTime::ToSec(DOUBLE& time)
         {
             time = WeekSecToSec(m_time, EPOCH_TO_BDT0);
         }
 
-        void CBDSTime::ToStandTime(SStandardTime &time)
+        void CBDSTime::ToStandTime(SStandardTime& time)
         {
             SecToStandTime(m_sec, time);
         }
 
         void CBDSTime::ToStandTime()
-        {
-        }
+        {}
 
         void CBDSTime::ToWeekSec(SGNSSTime& time)
         {

@@ -172,9 +172,9 @@ namespace sixents
             static INT32 GNSSTimeConvert(const UINT64 srcWeek,
                                          const DOUBLE srcSec,
                                          const UINT32 srcTimeType,
+                                         const UINT32 destTimeType,
                                          UINT64& destWeek,
-                                         DOUBLE& destSec,
-                                         const UINT32 destTimeType);
+                                         DOUBLE& destSec);
 
             /**
              * @brief           周内秒转秒
@@ -223,21 +223,21 @@ namespace sixents
              * @brief           空间直角坐标转大地坐标
              * @author          wuchuanfei@sixents.com
              * @param[in]       x,y,z       空间直角坐标，精确到小数点后9位
-             * @param[out]      lon         经度，以度为单位，精确到小数点后11位
              * @param[out]      lat         纬度，以度为单位，精确到小数点后11位
+             * @param[out]      lon         经度，以度为单位，精确到小数点后11位
              * @param[out]      height      高程，精确到小数点后9位
              * @exception       N/A
              * @return          函数执行是否成功
              * @note            N/A
              */
             static INT32
-            XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lon, DOUBLE& lat, DOUBLE& height);
+            XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lat, DOUBLE& lon, DOUBLE& height);
 
             /**
              * @brief           大地坐标转空间直角坐标
              * @author          wuchuanfei@sixents.com
-             * @param[in]       lon         经度，以度为单位，精确到小数点后11位
              * @param[in]       lat         纬度，以度为单位，精确到小数点后11位
+             * @param[in]       lon         经度，以度为单位，精确到小数点后11位
              * @param[in]       height      高程，精确到小数点后9位
              * @param[out]      x,y,z       空间直角坐标，精确到小数点后9位
              * @exception       N/A
@@ -245,7 +245,7 @@ namespace sixents
              * @note            N/A
              */
             static INT32
-            BLH2XYZ(const DOUBLE lon, const DOUBLE lat, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z);
+            BLH2XYZ(const DOUBLE lat, const DOUBLE lon, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
             /**
              * @brief           空间直角坐标转站心坐标

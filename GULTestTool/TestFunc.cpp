@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 namespace sixents {
-    namespace GNSSUtilityLib {
+    namespace Math {
         extern "C" {
             DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
                                                   const double sec,
@@ -157,62 +157,57 @@ namespace sixents {
             DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
             DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
             DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
-        }
-    } // end namespace GNSSUtilityLib
-
-    namespace GNSSMathUtilityLib {
-        extern "C" {
-        DLL_API int STD_CALL MatrixAdd(const double* leftMatrixData,
-                                       const unsigned int leftRow,
-                                       const unsigned int leftCol,
-                                       const double* rightMatrixData,
-                                       const unsigned int rightRow,
-                                       const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
-        DLL_API int STD_CALL MatrixSub(const double* leftMatrixData,
-                                       const unsigned int leftRow,
-                                       const unsigned int leftCol,
-                                       const double* rightMatrixData,
-                                       const unsigned int rightRow,
-                                       const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
-        DLL_API int STD_CALL MatrixMul(const double* leftMatrixData,
-                                       const unsigned int leftRow,
-                                       const unsigned int leftCol,
-                                       const double* rightMatrixData,
-                                       const unsigned int rightRow,
-                                       const unsigned int rightCol,
-                                       double* outMatrixData,
-                                       unsigned int& outRow,
-                                       unsigned int& outCol);
-        DLL_API int STD_CALL MatrixTransposition(const double* inMatrixData,
+            DLL_API int STD_CALL MatrixAdd(const double* leftMatrixData,
+                                           const unsigned int leftRow,
+                                           const unsigned int leftCol,
+                                           const double* rightMatrixData,
+                                           const unsigned int rightRow,
+                                           const unsigned int rightCol,
+                                           double* outMatrixData,
+                                           unsigned int& outRow,
+                                           unsigned int& outCol);
+            DLL_API int STD_CALL MatrixSub(const double* leftMatrixData,
+                                           const unsigned int leftRow,
+                                           const unsigned int leftCol,
+                                           const double* rightMatrixData,
+                                           const unsigned int rightRow,
+                                           const unsigned int rightCol,
+                                           double* outMatrixData,
+                                           unsigned int& outRow,
+                                           unsigned int& outCol);
+            DLL_API int STD_CALL MatrixMul(const double* leftMatrixData,
+                                           const unsigned int leftRow,
+                                           const unsigned int leftCol,
+                                           const double* rightMatrixData,
+                                           const unsigned int rightRow,
+                                           const unsigned int rightCol,
+                                           double* outMatrixData,
+                                           unsigned int& outRow,
+                                           unsigned int& outCol);
+            DLL_API int STD_CALL MatrixTransposition(const double* inMatrixData,
+                                                     const unsigned int inRow,
+                                                     const unsigned int inCol,
+                                                     double* outMatrixData,
+                                                     unsigned int& outRow,
+                                                     unsigned int& outCol);
+            DLL_API int STD_CALL MatrixInverse(const double* inMatrixData,
+                                               const unsigned int inRow,
+                                               const unsigned int inCol,
+                                               double* outMatrixData,
+                                               unsigned int& outRow,
+                                               unsigned int& outCol);
+            DLL_API int STD_CALL MatrixAddRowCol(const double* inMatrixData,
                                                  const unsigned int inRow,
                                                  const unsigned int inCol,
                                                  double* outMatrixData,
                                                  unsigned int& outRow,
                                                  unsigned int& outCol);
-        DLL_API int STD_CALL MatrixInverse(const double* inMatrixData,
-                                           const unsigned int inRow,
-                                           const unsigned int inCol,
-                                           double* outMatrixData,
-                                           unsigned int& outRow,
-                                           unsigned int& outCol);
-        DLL_API int STD_CALL MatrixAddRowCol(const double* inMatrixData,
-                                             const unsigned int inRow,
-                                             const unsigned int inCol,
-                                             double* outMatrixData,
-                                             unsigned int& outRow,
-                                             unsigned int& outCol);
-        DLL_API int STD_CALL MatrixSubRowCol(const double* inMatrixData,
-                                             const unsigned int inRow,
-                                             const unsigned int inCol,
-                                             double* outMatrixData,
-                                             unsigned int& outRow,
-                                             unsigned int& outCol);
+            DLL_API int STD_CALL MatrixSubRowCol(const double* inMatrixData,
+                                                 const unsigned int inRow,
+                                                 const unsigned int inCol,
+                                                 double* outMatrixData,
+                                                 unsigned int& outRow,
+                                                 unsigned int& outCol);
 //            DLL_API int STD_CALL MatrixAdd(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 //            DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 //            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix, SGNSSMatrix& outPutMatrix);
@@ -221,7 +216,7 @@ namespace sixents {
 //            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
 //            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
         }
-    } // end namespace GNSSMathUtilityLib
+    } // end namespace Math
 } // end namespace sixents
 
 // For RtkLib
