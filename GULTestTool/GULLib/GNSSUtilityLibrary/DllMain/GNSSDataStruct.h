@@ -479,6 +479,19 @@ namespace sixents
             DOUBLE m_a; ///< 地球长半轴，精确度：1位小数
             DOUBLE m_f; ///< 地球扁率，分母精确度：9位小数
         };
+
+        /**
+         * @class    SDMS
+         * @author   pengshupan@sixents.com
+         * @brief    角度结构定义
+         * @note     保存角度数据
+         */
+        struct SDMS
+        {
+            INT32 m_degree; ///< 度，必须为整数
+            UINT32 m_minute; ///< 分，在[0,60]的范围内
+            DOUBLE m_second; ///< 秒，精确到小数点后6后
+        };
     } // end namespace Math
 } // namespace sixents
 

@@ -17,12 +17,12 @@ public:
     ~CTestFunc();
 
     // 加载动态库
-    bool LoadRtkLib();
-    void UnloadRtkLib();
-    bool LoadGULLib();
-    void UnloadGULLib();
+    bool LoadRtcmLib();
+    void UnloadRtcmLib();
     bool LoadGULMathLib();
     void UnloadGULMathLib();
+    bool LoadGULLib();
+    void UnloadGULLib();
 
     // 测试接口
     // dataType is true, test file data;
@@ -63,12 +63,12 @@ private:
     bool MatrixSubRowCol(const QString testData, QString& result);
     // 读写TXT文件
     QString ReadTxtFile(const QString& filePath);
-
     // 读写矩阵文件
     void WriteTxtFile(const QString& filePath, const QString& data);
-
     // 读星历文件
     void FileConvertToBin(const QString& filePath, QString& outFilePath);
+    // 为RTCM解码二进制星历电文
+    void DecodeEph();
     // 生成文件名
     // 新生成的结果文件命名规则：接口名+当前时间（精确到秒）
     // 示例：FormatWeekSecTime20200416102203
@@ -82,7 +82,7 @@ private:
     bool mLoadRtkLibFlag;
     bool mLoadGULLibFlag;
     bool mLoadGULMathLibFlag;
-    QLibrary* mRtkLibObj;
+    QLibrary* mRtcmLibObj;
     QLibrary* mGULLibObj;
     QLibrary* mGULMathLibObj;
     FuncList mFuncs;

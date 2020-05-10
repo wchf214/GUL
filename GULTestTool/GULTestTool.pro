@@ -376,10 +376,10 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-#CONFIG(debug, debug|release):LIBS += -LE:/Projects/GNSSUtilityLib/GNSSUtilityLibrary/GULTestTool/GULTestTool/RtkLib/debug \
-#        -lRTKLIB
-#CONFIG(release, debug|release):LIBS += -LE:/Projects/GNSSUtilityLib/GNSSUtilityLibrary/GULTestTool/GULTestTool/RtkLib/release \
-#        -lRTKLIB
+CONFIG(debug, debug|release):LIBS += -LF:/myCodesInGit/GUL/GULTestTool/RtcmLib/debug \
+        -lrtcm
+CONFIG(release, debug|release):LIBS += -LF:/myCodesInGit/GUL/GULTestTool/RtcmLib/release \
+        -lrtcm
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

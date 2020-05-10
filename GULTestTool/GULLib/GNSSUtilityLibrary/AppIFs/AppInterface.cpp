@@ -6,6 +6,7 @@
 #include "../Ephemeris/CGNSSEphemeris.h"
 #include "../Time/TimeCalc/CCalcTime.h"
 #include "../Time/TimeSys/CTimeFactory.h"
+
 namespace sixents
 {
     namespace Math
@@ -528,16 +529,23 @@ namespace sixents
                                            UINT32& len,
                                            const BOOL_T formatType)
         {
-            CGNSSAngle angleObj(degree);
-            UINT32 length = angleObj.GetLength(true);
-
-            if (len != length || formatString == nullptr)
+            INT32 iRet = RETURN_FAIL;
+            do 
             {
-                len = length;
-                return RETURN_ERROR_PARAMETER;
-            }
-            angleObj.ToDegString(formatString, length, formatType);
-            return RETURN_SUCCESS;
+                std::string result = "";
+                CGNSSAngle angleObj(degree);
+                angleObj.DegToString(result, true);
+
+                if (len != result.size() + 1 || formatString == nullptr)
+                {
+                    len = result.size() + 1;
+                    iRet= RETURN_ERROR_PARAMETER;
+                }
+                formatString = const_cast<char*>(result.c_str());
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
+         
         }
 
         INT32 CAppInterface::FormatAngleByDMS(const INT32 degree,
@@ -547,46 +555,59 @@ namespace sixents
                                               UINT32& len,
                                               const BOOL_T formatType)
         {
-            CGNSSAngle angleObj(degree, minute, sec);
-            UINT32 length = angleObj.GetLength(false);
-            if (len != length || formatString == nullptr)
+            INT32 iRet = RETURN_FAIL;
+            do
             {
-                len = length;
-                return RETURN_ERROR_PARAMETER;
-            }
-            angleObj.ToDegString(formatString, length, formatType);
-            return RETURN_SUCCESS;
+                std::string result = "";
+                CGNSSAngle angleObj(degree, minute,sec);
+                angleObj.DegToString(result, false);
+
+                if (len != result.size() + 1 || formatString == nullptr)
+                {
+                    len = result.size() + 1;
+                    iRet = RETURN_ERROR_PARAMETER;
+                }
+                formatString = const_cast<char*>(result.c_str());
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         INT32 CAppInterface::Deg2Rad(const DOUBLE degree, DOUBLE& radian)
         {
-            CGNSSAngle angleObj(degree);
-            radian = angleObj.GetRad();
+            radian = degree * D2R;
             return RETURN_SUCCESS;
         }
 
         INT32 CAppInterface::DMS2Rad(const INT32 degree, const UINT32 minute, const DOUBLE sec, DOUBLE& radian)
         {
-            DOUBLE DegToRad = 0;
-            CGNSSAngle angleObj(degree, minute, sec);
-            // angleObj.DMSToDeg(degree, minute, sec, DegToRad);
-            angleObj.DegToRad(DegToRad, radian);
-            return RETURN_SUCCESS;
+            INT32 iRet = RETURN_FAIL;
+            do
+            {
+                if (minute < 0 || minute >= 60 || sec < 0 || sec >= 60)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                }
+                CGNSSAngle dms(degree, minute, sec);
+                CAppInterface::Deg2Rad(dms.GetDeg(), radian);
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
+           
         }
 
         INT32 CAppInterface::Rad2Deg(const DOUBLE radian, DOUBLE& degree)
         {
-            CGNSSAngle angleObj(radian, false);
-            degree = angleObj.GetDeg();
+            degree = radian * R2D;
             return RETURN_SUCCESS;
         }
 
         INT32 CAppInterface::Rad2DMS(const DOUBLE radian, INT32& degree, UINT32& minute, DOUBLE& sec)
         {
-            DOUBLE RadToDeg = 0;
-            CGNSSAngle angleObj(radian, false);
-            //   angleObj.RadToDeg(radian, RadToDeg);
-            // angleObj.DegToDMS(RadToDeg, degree, minute, sec);
+            CGNSSAngle degreeObj(radian * R2D);
+            degree = degreeObj.GetDMS().m_degree;
+            minute = degreeObj.GetDMS().m_minute;
+            sec = degreeObj.GetDMS().m_second;
             return RETURN_SUCCESS;
         }
     } // namespace Math

@@ -148,66 +148,66 @@ namespace sixents {
                                                     unsigned int& len,
                                                     const bool formatType);
             DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                                 const int minute,
-                                                 const double sec,
-                                                 char* formatString,
-                                                 unsigned int& len,
-                                                 const bool formatType);
+                                                  const unsigned int minute,
+                                                  const double sec,
+                                                  char* formatString,
+                                                  unsigned int& len,
+                                                  const bool formatType);
             DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
-            DLL_API int STD_CALL DMS2Rad(const int degree, const int minute, const double sec, double& radian);
+            DLL_API int STD_CALL DMS2Rad(const int degree, const unsigned int minute, const double sec, double& radian);
             DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
-            DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, int& minute, double& sec);
+            DLL_API int STD_CALL Rad2DMS(const double radian, int& degree, unsigned int& minute, double& sec);
             DLL_API int STD_CALL MatrixAdd(const double* leftMatrixData,
                                            const unsigned int leftRow,
                                            const unsigned int leftCol,
                                            const double* rightMatrixData,
                                            const unsigned int rightRow,
                                            const unsigned int rightCol,
-                                           double* outMatrixData,
-                                           unsigned int& outRow,
-                                           unsigned int& outCol);
+                                           const unsigned int outRow,
+                                           const unsigned int outCol,
+                                           double* outMatrixData);
             DLL_API int STD_CALL MatrixSub(const double* leftMatrixData,
                                            const unsigned int leftRow,
                                            const unsigned int leftCol,
                                            const double* rightMatrixData,
                                            const unsigned int rightRow,
                                            const unsigned int rightCol,
-                                           double* outMatrixData,
-                                           unsigned int& outRow,
-                                           unsigned int& outCol);
+                                           const unsigned int outRow,
+                                           const unsigned int outCol,
+                                           double* outMatrixData);
             DLL_API int STD_CALL MatrixMul(const double* leftMatrixData,
                                            const unsigned int leftRow,
                                            const unsigned int leftCol,
                                            const double* rightMatrixData,
                                            const unsigned int rightRow,
                                            const unsigned int rightCol,
-                                           double* outMatrixData,
-                                           unsigned int& outRow,
-                                           unsigned int& outCol);
+                                           const unsigned int outRow,
+                                           const unsigned int outCol,
+                                           double* outMatrixData);
             DLL_API int STD_CALL MatrixTransposition(const double* inMatrixData,
                                                      const unsigned int inRow,
                                                      const unsigned int inCol,
-                                                     double* outMatrixData,
-                                                     unsigned int& outRow,
-                                                     unsigned int& outCol);
+                                                     const unsigned int outRow,
+                                                     const unsigned int outCol,
+                                                     double* outMatrixData);
             DLL_API int STD_CALL MatrixInverse(const double* inMatrixData,
                                                const unsigned int inRow,
                                                const unsigned int inCol,
-                                               double* outMatrixData,
-                                               unsigned int& outRow,
-                                               unsigned int& outCol);
+                                               const unsigned int outRow,
+                                               const unsigned int outCol,
+                                               double* outMatrixData);
             DLL_API int STD_CALL MatrixAddRowCol(const double* inMatrixData,
                                                  const unsigned int inRow,
                                                  const unsigned int inCol,
-                                                 double* outMatrixData,
-                                                 unsigned int& outRow,
-                                                 unsigned int& outCol);
+                                                 const unsigned int outRow,
+                                                 const unsigned int outCol,
+                                                 double* outMatrixData);
             DLL_API int STD_CALL MatrixSubRowCol(const double* inMatrixData,
                                                  const unsigned int inRow,
                                                  const unsigned int inCol,
-                                                 double* outMatrixData,
-                                                 unsigned int& outRow,
-                                                 unsigned int& outCol);
+                                                 const unsigned int outRow,
+                                                 const unsigned int outCol,
+                                                 double* outMatrixData);
 //            DLL_API int STD_CALL MatrixAdd(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 //            DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
 //            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix, SGNSSMatrix& outPutMatrix);
@@ -280,7 +280,7 @@ CTestFunc::CTestFunc()
     : mLoadRtkLibFlag(false)
     , mLoadGULLibFlag(false)
     , mLoadGULMathLibFlag(false)
-    , mRtkLibObj(nullptr)
+    , mRtcmLibObj(nullptr)
     , mGULLibObj(nullptr)
     , mGULMathLibObj(nullptr)
 {
@@ -289,9 +289,9 @@ CTestFunc::CTestFunc()
 
 CTestFunc::~CTestFunc()
 {
-    if (mRtkLibObj) {
-        delete mRtkLibObj;
-        mRtkLibObj = nullptr;
+    if (mRtcmLibObj) {
+        delete mRtcmLibObj;
+        mRtcmLibObj = nullptr;
     }
 
     if (mGULLibObj) {
@@ -305,22 +305,22 @@ CTestFunc::~CTestFunc()
     }
 }
 
-bool CTestFunc::LoadRtkLib()
+bool CTestFunc::LoadRtcmLib()
 {
     mLoadRtkLibFlag = false;
-    QString libName("RTKLIB");
-    if (mRtkLibObj) {
-        delete mRtkLibObj;
-        mRtkLibObj = nullptr;
+    QString libName("rtcm");
+    if (mRtcmLibObj) {
+        delete mRtcmLibObj;
+        mRtcmLibObj = nullptr;
     }
 
     do
     {
-        mRtkLibObj = new QLibrary(libName);
-        if (mRtkLibObj == nullptr) {
+        mRtcmLibObj = new QLibrary(libName);
+        if (mRtcmLibObj == nullptr) {
             break;
         }
-        if (!mRtkLibObj->load()) {
+        if (!mRtcmLibObj->load()) {
             break;
         }
         mLoadRtkLibFlag = true;
@@ -329,12 +329,12 @@ bool CTestFunc::LoadRtkLib()
     return mLoadRtkLibFlag;
 }
 
-void CTestFunc::UnloadRtkLib()
+void CTestFunc::UnloadRtcmLib()
 {
-    if (!mLoadRtkLibFlag && nullptr == mRtkLibObj) {
+    if (!mLoadRtkLibFlag && nullptr == mRtcmLibObj) {
         return;
     }
-    if (mRtkLibObj->unload()) {
+    if (mRtcmLibObj->unload()) {
         mLoadRtkLibFlag = false;
     }
 }
@@ -536,14 +536,14 @@ bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+    sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
                                                outStr, outStrLen);
     if (outStrLen == 0) {
         return false;
     }
     outStr = new char[static_cast<unsigned long long>(outStrLen)];
     memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outStrLen));
-    sixents::GNSSUtilityLib::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+    sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
                                                outStr, outStrLen);
     QString gulRet = outStr;
     // 组装结果
@@ -586,7 +586,7 @@ bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+    sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                                 static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                                 static_cast<unsigned int>(minute), sec, outStr, outStrLen);
     if (outStrLen == 0) {
@@ -594,7 +594,7 @@ bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
     }
     outStr = new char[static_cast<unsigned long long>(outStrLen)];
     memset(outStr, 0, sizeof (char)* static_cast<unsigned long long>(outStrLen));
-    sixents::GNSSUtilityLib::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+    sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                                 static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                                 static_cast<unsigned int>(minute), sec, outStr, outStrLen);
     QString gulRet = outStr;
@@ -652,7 +652,7 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
     }
     QString rtkRet(chRet);
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GNSSTimeToUTCTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+    sixents::Math::GNSSTimeToUTCTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
                                                year, month, day, hour, minute, second);
     QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " "
             + QString::number(hour) + ":" + QString::number(minute) + ":" + QString::number(second, 'f', MSEC_ACCURACY);
@@ -724,7 +724,7 @@ bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
     // 执行GUL接口
     unsigned int week = 0;
     double second = 0.0;
-    sixents::GNSSUtilityLib::UTCTimeToGNSSTime(static_cast<UINT32>(year),
+    sixents::Math::UTCTimeToGNSSTime(static_cast<UINT32>(year),
                                                static_cast<UINT32>(month),
                                                static_cast<UINT32>(day),
                                                static_cast<UINT32>(hour),
@@ -788,7 +788,7 @@ bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
     // 执行GUL接口
     unsigned int destWeek = 0;
     double destSec = 0.0;
-    sixents::GNSSUtilityLib::GNSSTimeConvert(static_cast<UINT32>(srcWeek), srcSec, static_cast<UINT32>(srcType),
+    sixents::Math::GNSSTimeConvert(static_cast<UINT32>(srcWeek), srcSec, static_cast<UINT32>(srcType),
                                              destWeek, destSec, static_cast<UINT32>(destType));
     QString gulRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
     // 组装结果
@@ -838,7 +838,7 @@ bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GlonassTimeToUTCTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+    sixents::Math::GlonassTimeToUTCTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                                   static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                                   static_cast<unsigned int>(minute), sec,
                                                   utcYear, utcMonth, utcDay, utcHour, utcMinute, utcSec);
@@ -892,7 +892,7 @@ bool CTestFunc::UTCToGlonass(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::UTCTimeToGlonassTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+    sixents::Math::UTCTimeToGlonassTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                                   static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                                   static_cast<unsigned int>(minute), sec,
                                                   gloYear, gloMonth, gloDay, gloHour, gloMinute, gloSec);
@@ -942,7 +942,7 @@ bool CTestFunc::GlonassToGPS(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GlonassTimeToGPSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+    sixents::Math::GlonassTimeToGPSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                                   static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                                   static_cast<unsigned int>(minute), sec, week, second);
     QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
@@ -979,7 +979,7 @@ bool CTestFunc::GPSToGlonass(const QString testData, QString &result)
     // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
     // 执行GUL接口
-    sixents::GNSSUtilityLib::GPSTimeToGlonassTime(static_cast<unsigned int>(week), second,
+    sixents::Math::GPSTimeToGlonassTime(static_cast<unsigned int>(week), second,
                                                   year, month, day, hour, minute, sec);
     QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " " +
                      QString::number(hour) + ":" + QString::number(minute) + ":" +
@@ -1020,7 +1020,7 @@ bool CTestFunc::XYZ2BLH(const QString testData, QString& result)
     double b = 0;
     double l = 0;
     double h = 0;
-    sixents::GNSSUtilityLib::XYZ2BLH(xyz[0], xyz[1], xyz[2], b, l, h);
+    sixents::Math::XYZ2BLH(xyz[0], xyz[1], xyz[2], b, l, h);
     QString gulRet = QString::number(b, 'f', BLH_ACCURACY) + "," +
                      QString::number(l, 'f', BLH_ACCURACY) + "," +
                      QString::number(h, 'f', COORDINATE_ACCURACY);
@@ -1061,7 +1061,7 @@ bool CTestFunc::BLH2XYZ(const QString testData, QString& result)
     double x = 0;
     double y = 0;
     double z = 0;
-    sixents::GNSSUtilityLib::BLH2XYZ(blh[0], blh[1], blh[2], x, y, z);
+    sixents::Math::BLH2XYZ(blh[0], blh[1], blh[2], x, y, z);
     QString gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(y, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(z, 'f', COORDINATE_ACCURACY);
@@ -1122,7 +1122,7 @@ bool CTestFunc::XYZ2ENU(const QString testData, QString& result)
     double e = 0;
     double n = 0;
     double u = 0;
-    sixents::GNSSUtilityLib::XYZ2ENU(srcXYZ[0], srcXYZ[1], srcXYZ[2], refXYZ[0], refXYZ[1], refXYZ[2],
+    sixents::Math::XYZ2ENU(srcXYZ[0], srcXYZ[1], srcXYZ[2], refXYZ[0], refXYZ[1], refXYZ[2],
                                      e, n, u);
     QString gulRet = QString::number(e, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(n, 'f', COORDINATE_ACCURACY) + "," +
@@ -1184,7 +1184,7 @@ bool CTestFunc::ENU2XYZ(const QString testData, QString& result)
     double x = 0;
     double y = 0;
     double z = 0;
-    sixents::GNSSUtilityLib::ENU2XYZ(srcENU[0], srcENU[1], srcENU[2], refXYZ[0], refXYZ[1], refXYZ[2],
+    sixents::Math::ENU2XYZ(srcENU[0], srcENU[1], srcENU[2], refXYZ[0], refXYZ[1], refXYZ[2],
                                      x, y, z);
     QString gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(y, 'f', COORDINATE_ACCURACY) + "," +
@@ -1260,7 +1260,7 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
     // 调用RTCM接口，解码星历电文
 
 
-    sixents::GNSSUtilityLib::SGlonassEphemeris glonassEphemeris;
+    sixents::Math::SGlonassEphemeris glonassEphemeris;
 
     glonassEphemeris.m_dbGammaTb=2.72848e-12;
     glonassEphemeris.m_dbGmDeltaTn=0;
@@ -1371,8 +1371,11 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
     QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
-
-    sixents::GNSSUtilityLib::SEphemeris ephemeris;
+    // 加载RtcmLib库
+    if(!LoadRtcmLib()) {
+        return false;
+    }
+    sixents::Math::SEphemeris ephemeris;
     ephemeris.m_dbAHalf=5153.61;
     ephemeris.m_dbAf0=0.000167371;
     ephemeris.m_dbAf1=6.9349e-12;
@@ -1422,8 +1425,8 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
     ephemeris.m_ui8SvSisa=0;
     ephemeris.m_ui8URA=0;
     double clock=0;
-    sixents::GNSSUtilityLib::CalcEphSatClock(1577836818,ephemeris,clock);
-
+    sixents::Math::CalcEphSatClock(1577836818,ephemeris,clock);
+    UnloadRtcmLib();
     // 调用GUL接口解算
     QString gulRet("null");
     // 组装结果
@@ -1599,10 +1602,10 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
     // 执行GUL接口
     char* gulChRet = nullptr;
     unsigned int len = 0;
-    sixents::GNSSUtilityLib::FormatAngleByDegree(deg, gulChRet, len);
+    sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
 
     gulChRet=new char[len + 1];
-    sixents::GNSSUtilityLib::FormatAngleByDegree(deg, gulChRet, len);
+    sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
 
     QString gulRet = gulChRet;
     // 组装结果
@@ -1622,7 +1625,7 @@ bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
         return false;
     }
     int degree = dmsList[0].toInt();
-    int minute = dmsList[1].toInt();
+    unsigned int minute = static_cast<unsigned int>(dmsList[1].toInt());
     double sec = dmsList[2].toDouble();
 
     // 执行Rtk接口，未实现该结果
@@ -1630,10 +1633,10 @@ bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
     // 执行GUL接口
     char* gulChRet = nullptr;
     unsigned int len = 0;
-    sixents::GNSSUtilityLib::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+    sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
 
     gulChRet=new char[len + 1];
-    sixents::GNSSUtilityLib::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+    sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
 
     QString gulRet = gulChRet;
     // 组装结果
@@ -1656,7 +1659,7 @@ bool CTestFunc::Deg2Rad(const QString testData, QString& result)
 
     // 执行GUL接口
     double gulRad = 0.0;
-    sixents::GNSSUtilityLib::Deg2Rad(deg, gulRad);
+    sixents::Math::Deg2Rad(deg, gulRad);
     QString gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -1685,7 +1688,7 @@ bool CTestFunc::DMS2Rad(const QString testData, QString& result)
     QString rtkRet = QString::number(rtkRad, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     double gulRad = 0.0;
-    sixents::GNSSUtilityLib::DMS2Rad(degree, minute, sec, gulRad);
+    sixents::Math::DMS2Rad(degree, static_cast<unsigned int>(minute), sec, gulRad);
     QString gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -1706,7 +1709,7 @@ bool CTestFunc::Rad2Deg(const QString testData, QString& result)
     QString rtkRet = QString::number(rtkDeg, 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     double gulDeg = 0.0;
-    sixents::GNSSUtilityLib::Rad2Deg(rad, gulDeg);
+    sixents::Math::Rad2Deg(rad, gulDeg);
     QString gulRet = QString::number(gulDeg, 'f', COORDINATE_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
@@ -1732,9 +1735,9 @@ bool CTestFunc::Rad2DMS(const QString testData, QString& result)
                      QString::number(rtkDMSArr[2], 'f', COORDINATE_ACCURACY);
     // 执行GUL接口
     int gulDegree = 0;
-    int gulMinute = 0;
+    unsigned int gulMinute = 0;
     double gulSec = 0.0;
-    sixents::GNSSUtilityLib::Rad2DMS(rad, gulDegree, gulMinute, gulSec);
+    sixents::Math::Rad2DMS(rad, gulDegree, gulMinute, gulSec);
     QString gulRet = QString::number(gulDegree, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(gulMinute, 'f', COORDINATE_ACCURACY) + "," +
                      QString::number(gulSec, 'f', COORDINATE_ACCURACY);
@@ -1848,9 +1851,9 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixAdd(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+    sixents::Math::MatrixAdd(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outMatrix, outRow, outCol);
+                                           outRow, outCol, outMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -1981,9 +1984,9 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+    sixents::Math::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outMatrix, outRow, outCol);
+                                           outRow, outCol, outMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2132,9 +2135,9 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixMul(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+    sixents::Math::MatrixMul(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outMatrix, outRow, outCol);
+                                           outRow, outCol, outMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2209,8 +2212,8 @@ bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
     DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixTransposition(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                                     destMatrix, outRow, outCol);
+    sixents::Math::MatrixTransposition(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                       outRow, outCol, destMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2311,8 +2314,8 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     memset(destMatrix, 0, static_cast<unsigned long long>(row*col));
     unsigned int outRow = static_cast<unsigned int>(row);
     unsigned int outCol = static_cast<unsigned int>(col);
-    sixents::GNSSMathUtilityLib::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                               destMatrix, outRow, outCol);
+    sixents::Math::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                 outRow, outCol, destMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2399,8 +2402,8 @@ bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
     DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixAddRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                                 destMatrix, outRow, outCol);
+    sixents::Math::MatrixAddRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                   outRow, outCol, destMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2486,8 +2489,8 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
     DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    sixents::GNSSMathUtilityLib::MatrixSubRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                                 destMatrix, outRow, outCol);
+    sixents::Math::MatrixSubRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                   outRow, outCol, destMatrix);
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
