@@ -168,12 +168,18 @@ namespace sixents
         const INT32 MSEC_ACCURACY = 3;       ///< 秒的精确度(精确到毫秒)
         const INT32 MATRIX_ACCURACY = 6;     ///< 矩阵中DOUBLE数据与角分秒格式中的秒的精确度
         const INT32 DEGREE_ACCURACY = 11;    ///< 大地坐标中经纬度与小数度的精确度(小数后11位)
+        const std::string DEGREE_UNIT = "D"; ///< 小数度的单位
         const DOUBLE LAT_ACCURACY = 1.0e-11; ///< 计算大地纬度B时的精度
 
         const DOUBLE LONGITUDE_LOWER_LIMIT = -180; ///< 经度下限
         const DOUBLE LONGITUDE_UPPER_LIMIT = 180;  ///< 经度上限
         const DOUBLE LATITUDE_LOWER_LIMIT = -90;   ///< 纬度下限
         const DOUBLE LATITUDE_UPPER_LIMIT = 90;    ///< 纬度上限
+
+        const DOUBLE LONGITUDE_DOUBLE_UPPER_LIMIT = 360;
+
+        const DOUBLE ZERO_POINT_FIVE = 0.5;
+        const DOUBLE ONE_POINT_FIVE = 1.5;
 
         //地球的长半轴
 

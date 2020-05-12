@@ -1,24 +1,46 @@
 ﻿
 #include "TestFunc.h"
 #include "ConstantDef.h"
+#include "mainwindow.h"
 
 // rtk lib
 #include "RtkLib/rtklib.h"
 
 // gul lib
 #include "GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h"
+#include "GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h"
+// gul math lib
 #include "GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.h"
 #include "GULLib/GNSSMathUtilityLib/DllMain/GNSSCommonStruct.h"
-#include "GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h"
+// rtcm lib
+#include "RtcmLib/include/BasicType.h"
+#include "RtcmLib/include/Constants.h"
+#include "RtcmLib/include/CParam.h"
+#include "RtcmLib/include/IGnssDataInterface.h"
+#include "RtcmLib/include/IAppOpt.h"
+
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
 #include <QDataStream>
+#include <QDebug>
 
 #include <stdio.h>
 
 namespace sixents {
-    namespace Math {
+    extern "C" {  // For Rtcm
+    DLL_API INT32 STD_CALL RtcmInit(CParam& pamIn, CParam& pamOut);
+    DLL_API INT32 STD_CALL RtcmGetMessage(const BYTE* pbyBuf,
+                                          const UINT32& uiLen,
+                                          UINT32& uiMsgType,
+                                          UINT32& uiMsgPos,
+                                          UINT32& uiExpectLen);
+    DLL_API INT32 STD_CALL RtcmDecode(CParam& pamIn, CParam& pamOut);
+    DLL_API INT32 STD_CALL RtcmEncode(CParam& pamIn, CParam& pamOut);
+    DLL_API INT32 STD_CALL RtcmCmd(CParam& pamIn, CParam& pamOut);
+    DLL_API INT32 STD_CALL RtcmFinal();
+    }
+    namespace Math {  // For Gul
         extern "C" {
             DLL_API int STD_CALL FormatWeekSecTime(const unsigned int week,
                                                   const double sec,
@@ -208,22 +230,13 @@ namespace sixents {
                                                  const unsigned int outRow,
                                                  const unsigned int outCol,
                                                  double* outMatrixData);
-//            DLL_API int STD_CALL MatrixAdd(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
-//            DLL_API int STD_CALL MatrixSub(const SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix);
-//            DLL_API int STD_CALL MatrixMul(SGNSSMatrix& srcMatrix, SGNSSMatrix& destMatrix, SGNSSMatrix& outPutMatrix);
-//            DLL_API int STD_CALL MatrixTransposition(SGNSSMatrix& matrix,SGNSSMatrix& outPutMatrix);
-//            DLL_API int STD_CALL MatrixInverse(SGNSSMatrix& matrix);
-//            DLL_API int STD_CALL MatrixAddRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
-//            DLL_API int STD_CALL MatrixSubRowCol(SGNSSMatrix& matrix, const int row, const int col,SGNSSMatrix& outPutMatrix);
         }
     } // end namespace Math
 } // end namespace sixents
 
 // For RtkLib
 extern "C" {
-//#ifndef EXPORT
-//#define EXPORT
-// 时间
+// 时间转换
 EXPORT gtime_t epoch2time(const double *ep);
 EXPORT void    time2epoch(gtime_t t, double *ep);
 EXPORT gtime_t gpst2time(int week, double sec);
@@ -236,6 +249,8 @@ EXPORT gtime_t gpst2utc (gtime_t t);
 EXPORT gtime_t utc2gpst (gtime_t t);
 EXPORT gtime_t gpst2bdt (gtime_t t);
 EXPORT gtime_t bdt2gpst (gtime_t t);
+// 时间格式化
+EXPORT void    time2str(gtime_t t, char *str, int n);
 
 // 坐标
 EXPORT void ecef2pos(const double *r, double *pos);
@@ -245,8 +260,6 @@ EXPORT void enu2ecef(const double *pos, const double *e, double *r);
 EXPORT void xyz2enu (const double *pos, double *E);
 
 // 角度
-// #define D2R         (PI/180.0)          /* deg to rad */
-// #define R2D         (180.0/PI)          /* rad to deg */
 EXPORT void deg2dms(double deg, double *dms, int ndec);
 EXPORT double dms2deg(const double *dms);
 
@@ -264,19 +277,9 @@ EXPORT void matmul(const char *tr, int n, int k, int m, double alpha,
                    const double *A, const double *B, double beta, double *C);
 // 求逆
 EXPORT int  matinv(double *A, int n);
-// 打印矩阵到文件
-//EXPORT void matfprint(const double *A, int n, int m, int p, int q, FILE *fp);
-
-//#endif
 }
 
-// 常量定义
-const static int COORDINATE_ACCURACY = 9;  // 空间直角坐标，以及大地坐标中高程的精确度
-const static int BLH_ACCURACY = 11;        // 大地坐标中经纬度的精确度
-const static int MSEC_ACCURACY = 3;        // 小数秒的精确度（精确到毫秒）
-const static int MATRIX_ACCURACY = 6;      // 矩阵中double数据的精确度
-
-CTestFunc::CTestFunc()
+CTestFunc::CTestFunc(MainWindow* parent)
     : mLoadRtkLibFlag(false)
     , mLoadGULLibFlag(false)
     , mLoadGULMathLibFlag(false)
@@ -285,6 +288,7 @@ CTestFunc::CTestFunc()
     , mGULMathLibObj(nullptr)
 {
     InitFuncMap();
+    mParent = parent;
 }
 
 CTestFunc::~CTestFunc()
@@ -308,15 +312,13 @@ CTestFunc::~CTestFunc()
 bool CTestFunc::LoadRtcmLib()
 {
     mLoadRtkLibFlag = false;
-    QString libName("rtcm");
     if (mRtcmLibObj) {
         delete mRtcmLibObj;
         mRtcmLibObj = nullptr;
     }
 
-    do
-    {
-        mRtcmLibObj = new QLibrary(libName);
+    do {
+        mRtcmLibObj = new QLibrary(RtcmLibName);
         if (mRtcmLibObj == nullptr) {
             break;
         }
@@ -342,15 +344,13 @@ void CTestFunc::UnloadRtcmLib()
 bool CTestFunc::LoadGULLib()
 {
     mLoadGULLibFlag = false;
-    QString libName("GNSSUtilityLib");
     if (mGULLibObj) {
         delete mGULLibObj;
         mGULLibObj = nullptr;
     }
 
-    do
-    {
-        mGULLibObj = new QLibrary(libName);
+    do {
+        mGULLibObj = new QLibrary(GulUtilityLibName);
         if (mGULLibObj == nullptr) {
             break;
         }
@@ -376,15 +376,13 @@ void CTestFunc::UnloadGULLib()
 bool CTestFunc::LoadGULMathLib()
 {
     mLoadGULMathLibFlag = false;
-    QString libName("GNSSMathLib");
     if (mGULMathLibObj != nullptr) {
         delete mGULMathLibObj;
         mGULMathLibObj = nullptr;
     }
 
-    do
-    {
-        mGULMathLibObj = new QLibrary(libName);
+    do {
+        mGULMathLibObj = new QLibrary(GulMathLibName);
         if (mGULMathLibObj == nullptr) {
             break;
         }
@@ -420,8 +418,10 @@ int CTestFunc::ExecuteTest(const QString testData, const int testFunc, QString &
 
     bool ret = iter->second(*this, curTestData, result);
     if (ret) {
+        mParent->showInfomationdlg("Tips", "Execute Success");
         return 0;
     }
+    mParent->showInfomationdlg("Tips", "Execute Failed");
     return -1;
 }
 
@@ -1364,71 +1364,109 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
     gtime_t rtkClk;
     double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                            static_cast<double>(hour), static_cast<double>(minute), second};
-    gtime_t timeTemp = epoch2time(epochTime);
-    rtkClk = utc2gpst(timeTemp);
+    gtime_t rtkSecTime = epoch2time(epochTime);
+    rtkClk = utc2gpst(rtkSecTime);
     double rtkClkRet = eph2clk(rtkClk, rtcm.nav.eph);
     free_rtcm(&rtcm);
     QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
+
     // 执行GUL接口
     // 调用RTCM接口，解码星历电文
     // 加载RtcmLib库
     if(!LoadRtcmLib()) {
         return false;
     }
+
+    // 初始化RTCM
+    sixents::CParam paramInForInit;
+    sixents::CParam paramOutForInit;
+    INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
+    if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
+        qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
+        return false;
+    }
+
+    // 读取星历电文
+    QFile fileObj(testDataFilePath);
+    if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+    QByteArray ephHexText = fileObj.readAll();// 原始电文
+    // 从所有电文中读取星历电文
+    UINT32 msgType = 0;
+    UINT32 msgPos = 0;
+    UINT32 expectLen = 0;
+    QByteArray msg;
+    do {
+        INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
+                                         static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
+        if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
+            ephHexText.clear();
+            msgPos = 0;
+            break;
+        } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
+            ephHexText.remove(0, static_cast<int>(msgPos));
+            msgPos = 0;
+            break;
+        } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
+            if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
+                msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
+                break;
+            }
+            int startPos = 0;    // 删除时的起始位置
+            int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
+            ephHexText.remove(startPos, delLength);
+            msgPos = 0;
+            msgType = 0;
+        }
+        qDebug() << "ephHexText length:" << ephHexText.length();
+    } while (!ephHexText.isEmpty());
+
+    // 解星历电文
+    if (msg.isEmpty()) { // 当前指针不能为空指针
+        return false;
+    }
+    // 1、AddValue,把电文添加到入参
+    sixents::CParam paramInForDecode;
+    int msgLen = static_cast<int>(msg.count());
+    paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
+                              reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
+                              reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
+    // 2、Decode
+    sixents::CParam paramOutForDecode;
+    INT32 retDecode = RtcmDecode(paramInForDecode, paramOutForDecode);
+    if (retDecode == sixents::common::rtcm::RETURN_SUCCESS) {
+        return false;
+    }
+
+    // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
+    // 注：最后一步处理，不对返回值进行判断
+    sixents::IGnssDataInterface *gnssData = nullptr;
     sixents::Math::SEphemeris ephemeris;
-    ephemeris.m_dbAHalf=5153.61;
-    ephemeris.m_dbAf0=0.000167371;
-    ephemeris.m_dbAf1=6.9349e-12;
-    ephemeris.m_dbAf2=0;
-    ephemeris.m_dbArgumentOfPerigee=-0.5372;
-    ephemeris.m_dbBgdE1E5a=0;
-    ephemeris.m_dbBgdE5bE1=0;
-    ephemeris.m_dbCic=-2.27243e-07;
-    ephemeris.m_dbCis=-2.47732e-07;
-    ephemeris.m_dbCrc=187.5;
-    ephemeris.m_dbCrs=-22.8125;
-    ephemeris.m_dbCuc=-1.32993e-06;
-    ephemeris.m_dbCus=1.08909e-05;
-    ephemeris.m_dbDeltaN=1.21099e-09;
-    ephemeris.m_dbEccentricity=0.0133868;
-    ephemeris.m_dbI0=0.313307;
-    ephemeris.m_dbIODot=0;
-    ephemeris.m_dbIdot=-3.71756e-11;
-    ephemeris.m_dbM0=0.408408;
-    ephemeris.m_dbOmega0=-0.263181;
-    ephemeris.m_dbOmegaDot=-2.49622e-09;
-    ephemeris.m_dbTgd=-1.11759e-08;
-    ephemeris.m_dbTgd1=0;
-    ephemeris.m_dbTgd2=0;
-    ephemeris.m_ui16IODnav=0;
-    ephemeris.m_ui16Iodc=76;
-    ephemeris.m_ui16MsgType=1019;
-    ephemeris.m_ui16WeekNum=32;
-    ephemeris.m_ui32Toc=446400;
-    ephemeris.m_ui32Toe=446400;
-    ephemeris.m_ui8AgeOfDataClock=0;
-    ephemeris.m_ui8AgeOfDataEphemeris=0;
-    ephemeris.m_ui8CodeOnL2=1;
-    ephemeris.m_ui8E1bDataValidityStatus=0;
-    ephemeris.m_ui8E1bSignalHealthStatus=0;
-    ephemeris.m_ui8E5bDataValidityStatus=0;
-    ephemeris.m_ui8E5bSignalHealthStatus=0;
-    ephemeris.m_ui8FitInterval=0;
-    ephemeris.m_ui8Iode=76;
-    ephemeris.m_ui8L2PDataFlag=0;
-    ephemeris.m_ui8OSDVS=0;
-    ephemeris.m_ui8OSHS=0;
-    ephemeris.m_ui8Reserved=0;
-    ephemeris.m_ui8SISAIndex=0;
-    ephemeris.m_ui8SatId=17;
-    ephemeris.m_ui8SvHealth=0;
-    ephemeris.m_ui8SvSisa=0;
-    ephemeris.m_ui8URA=0;
+    sixents::SEphemeris ephTemp;
+    bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
+    if (!retGetValue || !gnssData) {
+        return false;
+    }
+    sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
+    if (dataType == sixents::IGnssDataInterface::GDT_EPH) {
+        sixents::CEphemeris *ephObj = dynamic_cast<sixents::CEphemeris *>(gnssData);
+        ephTemp = ephObj->GetEphemeris();
+    } else {
+        return false;
+    }
+    RtcmEphToMathEph(&ephTemp, &ephemeris);
+    // 将当前时间转为double时间
     double clock=0;
-    sixents::Math::CalcEphSatClock(1577836818,ephemeris,clock);
+    double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+
+    sixents::Math::CalcEphSatClock(gulSecTime, ephemeris, clock);
+    // 释放RTCM对象
+    sixents::RtcmFinal();
+    // 卸载RTCM Lib
     UnloadRtcmLib();
     // 调用GUL接口解算
-    QString gulRet("null");
+    QString gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY);
     // 组装结果
     result = rtkRet + ";" + gulRet;
     return true;
@@ -1850,10 +1888,15 @@ bool CTestFunc::MatrixAdd(const QString testData, QString& result)
     unsigned int outCol = static_cast<unsigned int>(destCol);
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
-
+    UINT32 timeGulBeg = GetTickCount();
     sixents::Math::MatrixAdd(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
                                            outRow, outCol, outMatrix);
+    UINT32 timeGulEnd = GetTickCount();
+    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+            "\nEnd Time:" + QString::number(timeGulEnd) +
+            "\nUse Time:" + QString::number(gulUseTime) + "\n";
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -1983,10 +2026,15 @@ bool CTestFunc::MatrixSub(const QString testData, QString& result)
     unsigned int outCol = static_cast<unsigned int>(destCol);
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
-
+    UINT32 timeGulBeg = GetTickCount();
     sixents::Math::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
                                            outRow, outCol, outMatrix);
+    UINT32 timeGulEnd = GetTickCount();
+    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+            "\nEnd Time:" + QString::number(timeGulEnd) +
+            "\nUse Time:" + QString::number(gulUseTime) + "\n";
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2088,8 +2136,14 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
     double alpha = 1.0;
     double beta = 0.0;
     // 执行Rtk接口，未实现该结果
+    UINT32 timeRtkBeg = GetTickCount();
     matmul("NN", srcRow, destCol, srcCol, alpha, srcMatrixData, destMatrixData, beta, resultMatrixData);
+    UINT32 timeRtkEnd = GetTickCount();
+    UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
     QString rtkRet("Rtk Result\n");
+    rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
+            "\nEnd Time:" + QString::number(timeRtkEnd) +
+            "\nUse Time:" +QString::number(rtkUseTime) + "\n";
     rtkRet += QString::number(srcRow) + "," + QString::number(destCol) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < srcRow; rIdx ++) {
@@ -2135,9 +2189,16 @@ bool CTestFunc::MatrixMul(const QString testData, QString& result)
     DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
     memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
+
+    UINT32 timeGulBeg = GetTickCount();
     sixents::Math::MatrixMul(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
                                            rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
                                            outRow, outCol, outMatrix);
+    UINT32 timeGulEnd = GetTickCount();
+    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+            "\nEnd Time:" + QString::number(timeGulEnd) +
+            "\nUse Time:" + QString::number(gulUseTime) + "\n";
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2280,8 +2341,14 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
         }
     }
     // 执行Rtk接口，未实现该结果
+    UINT32 timeRtkBeg = GetTickCount();
     matinv(data, row);
+    UINT32 timeRtkEnd = GetTickCount();
+    UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
     QString rtkRet("Rtk Result\n");
+    rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
+            "\nEnd Time:" + QString::number(timeRtkEnd) +
+            "\nUse Time:" +QString::number(rtkUseTime) + "\n";
     rtkRet += QString::number(row) + "," + QString::number(col) + "\n";
     dataIdx = 0;
     for (int rIdx = 0; rIdx < row; rIdx ++) {
@@ -2314,8 +2381,14 @@ bool CTestFunc::MatrixInverse(const QString testData, QString& result)
     memset(destMatrix, 0, static_cast<unsigned long long>(row*col));
     unsigned int outRow = static_cast<unsigned int>(row);
     unsigned int outCol = static_cast<unsigned int>(col);
+    UINT32 timeGulBeg = GetTickCount();
     sixents::Math::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
                                  outRow, outCol, destMatrix);
+    UINT32 timeGulEnd = GetTickCount();
+    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+            "\nEnd Time:" + QString::number(timeGulEnd) +
+            "\nUse Time:" + QString::number(gulUseTime) + "\n";
     gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
     dataIdx = 0;
     for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
@@ -2544,10 +2617,16 @@ void CTestFunc::FileConvertToBin(const QString &filePath, QString &outFilePath)
 {
     QString destFilePath(".dat");
     QStringList filePaths = filePath.split(".");
+    if (filePaths[1] != "txt") {
+        outFilePath = filePath;
+        return ;
+    }
     outFilePath = filePaths[0] + destFilePath;
     QFile srcFileObj(filePath);
     QFile destFileObj(outFilePath);
-    if (!srcFileObj.open(QIODevice::ReadOnly) || !destFileObj.open(QIODevice::WriteOnly)) {
+    bool srcRet = srcFileObj.open(QIODevice::ReadOnly);
+    bool destRet = destFileObj.open(QIODevice::WriteOnly);
+    if (!srcRet || !destRet) {
         return;
     }
     QTextStream srcStream(&srcFileObj);
@@ -2560,6 +2639,105 @@ void CTestFunc::FileConvertToBin(const QString &filePath, QString &outFilePath)
     destStream << srcDataArr;
     destFileObj.close();
     srcFileObj.close();
+}
+
+void CTestFunc::RtcmEphToMathEph(sixents::SEphemeris *rtcmEph, sixents::Math::SEphemeris *gulEph)
+{
+    if (rtcmEph == nullptr || gulEph == nullptr) {
+        return;
+    }
+    gulEph->m_ui16MsgType               = rtcmEph->m_ui16MsgType;
+    gulEph->m_ui8SatId                  = rtcmEph->m_ui8SatId;
+    gulEph->m_ui16WeekNum               = rtcmEph->m_ui16WeekNum;
+    gulEph->m_ui8URA                    = rtcmEph->m_ui8URA;
+    gulEph->m_ui8CodeOnL2               = rtcmEph->m_ui8CodeOnL2;
+    gulEph->m_dbIdot                    = rtcmEph->m_dbIdot;
+    gulEph->m_ui8Iode                   = rtcmEph->m_ui8Iode;
+    gulEph->m_ui32Toc                   = rtcmEph->m_ui32Toc;
+    gulEph->m_dbAf2                     = rtcmEph->m_dbAf2;
+    gulEph->m_dbAf1                     = rtcmEph->m_dbAf1;
+    gulEph->m_dbAf0                     = rtcmEph->m_dbAf0;
+    gulEph->m_ui16Iodc                  = rtcmEph->m_ui16Iodc;
+    gulEph->m_dbCrs                     = rtcmEph->m_dbCrs;
+    gulEph->m_dbDeltaN                  = rtcmEph->m_dbDeltaN;
+    gulEph->m_dbM0                      = rtcmEph->m_dbM0;
+    gulEph->m_dbCuc                     = rtcmEph->m_dbCuc;
+    gulEph->m_dbEccentricity            = rtcmEph->m_dbEccentricity;
+    gulEph->m_dbCus                     = rtcmEph->m_dbCus;
+    gulEph->m_dbAHalf                   = rtcmEph->m_dbAHalf;
+    gulEph->m_ui32Toe                   = rtcmEph->m_ui32Toe;
+    gulEph->m_dbCic                     = rtcmEph->m_dbCic;
+    gulEph->m_dbOmega0                  = rtcmEph->m_dbOmega0;
+    gulEph->m_dbCis                     = rtcmEph->m_dbCis;
+    gulEph->m_dbI0                      = rtcmEph->m_dbI0;
+    gulEph->m_dbCrc                     = rtcmEph->m_dbCrc;
+    gulEph->m_dbArgumentOfPerigee       = rtcmEph->m_dbArgumentOfPerigee;
+    gulEph->m_dbOmegaDot                = rtcmEph->m_dbOmegaDot;
+    gulEph->m_dbIODot                   = rtcmEph->m_dbIODot;
+    gulEph->m_dbTgd                     = rtcmEph->m_dbTgd;
+    gulEph->m_ui8SvHealth               = rtcmEph->m_ui8SvHealth;
+    gulEph->m_ui8L2PDataFlag            = rtcmEph->m_ui8L2PDataFlag;
+    gulEph->m_ui8FitInterval            = rtcmEph->m_ui8FitInterval;
+    gulEph->m_ui8SISAIndex              = rtcmEph->m_ui8SISAIndex;
+    gulEph->m_ui16IODnav                = rtcmEph->m_ui16IODnav;
+    gulEph->m_ui8SvSisa                 = rtcmEph->m_ui8SvSisa;
+    gulEph->m_dbBgdE1E5a                = rtcmEph->m_dbBgdE1E5a;
+    gulEph->m_dbBgdE5bE1                = rtcmEph->m_dbBgdE5bE1;
+    gulEph->m_ui8OSHS                   = rtcmEph->m_ui8OSHS;
+    gulEph->m_ui8OSDVS                  = rtcmEph->m_ui8OSDVS;
+    gulEph->m_ui8E5bSignalHealthStatus  = rtcmEph->m_ui8E5bSignalHealthStatus;
+    gulEph->m_ui8E5bDataValidityStatus   = rtcmEph->m_ui8E5bDataValidityStatus;
+    gulEph->m_ui8E1bSignalHealthStatus  = rtcmEph->m_ui8E1bSignalHealthStatus;
+    gulEph->m_ui8E1bDataValidityStatus  = rtcmEph->m_ui8E1bDataValidityStatus;
+    gulEph->m_ui8AgeOfDataEphemeris     = rtcmEph->m_ui8AgeOfDataEphemeris;
+    gulEph->m_ui8AgeOfDataClock         = rtcmEph->m_ui8AgeOfDataClock;
+    gulEph->m_dbTgd1                    = rtcmEph->m_dbTgd1;
+    gulEph->m_dbTgd2                    = rtcmEph->m_dbTgd2;
+    gulEph->m_ui8Reserved               = rtcmEph->m_ui8Reserved;
+}
+
+void CTestFunc::RtcmGloEphToMathGloEph(sixents::SGlonassEphemeris *rtcmEph, sixents::Math::SGlonassEphemeris *gulEph)
+{
+    if (rtcmEph == nullptr || gulEph == nullptr) {
+        return;
+    }
+    gulEph->m_ui16MsgType                  = rtcmEph->m_ui16MsgType;
+    gulEph->m_ui8SatId                     = rtcmEph->m_ui8SatId;
+    gulEph->m_ui8SatFrequencyChannelNumber = rtcmEph->m_ui8SatFrequencyChannelNumber;
+    gulEph->m_ui8AlmanacHealth             = rtcmEph->m_ui8AlmanacHealth;
+    gulEph->m_ui8AHAI                      = rtcmEph->m_ui8AHAI;
+    gulEph->m_ui8P1                        = rtcmEph->m_ui8P1;
+    gulEph->m_ui16Tk                       = rtcmEph->m_ui16Tk;
+    gulEph->m_ui8MsbOfBn                   = rtcmEph->m_ui8MsbOfBn;
+    gulEph->m_ui8P2                        = rtcmEph->m_ui8P2;
+    gulEph->m_ui16Tb                       = rtcmEph->m_ui16Tb;
+    gulEph->m_dbXnTbFirstDerivative        = rtcmEph->m_dbXnTbFirstDerivative;
+    gulEph->m_dbXnTb                       = rtcmEph->m_dbXnTb;
+    gulEph->m_dbXnTbSecondDerivative       = rtcmEph->m_dbXnTbSecondDerivative;
+    gulEph->m_dbYnTbFirstDerivative        = rtcmEph->m_dbYnTbFirstDerivative;
+    gulEph->m_dbYnTb                       = rtcmEph->m_dbYnTb;
+    gulEph->m_dbYnTbSecondDerivative       = rtcmEph->m_dbYnTbSecondDerivative;
+    gulEph->m_dbZnTbFirstDerivative        = rtcmEph->m_dbZnTbFirstDerivative;
+    gulEph->m_dbZnTb                       = rtcmEph->m_dbZnTb;
+    gulEph->m_dbZnTbSecondDerivative       = rtcmEph->m_dbZnTbSecondDerivative;
+    gulEph->m_ui8P3                        = rtcmEph->m_ui8P3;
+    gulEph->m_dbGammaTb                    = rtcmEph->m_dbGammaTb;
+    gulEph->m_ui8GmP                       = rtcmEph->m_ui8GmP;
+    gulEph->m_ui8GmLn3                     = rtcmEph->m_ui8GmLn3;
+    gulEph->m_dbTnTb                       = rtcmEph->m_dbTnTb;
+    gulEph->m_dbGmDeltaTn                  = rtcmEph->m_dbGmDeltaTn;
+    gulEph->m_ui8En                        = rtcmEph->m_ui8En;
+    gulEph->m_ui8GmP4                      = rtcmEph->m_ui8GmP4;
+    gulEph->m_ui8GmFt                      = rtcmEph->m_ui8GmFt;
+    gulEph->m_ui16GmNt                     = rtcmEph->m_ui16GmNt;
+    gulEph->m_ui8GmM                       = rtcmEph->m_ui8GmM;
+    gulEph->m_ui8AOAD                      = rtcmEph->m_ui8AOAD;
+    gulEph->m_ui16NA                       = rtcmEph->m_ui16NA;
+    gulEph->m_dbTc                         = rtcmEph->m_dbTc;
+    gulEph->m_ui8GmN4                      = rtcmEph->m_ui8GmN4;
+    gulEph->m_dbGmTGps                     = rtcmEph->m_dbGmTGps;
+    gulEph->m_ui8GmLn5                     = rtcmEph->m_ui8GmLn5;
+    gulEph->m_ui8Reserved                  = rtcmEph->m_ui8Reserved;
 }
 
 

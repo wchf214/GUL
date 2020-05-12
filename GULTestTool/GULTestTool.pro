@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -369,6 +369,11 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CTimeFactory.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CUTCTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/IGNSSTime.h \
+    RtcmLib/include/BasicType.h \
+    RtcmLib/include/CParam.h \
+    RtcmLib/include/Constants.h \
+    RtcmLib/include/IAppOpt.h \
+    RtcmLib/include/IGnssDataInterface.h \
     RtkLib/rtklib.h \
     TestFunc.h \
     mainwindow.h
@@ -376,9 +381,9 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-CONFIG(debug, debug|release):LIBS += -LF:/myCodesInGit/GUL/GULTestTool/RtcmLib/debug \
+CONFIG(debug, debug|release):LIBS += -LE:/Codes/myCodesInGit/GUL/GULTestTool/RtcmLib/debug \
         -lrtcm
-CONFIG(release, debug|release):LIBS += -LF:/myCodesInGit/GUL/GULTestTool/RtcmLib/release \
+CONFIG(release, debug|release):LIBS += -LE:/Codes/myCodesInGit/GUL/GULTestTool/RtcmLib/release \
         -lrtcm
 
 # Default rules for deployment.

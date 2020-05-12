@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * rtcm2.c : rtcm ver.2 message functions
 *
 *          Copyright (C) 2009-2014 by T.TAKASU, All rights reserved.
@@ -69,7 +69,7 @@ static int decode_type1(rtcm_t *rtcm)
             continue;
         }
         if (rtcm->dgps) {
-            sat=satno(SYS_GPS,prn);
+            sat=satno(SYS_GPS_RTK,prn);
             rtcm->dgps[sat-1].t0=rtcm->time;
             rtcm->dgps[sat-1].prc=prc*(fact?0.32:0.02);
             rtcm->dgps[sat-1].rrc=rrc*(fact?0.032:0.002);
@@ -146,30 +146,30 @@ static int decode_type17(rtcm_t *rtcm)
     
     if (i+480<=rtcm->len*8) {
         week      =getbitu(rtcm->buff,i,10);              i+=10;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         eph.iode  =getbitu(rtcm->buff,i, 8);              i+= 8;
         toc       =getbitu(rtcm->buff,i,16)*16.0;         i+=16;
-        eph.f1    =getbits(rtcm->buff,i,16)*P2_43;        i+=16;
-        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55;        i+= 8;
-        eph.crs   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
+        eph.f1    =getbits(rtcm->buff,i,16)*P2_43_RTK;        i+=16;
+        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55_RTK;        i+= 8;
+        eph.crs   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
         eph.cus   =getbits(rtcm->buff,i,16);              i+=16;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,16);              i+=16;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cic   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cic   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
         eph.iodc  =getbitu(rtcm->buff,i,10);              i+=10;
-        eph.f0    =getbits(rtcm->buff,i,22)*P2_31;        i+=22;
+        eph.f0    =getbits(rtcm->buff,i,22)*P2_31_RTK;        i+=22;
         prn       =getbitu(rtcm->buff,i, 5);              i+= 5+3;
-        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31;        i+= 8;
+        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31_RTK;        i+= 8;
         eph.code  =getbitu(rtcm->buff,i, 2);              i+= 2;
         eph.sva   =getbitu(rtcm->buff,i, 4);              i+= 4;
         eph.svh   =getbitu(rtcm->buff,i, 6);              i+= 6;
@@ -180,7 +180,7 @@ static int decode_type17(rtcm_t *rtcm)
         return -1;
     }
     if (prn==0) prn=32;
-    sat=satno(SYS_GPS,prn);
+    sat=satno(SYS_GPS_RTK,prn);
     eph.sat=sat;
     eph.week=adjgpsweek(week);
     eph.toe=gpst2time(eph.week,eph.toes);
@@ -222,7 +222,7 @@ static int decode_type18(rtcm_t *rtcm)
         loss=getbitu(rtcm->buff,i, 5); i+= 5;
         cp  =getbits(rtcm->buff,i,32); i+=32;
         if (prn==0) prn=32;
-        if (!(sat=satno(sys?SYS_GLO:SYS_GPS,prn))) {
+        if (!(sat=satno(sys?SYS_GLO_RTK:SYS_GPS_RTK,prn))) {
             trace(2,"rtcm2 18 satellite number error: sys=%d prn=%d\n",sys,prn);
             continue;
         }
@@ -274,7 +274,7 @@ static int decode_type19(rtcm_t *rtcm)
         prn =getbitu(rtcm->buff,i, 5); i+= 5+8;
         pr  =getbitu(rtcm->buff,i,32); i+=32;
         if (prn==0) prn=32;
-        if (!(sat=satno(sys?SYS_GLO:SYS_GPS,prn))) {
+        if (!(sat=satno(sys?SYS_GLO_RTK:SYS_GPS_RTK,prn))) {
             trace(2,"rtcm2 19 satellite number error: sys=%d prn=%d\n",sys,prn);
             continue;
         }

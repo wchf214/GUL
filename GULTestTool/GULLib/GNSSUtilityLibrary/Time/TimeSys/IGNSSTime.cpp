@@ -63,9 +63,9 @@ namespace sixents
 
             // 计算天数
             /* leap year if year%4==0 in 1901-2099 */
-            const INT32 FEB_LEAP_DAY = 2; // 每个月按30天算，2月多了两天。
-            const INT32 MIN_MONTH_NUM = 3;
-            const INT32 BEFORE_ONE_DATA = 1; // 除当前年或月或日外，之前所有的年或月或日
+            const INT32 FEB_LEAP_DAY = NUM_TWO; // 每个月按30天算，2月多了两天。
+            const INT32 MIN_MONTH_NUM = NUM_THREE;
+            const INT32 BEFORE_ONE_DATA = NUM_ONE; // 除当前年或月或日外，之前所有的年或月或日
             // 含当前年的年数，与1970相差多少年，并将年数转为天数
             INT32 curDayInYear = static_cast<INT32>((stdTime.m_year - EPOCHT0.m_year)) * DAY_IN_YEAR;
             // 除当前年以前的年数中存在的闰年年数

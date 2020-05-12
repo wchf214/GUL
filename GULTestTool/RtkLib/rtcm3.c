@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * rtcm3.c : rtcm ver.3 message decorder functions
 *
 *          Copyright (C) 2009-2019 by T.TAKASU, All rights reserved.
@@ -45,7 +45,7 @@
 
 #define PRUNIT_GPS  299792.458  /* rtcm ver.3 unit of gps pseudorange (m) */
 #define PRUNIT_GLO  599584.916  /* rtcm ver.3 unit of glonass pseudorange (m) */
-#define RANGE_MS    (CLIGHT*0.001)      /* range in 1 ms */
+#define RANGE_MS    (CLIGHT_RTK*0.001)      /* range in 1 ms */
 
 #define P2_10       0.0009765625          /* 2^-10 */
 #define P2_34       5.820766091346740E-11 /* 2^-34 */
@@ -276,10 +276,10 @@ static int decode_type1002(rtcm_t *rtcm)
         amb  =getbitu(rtcm->buff,i, 8); i+= 8;
         cnr1 =getbitu(rtcm->buff,i, 8); i+= 8;
         if (prn<40) {
-            sys=SYS_GPS;
+            sys=SYS_GPS_RTK;
         }
         else {
-            sys=SYS_SBS; prn+=80;
+            sys=SYS_SBS_RTK; prn+=80;
         }
         if (!(sat=satno(sys,prn))) {
             trace(2,"rtcm3 1002 satellite number error: prn=%d\n",prn);
@@ -334,10 +334,10 @@ static int decode_type1004(rtcm_t *rtcm)
         lock2=getbitu(rtcm->buff,i, 7); i+= 7;
         cnr2 =getbitu(rtcm->buff,i, 8); i+= 8;
         if (prn<40) {
-            sys=SYS_GPS;
+            sys=SYS_GPS_RTK;
         }
         else {
-            sys=SYS_SBS; prn+=80;
+            sys=SYS_SBS_RTK; prn+=80;
         }
         if (!(sat=satno(sys,prn))) {
             trace(2,"rtcm3 1004 satellite number error: sys=%d prn=%d\n",sys,prn);
@@ -565,7 +565,7 @@ static int decode_type1009(rtcm_t *rtcm)
 static int decode_type1010(rtcm_t *rtcm)
 {
     double pr1,cnr1,tt,cp1,lam1;
-    int i=24+61,j,index,nsat,sync,prn,sat,code,freq,ppr1,lock1,amb,sys=SYS_GLO;
+    int i=24+61,j,index,nsat,sync,prn,sat,code,freq,ppr1,lock1,amb,sys=SYS_GLO_RTK;
     
     if ((nsat=decode_head1009(rtcm,&sync))<0) return -1;
     
@@ -590,7 +590,7 @@ static int decode_type1010(rtcm_t *rtcm)
         pr1=pr1*0.02+amb*PRUNIT_GLO;
         if (ppr1!=(int)0xFFF80000) {
             rtcm->obs.data[index].P[0]=pr1;
-            lam1=CLIGHT/(FREQ1_GLO+DFRQ1_GLO*(freq-7));
+            lam1=CLIGHT_RTK/(FREQ1_GLO_RTK+DFRQ1_GLO_RTK*(freq-7));
             cp1=adjcp(rtcm,sat,0,ppr1*0.0005/lam1);
             rtcm->obs.data[index].L[0]=pr1/lam1+cp1;
         }
@@ -613,7 +613,7 @@ static int decode_type1012(rtcm_t *rtcm)
 {
     double pr1,cnr1,cnr2,tt,cp1,cp2,lam1,lam2;
     int i=24+61,j,index,nsat,sync,prn,sat,freq,code1,code2,pr21,ppr1,ppr2;
-    int lock1,lock2,amb,sys=SYS_GLO;
+    int lock1,lock2,amb,sys=SYS_GLO_RTK;
     
     if ((nsat=decode_head1009(rtcm,&sync))<0) return -1;
     
@@ -642,7 +642,7 @@ static int decode_type1012(rtcm_t *rtcm)
         if ((index=obsindex(&rtcm->obs,rtcm->time,sat))<0) continue;
         pr1=pr1*0.02+amb*PRUNIT_GLO;
         if (ppr1!=(int)0xFFF80000) {
-            lam1=CLIGHT/(FREQ1_GLO+DFRQ1_GLO*(freq-7));
+            lam1=CLIGHT_RTK/(FREQ1_GLO_RTK+DFRQ1_GLO_RTK*(freq-7));
             rtcm->obs.data[index].P[0]=pr1;
             cp1=adjcp(rtcm,sat,0,ppr1*0.0005/lam1);
             rtcm->obs.data[index].L[0]=pr1/lam1+cp1;
@@ -655,7 +655,7 @@ static int decode_type1012(rtcm_t *rtcm)
             rtcm->obs.data[index].P[1]=pr1+pr21*0.02;
         }
         if (ppr2!=(int)0xFFF80000) {
-            lam2=CLIGHT/(FREQ2_GLO+DFRQ2_GLO*(freq-7));
+            lam2=CLIGHT_RTK/(FREQ2_GLO_RTK+DFRQ2_GLO_RTK*(freq-7));
             cp2=adjcp(rtcm,sat,1,ppr2*0.0005/lam2);
             rtcm->obs.data[index].L[1]=pr1/lam2+cp2;
         }
@@ -677,36 +677,36 @@ static int decode_type1019(rtcm_t *rtcm)
     eph_t eph={0};
     double toc,sqrtA;
     char *msg;
-    int i=24+12,prn,sat,week,sys=SYS_GPS;
+    int i=24+12,prn,sat,week,sys=SYS_GPS_RTK;
     
     if (i+476<=rtcm->len*8) {
         prn       =getbitu(rtcm->buff,i, 6);              i+= 6;
         week      =getbitu(rtcm->buff,i,10);              i+=10;
         eph.sva   =getbitu(rtcm->buff,i, 4);              i+= 4;
         eph.code  =getbitu(rtcm->buff,i, 2);              i+= 2;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         eph.iode  =getbitu(rtcm->buff,i, 8);              i+= 8;
         toc       =getbitu(rtcm->buff,i,16)*16.0;         i+=16;
-        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55;        i+= 8;
-        eph.f1    =getbits(rtcm->buff,i,16)*P2_43;        i+=16;
-        eph.f0    =getbits(rtcm->buff,i,22)*P2_31;        i+=22;
+        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55_RTK;        i+= 8;
+        eph.f1    =getbits(rtcm->buff,i,16)*P2_43_RTK;        i+=16;
+        eph.f0    =getbits(rtcm->buff,i,22)*P2_31_RTK;        i+=22;
         eph.iodc  =getbitu(rtcm->buff,i,10);              i+=10;
-        eph.crs   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
-        eph.cus   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        eph.crs   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
+        eph.cus   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,16)*16.0;         i+=16;
-        eph.cic   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
-        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31;        i+= 8;
+        eph.cic   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
+        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31_RTK;        i+= 8;
         eph.svh   =getbitu(rtcm->buff,i, 6);              i+= 6;
         eph.flag  =getbitu(rtcm->buff,i, 1);              i+= 1;
         eph.fit   =getbitu(rtcm->buff,i, 1)?0.0:4.0; /* 0:4hr,1:>4hr */
@@ -716,7 +716,7 @@ static int decode_type1019(rtcm_t *rtcm)
         return -1;
     }
     if (prn>=40) {
-        sys=SYS_SBS; prn+=80;
+        sys=SYS_SBS_RTK; prn+=80;
     }
     trace(4,"decode_type1019: prn=%d iode=%d toe=%.0f\n",prn,eph.iode,eph.toes);
     
@@ -748,7 +748,7 @@ static int decode_type1020(rtcm_t *rtcm)
     geph_t geph={0};
     double tk_h,tk_m,tk_s,toe,tow,tod,tof;
     char *msg;
-    int i=24+12,prn,sat,week,tb,bn,sys=SYS_GLO;
+    int i=24+12,prn,sat,week,tb,bn,sys=SYS_GLO_RTK;
     
     if (i+348<=rtcm->len*8) {
         prn        =getbitu(rtcm->buff,i, 6);           i+= 6;
@@ -758,17 +758,17 @@ static int decode_type1020(rtcm_t *rtcm)
         tk_s       =getbitu(rtcm->buff,i, 1)*30.0;      i+= 1;
         bn         =getbitu(rtcm->buff,i, 1);           i+= 1+1;
         tb         =getbitu(rtcm->buff,i, 7);           i+= 7;
-        geph.vel[0]=getbitg(rtcm->buff,i,24)*P2_20*1E3; i+=24;
-        geph.pos[0]=getbitg(rtcm->buff,i,27)*P2_11*1E3; i+=27;
-        geph.acc[0]=getbitg(rtcm->buff,i, 5)*P2_30*1E3; i+= 5;
-        geph.vel[1]=getbitg(rtcm->buff,i,24)*P2_20*1E3; i+=24;
-        geph.pos[1]=getbitg(rtcm->buff,i,27)*P2_11*1E3; i+=27;
-        geph.acc[1]=getbitg(rtcm->buff,i, 5)*P2_30*1E3; i+= 5;
-        geph.vel[2]=getbitg(rtcm->buff,i,24)*P2_20*1E3; i+=24;
-        geph.pos[2]=getbitg(rtcm->buff,i,27)*P2_11*1E3; i+=27;
-        geph.acc[2]=getbitg(rtcm->buff,i, 5)*P2_30*1E3; i+= 5+1;
-        geph.gamn  =getbitg(rtcm->buff,i,11)*P2_40;     i+=11+3;
-        geph.taun  =getbitg(rtcm->buff,i,22)*P2_30;
+        geph.vel[0]=getbitg(rtcm->buff,i,24)*P2_20_RTK*1E3; i+=24;
+        geph.pos[0]=getbitg(rtcm->buff,i,27)*P2_11_RTK*1E3; i+=27;
+        geph.acc[0]=getbitg(rtcm->buff,i, 5)*P2_30_RTK*1E3; i+= 5;
+        geph.vel[1]=getbitg(rtcm->buff,i,24)*P2_20_RTK*1E3; i+=24;
+        geph.pos[1]=getbitg(rtcm->buff,i,27)*P2_11_RTK*1E3; i+=27;
+        geph.acc[1]=getbitg(rtcm->buff,i, 5)*P2_30_RTK*1E3; i+= 5;
+        geph.vel[2]=getbitg(rtcm->buff,i,24)*P2_20_RTK*1E3; i+=24;
+        geph.pos[2]=getbitg(rtcm->buff,i,27)*P2_11_RTK*1E3; i+=27;
+        geph.acc[2]=getbitg(rtcm->buff,i, 5)*P2_30_RTK*1E3; i+= 5+1;
+        geph.gamn  =getbitg(rtcm->buff,i,11)*P2_40_RTK;     i+=11+3;
+        geph.taun  =getbitg(rtcm->buff,i,22)*P2_30_RTK;
     }
     else {
         trace(2,"rtcm3 1020 length error: len=%d\n",rtcm->len);
@@ -992,36 +992,36 @@ static int decode_type1044(rtcm_t *rtcm)
     eph_t eph={0};
     double toc,sqrtA;
     char *msg;
-    int i=24+12,prn,sat,week,sys=SYS_QZS;
+    int i=24+12,prn,sat,week,sys=SYS_QZS_RTK;
     
     if (i+473<=rtcm->len*8) {
         prn       =getbitu(rtcm->buff,i, 4)+192;          i+= 4;
         toc       =getbitu(rtcm->buff,i,16)*16.0;         i+=16;
-        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55;        i+= 8;
-        eph.f1    =getbits(rtcm->buff,i,16)*P2_43;        i+=16;
-        eph.f0    =getbits(rtcm->buff,i,22)*P2_31;        i+=22;
+        eph.f2    =getbits(rtcm->buff,i, 8)*P2_55_RTK;        i+= 8;
+        eph.f1    =getbits(rtcm->buff,i,16)*P2_43_RTK;        i+=16;
+        eph.f0    =getbits(rtcm->buff,i,22)*P2_31_RTK;        i+=22;
         eph.iode  =getbitu(rtcm->buff,i, 8);              i+= 8;
-        eph.crs   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
-        eph.cus   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        eph.crs   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
+        eph.cus   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,16)*16.0;         i+=16;
-        eph.cic   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.cic   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         eph.code  =getbitu(rtcm->buff,i, 2);              i+= 2;
         week      =getbitu(rtcm->buff,i,10);              i+=10;
         eph.sva   =getbitu(rtcm->buff,i, 4);              i+= 4;
         eph.svh   =getbitu(rtcm->buff,i, 6);              i+= 6;
-        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31;        i+= 8;
+        eph.tgd[0]=getbits(rtcm->buff,i, 8)*P2_31_RTK;        i+= 8;
         eph.iodc  =getbitu(rtcm->buff,i,10);              i+=10;
         eph.fit   =getbitu(rtcm->buff,i, 1)?0.0:2.0; /* 0:2hr,1:>2hr */
     }
@@ -1060,34 +1060,34 @@ static int decode_type1045(rtcm_t *rtcm)
     eph_t eph={0};
     double toc,sqrtA;
     char *msg;
-    int i=24+12,prn,sat,week,e5a_hs,e5a_dvs,rsv,sys=SYS_GAL;
+    int i=24+12,prn,sat,week,e5a_hs,e5a_dvs,rsv,sys=SYS_GAL_RTK;
     
     if (i+484<=rtcm->len*8) {
         prn       =getbitu(rtcm->buff,i, 6);              i+= 6;
         week      =getbitu(rtcm->buff,i,12);              i+=12; /* gst-week */
         eph.iode  =getbitu(rtcm->buff,i,10);              i+=10;
         eph.sva   =getbitu(rtcm->buff,i, 8);              i+= 8;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         toc       =getbitu(rtcm->buff,i,14)*60.0;         i+=14;
         eph.f2    =getbits(rtcm->buff,i, 6)*P2_59;        i+= 6;
         eph.f1    =getbits(rtcm->buff,i,21)*P2_46;        i+=21;
         eph.f0    =getbits(rtcm->buff,i,31)*P2_34;        i+=31;
-        eph.crs   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
-        eph.cus   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        eph.crs   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
+        eph.cus   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,14)*60.0;         i+=14;
-        eph.cic   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
-        eph.tgd[0]=getbits(rtcm->buff,i,10)*P2_32;        i+=10; /* E5a/E1 */
+        eph.cic   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
+        eph.tgd[0]=getbits(rtcm->buff,i,10)*P2_32_RTK;        i+=10; /* E5a/E1 */
         e5a_hs    =getbitu(rtcm->buff,i, 2);              i+= 2; /* OSHS */
         e5a_dvs   =getbitu(rtcm->buff,i, 1);              i+= 1; /* OSDVS */
         rsv       =getbitu(rtcm->buff,i, 7);
@@ -1131,35 +1131,35 @@ static int decode_type1046(rtcm_t *rtcm)
     eph_t eph={0};
     double toc,sqrtA;
     char *msg;
-    int i=24+12,prn,sat,week,e5b_hs,e5b_dvs,e1_hs,e1_dvs,sys=SYS_GAL;
+    int i=24+12,prn,sat,week,e5b_hs,e5b_dvs,e1_hs,e1_dvs,sys=SYS_GAL_RTK;
     
     if (i+492<=rtcm->len*8) {
         prn       =getbitu(rtcm->buff,i, 6);              i+= 6;
         week      =getbitu(rtcm->buff,i,12);              i+=12;
         eph.iode  =getbitu(rtcm->buff,i,10);              i+=10;
         eph.sva   =getbitu(rtcm->buff,i, 8);              i+= 8;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         toc       =getbitu(rtcm->buff,i,14)*60.0;         i+=14;
         eph.f2    =getbits(rtcm->buff,i, 6)*P2_59;        i+= 6;
         eph.f1    =getbits(rtcm->buff,i,21)*P2_46;        i+=21;
         eph.f0    =getbits(rtcm->buff,i,31)*P2_34;        i+=31;
-        eph.crs   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
-        eph.cus   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        eph.crs   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cuc   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
+        eph.cus   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,14)*60.0;         i+=14;
-        eph.cic   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,16)*P2_29;        i+=16;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,16)*P2_5;         i+=16;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
-        eph.tgd[0]=getbits(rtcm->buff,i,10)*P2_32;        i+=10; /* E5a/E1 */
-        eph.tgd[1]=getbits(rtcm->buff,i,10)*P2_32;        i+=10; /* E5b/E1 */
+        eph.cic   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,16)*P2_29_RTK;        i+=16;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,16)*P2_5_RTK;         i+=16;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
+        eph.tgd[0]=getbits(rtcm->buff,i,10)*P2_32_RTK;        i+=10; /* E5a/E1 */
+        eph.tgd[1]=getbits(rtcm->buff,i,10)*P2_32_RTK;        i+=10; /* E5b/E1 */
         e5b_hs    =getbitu(rtcm->buff,i, 2);              i+= 2; /* E5b OSHS */
         e5b_dvs   =getbitu(rtcm->buff,i, 1);              i+= 1; /* E5b OSDVS */
         e1_hs     =getbitu(rtcm->buff,i, 2);              i+= 2; /* E1 OSHS */
@@ -1204,34 +1204,34 @@ static int decode_type1042(rtcm_t *rtcm)
     eph_t eph={0};
     double toc,sqrtA;
     char *msg;
-    int i=24+12,prn,sat,week,sys=SYS_CMP;
+    int i=24+12,prn,sat,week,sys=SYS_CMP_RTK;
     
     if (i+499<=rtcm->len*8) {
         prn       =getbitu(rtcm->buff,i, 6);              i+= 6;
         week      =getbitu(rtcm->buff,i,13);              i+=13;
         eph.sva   =getbitu(rtcm->buff,i, 4);              i+= 4;
-        eph.idot  =getbits(rtcm->buff,i,14)*P2_43*SC2RAD; i+=14;
+        eph.idot  =getbits(rtcm->buff,i,14)*P2_43_RTK*SC2RAD_RTK; i+=14;
         eph.iode  =getbitu(rtcm->buff,i, 5);              i+= 5; /* AODE */
         toc       =getbitu(rtcm->buff,i,17)*8.0;          i+=17;
         eph.f2    =getbits(rtcm->buff,i,11)*P2_66;        i+=11;
-        eph.f1    =getbits(rtcm->buff,i,22)*P2_50;        i+=22;
-        eph.f0    =getbits(rtcm->buff,i,24)*P2_33;        i+=24;
+        eph.f1    =getbits(rtcm->buff,i,22)*P2_50_RTK;        i+=22;
+        eph.f0    =getbits(rtcm->buff,i,24)*P2_33_RTK;        i+=24;
         eph.iodc  =getbitu(rtcm->buff,i, 5);              i+= 5; /* AODC */
-        eph.crs   =getbits(rtcm->buff,i,18)*P2_6;         i+=18;
-        eph.deln  =getbits(rtcm->buff,i,16)*P2_43*SC2RAD; i+=16;
-        eph.M0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cuc   =getbits(rtcm->buff,i,18)*P2_31;        i+=18;
-        eph.e     =getbitu(rtcm->buff,i,32)*P2_33;        i+=32;
-        eph.cus   =getbits(rtcm->buff,i,18)*P2_31;        i+=18;
-        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19;        i+=32;
+        eph.crs   =getbits(rtcm->buff,i,18)*P2_6_RTK;         i+=18;
+        eph.deln  =getbits(rtcm->buff,i,16)*P2_43_RTK*SC2RAD_RTK; i+=16;
+        eph.M0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cuc   =getbits(rtcm->buff,i,18)*P2_31_RTK;        i+=18;
+        eph.e     =getbitu(rtcm->buff,i,32)*P2_33_RTK;        i+=32;
+        eph.cus   =getbits(rtcm->buff,i,18)*P2_31_RTK;        i+=18;
+        sqrtA     =getbitu(rtcm->buff,i,32)*P2_19_RTK;        i+=32;
         eph.toes  =getbitu(rtcm->buff,i,17)*8.0;          i+=17;
-        eph.cic   =getbits(rtcm->buff,i,18)*P2_31;        i+=18;
-        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.cis   =getbits(rtcm->buff,i,18)*P2_31;        i+=18;
-        eph.i0    =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.crc   =getbits(rtcm->buff,i,18)*P2_6;         i+=18;
-        eph.omg   =getbits(rtcm->buff,i,32)*P2_31*SC2RAD; i+=32;
-        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43*SC2RAD; i+=24;
+        eph.cic   =getbits(rtcm->buff,i,18)*P2_31_RTK;        i+=18;
+        eph.OMG0  =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.cis   =getbits(rtcm->buff,i,18)*P2_31_RTK;        i+=18;
+        eph.i0    =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.crc   =getbits(rtcm->buff,i,18)*P2_6_RTK;         i+=18;
+        eph.omg   =getbits(rtcm->buff,i,32)*P2_31_RTK*SC2RAD_RTK; i+=32;
+        eph.OMGd  =getbits(rtcm->buff,i,24)*P2_43_RTK*SC2RAD_RTK; i+=24;
         eph.tgd[0]=getbits(rtcm->buff,i,10)*1E-10;        i+=10;
         eph.tgd[1]=getbits(rtcm->buff,i,10)*1E-10;        i+=10;
         eph.svh   =getbitu(rtcm->buff,i, 1);              i+= 1;
@@ -1274,11 +1274,11 @@ static int decode_ssr1_head(rtcm_t *rtcm, int sys, int *sync, int *iod,
     char *msg,tstr[64];
     int i=24+12,nsat,udi,provid=0,solid=0,ns;
     
-    ns=sys==SYS_QZS?4:6;
+    ns=sys==SYS_QZS_RTK?4:6;
     
-    if (i+(sys==SYS_GLO?53:50+ns)>rtcm->len*8) return -1;
+    if (i+(sys==SYS_GLO_RTK?53:50+ns)>rtcm->len*8) return -1;
     
-    if (sys==SYS_GLO) {
+    if (sys==SYS_GLO_RTK) {
         tod=getbitu(rtcm->buff,i,17); i+=17;
         adjday_glot(rtcm,tod);
     }
@@ -1315,11 +1315,11 @@ static int decode_ssr2_head(rtcm_t *rtcm, int sys, int *sync, int *iod,
     char *msg,tstr[64];
     int i=24+12,nsat,udi,provid=0,solid=0,ns;
     
-    ns=sys==SYS_QZS?4:6;
+    ns=sys==SYS_QZS_RTK?4:6;
     
-    if (i+(sys==SYS_GLO?52:49+ns)>rtcm->len*8) return -1;
+    if (i+(sys==SYS_GLO_RTK?52:49+ns)>rtcm->len*8) return -1;
     
-    if (sys==SYS_GLO) {
+    if (sys==SYS_GLO_RTK) {
         tod=getbitu(rtcm->buff,i,17); i+=17;
         adjday_glot(rtcm,tod);
     }
@@ -1385,12 +1385,12 @@ static int decode_ssr1(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; ni= 8; nj= 0; offp=  0; break;
-        case SYS_GLO: np=5; ni= 8; nj= 0; offp=  0; break;
-        case SYS_GAL: np=6; ni=10; nj= 0; offp=  0; break;
-        case SYS_QZS: np=4; ni= 8; nj= 0; offp=192; break;
-        case SYS_CMP: np=6; ni=10; nj=24; offp=  1; break;
-        case SYS_SBS: np=6; ni= 9; nj=24; offp=120; break;
+        case SYS_GPS_RTK: np=6; ni= 8; nj= 0; offp=  0; break;
+        case SYS_GLO_RTK: np=5; ni= 8; nj= 0; offp=  0; break;
+        case SYS_GAL_RTK: np=6; ni=10; nj= 0; offp=  0; break;
+        case SYS_QZS_RTK: np=4; ni= 8; nj= 0; offp=192; break;
+        case SYS_CMP_RTK: np=6; ni=10; nj=24; offp=  1; break;
+        case SYS_SBS_RTK: np=6; ni= 9; nj=24; offp=120; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+121+np+ni+nj<=rtcm->len*8;j++) {
@@ -1436,12 +1436,12 @@ static int decode_ssr2(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; offp=  0; break;
-        case SYS_GLO: np=5; offp=  0; break;
-        case SYS_GAL: np=6; offp=  0; break;
-        case SYS_QZS: np=4; offp=192; break;
-        case SYS_CMP: np=6; offp=  1; break;
-        case SYS_SBS: np=6; offp=120; break;
+        case SYS_GPS_RTK: np=6; offp=  0; break;
+        case SYS_GLO_RTK: np=5; offp=  0; break;
+        case SYS_GAL_RTK: np=6; offp=  0; break;
+        case SYS_QZS_RTK: np=4; offp=192; break;
+        case SYS_CMP_RTK: np=6; offp=  1; break;
+        case SYS_SBS_RTK: np=6; offp=120; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+70+np<=rtcm->len*8;j++) {
@@ -1479,12 +1479,12 @@ static int decode_ssr3(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; offp=  0; codes=codes_gps; ncode=17; break;
-        case SYS_GLO: np=5; offp=  0; codes=codes_glo; ncode= 4; break;
-        case SYS_GAL: np=6; offp=  0; codes=codes_gal; ncode=19; break;
-        case SYS_QZS: np=4; offp=192; codes=codes_qzs; ncode=13; break;
-        case SYS_CMP: np=6; offp=  1; codes=codes_bds; ncode= 9; break;
-        case SYS_SBS: np=6; offp=120; codes=codes_sbs; ncode= 4; break;
+        case SYS_GPS_RTK: np=6; offp=  0; codes=codes_gps; ncode=17; break;
+        case SYS_GLO_RTK: np=5; offp=  0; codes=codes_glo; ncode= 4; break;
+        case SYS_GAL_RTK: np=6; offp=  0; codes=codes_gal; ncode=19; break;
+        case SYS_QZS_RTK: np=4; offp=192; codes=codes_qzs; ncode=13; break;
+        case SYS_CMP_RTK: np=6; offp=  1; codes=codes_bds; ncode= 9; break;
+        case SYS_SBS_RTK: np=6; offp=120; codes=codes_sbs; ncode= 4; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+5+np<=rtcm->len*8;j++) {
@@ -1530,12 +1530,12 @@ static int decode_ssr4(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; ni= 8; nj= 0; offp=  0; break;
-        case SYS_GLO: np=5; ni= 8; nj= 0; offp=  0; break;
-        case SYS_GAL: np=6; ni=10; nj= 0; offp=  0; break;
-        case SYS_QZS: np=4; ni= 8; nj= 0; offp=192; break;
-        case SYS_CMP: np=6; ni=10; nj=24; offp=  1; break;
-        case SYS_SBS: np=6; ni= 9; nj=24; offp=120; break;
+        case SYS_GPS_RTK: np=6; ni= 8; nj= 0; offp=  0; break;
+        case SYS_GLO_RTK: np=5; ni= 8; nj= 0; offp=  0; break;
+        case SYS_GAL_RTK: np=6; ni=10; nj= 0; offp=  0; break;
+        case SYS_QZS_RTK: np=4; ni= 8; nj= 0; offp=192; break;
+        case SYS_CMP_RTK: np=6; ni=10; nj=24; offp=  1; break;
+        case SYS_SBS_RTK: np=6; ni= 9; nj=24; offp=120; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+191+np+ni+nj<=rtcm->len*8;j++) {
@@ -1586,12 +1586,12 @@ static int decode_ssr5(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; offp=  0; break;
-        case SYS_GLO: np=5; offp=  0; break;
-        case SYS_GAL: np=6; offp=  0; break;
-        case SYS_QZS: np=4; offp=192; break;
-        case SYS_CMP: np=6; offp=  1; break;
-        case SYS_SBS: np=6; offp=120; break;
+        case SYS_GPS_RTK: np=6; offp=  0; break;
+        case SYS_GLO_RTK: np=5; offp=  0; break;
+        case SYS_GAL_RTK: np=6; offp=  0; break;
+        case SYS_QZS_RTK: np=4; offp=192; break;
+        case SYS_CMP_RTK: np=6; offp=  1; break;
+        case SYS_SBS_RTK: np=6; offp=120; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+6+np<=rtcm->len*8;j++) {
@@ -1623,12 +1623,12 @@ static int decode_ssr6(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; offp=  0; break;
-        case SYS_GLO: np=5; offp=  0; break;
-        case SYS_GAL: np=6; offp=  0; break;
-        case SYS_QZS: np=4; offp=192; break;
-        case SYS_CMP: np=6; offp=  1; break;
-        case SYS_SBS: np=6; offp=120; break;
+        case SYS_GPS_RTK: np=6; offp=  0; break;
+        case SYS_GLO_RTK: np=5; offp=  0; break;
+        case SYS_GAL_RTK: np=6; offp=  0; break;
+        case SYS_QZS_RTK: np=4; offp=192; break;
+        case SYS_CMP_RTK: np=6; offp=  1; break;
+        case SYS_SBS_RTK: np=6; offp=120; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+22+np<=rtcm->len*8;j++) {
@@ -1655,11 +1655,11 @@ static int decode_ssr7_head(rtcm_t *rtcm, int sys, int *sync, int *iod,
     char *msg,tstr[64];
     int i=24+12,nsat,udi,provid=0,solid=0,ns;
     
-    ns=sys==SYS_QZS?4:6;
+    ns=sys==SYS_QZS_RTK?4:6;
     
-    if (i+(sys==SYS_GLO?54:51+ns)>rtcm->len*8) return -1;
+    if (i+(sys==SYS_GLO_RTK?54:51+ns)>rtcm->len*8) return -1;
     
-    if (sys==SYS_GLO) {
+    if (sys==SYS_GLO_RTK) {
         tod=getbitu(rtcm->buff,i,17); i+=17;
         adjday_glot(rtcm,tod);
     }
@@ -1704,11 +1704,11 @@ static int decode_ssr7(rtcm_t *rtcm, int sys)
         return -1;
     }
     switch (sys) {
-        case SYS_GPS: np=6; offp=  0; codes=codes_gps; ncode=17; break;
-        case SYS_GLO: np=5; offp=  0; codes=codes_glo; ncode= 4; break;
-        case SYS_GAL: np=6; offp=  0; codes=codes_gal; ncode=19; break;
-        case SYS_QZS: np=4; offp=192; codes=codes_qzs; ncode=13; break;
-        case SYS_CMP: np=6; offp=  1; codes=codes_bds; ncode= 9; break;
+        case SYS_GPS_RTK: np=6; offp=  0; codes=codes_gps; ncode=17; break;
+        case SYS_GLO_RTK: np=5; offp=  0; codes=codes_glo; ncode= 4; break;
+        case SYS_GAL_RTK: np=6; offp=  0; codes=codes_gal; ncode=19; break;
+        case SYS_QZS_RTK: np=4; offp=192; codes=codes_qzs; ncode=13; break;
+        case SYS_CMP_RTK: np=6; offp=  1; codes=codes_bds; ncode= 9; break;
         default: return sync?0:10;
     }
     for (j=0;j<nsat&&i+5+17+np<=rtcm->len*8;j++) {
@@ -1803,33 +1803,33 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
     type=getbitu(rtcm->buff,24,12);
     
     switch (sys) {
-        case SYS_GPS: msm_type=q=rtcm->msmtype[0]; break;
-        case SYS_GLO: msm_type=q=rtcm->msmtype[1]; break;
-        case SYS_GAL: msm_type=q=rtcm->msmtype[2]; break;
-        case SYS_QZS: msm_type=q=rtcm->msmtype[3]; break;
-        case SYS_SBS: msm_type=q=rtcm->msmtype[4]; break;
-        case SYS_CMP: msm_type=q=rtcm->msmtype[5]; break;
+        case SYS_GPS_RTK: msm_type=q=rtcm->msmtype[0]; break;
+        case SYS_GLO_RTK: msm_type=q=rtcm->msmtype[1]; break;
+        case SYS_GAL_RTK: msm_type=q=rtcm->msmtype[2]; break;
+        case SYS_QZS_RTK: msm_type=q=rtcm->msmtype[3]; break;
+        case SYS_SBS_RTK: msm_type=q=rtcm->msmtype[4]; break;
+        case SYS_CMP_RTK: msm_type=q=rtcm->msmtype[5]; break;
     }
     /* id to signal */
     for (i=0;i<h->nsig;i++) {
         switch (sys) {
-            case SYS_GPS: sig[i]=msm_sig_gps[h->sigs[i]-1]; break;
-            case SYS_GLO: sig[i]=msm_sig_glo[h->sigs[i]-1]; break;
-            case SYS_GAL: sig[i]=msm_sig_gal[h->sigs[i]-1]; break;
-            case SYS_QZS: sig[i]=msm_sig_qzs[h->sigs[i]-1]; break;
-            case SYS_SBS: sig[i]=msm_sig_sbs[h->sigs[i]-1]; break;
-            case SYS_CMP: sig[i]=msm_sig_cmp[h->sigs[i]-1]; break;
+            case SYS_GPS_RTK: sig[i]=msm_sig_gps[h->sigs[i]-1]; break;
+            case SYS_GLO_RTK: sig[i]=msm_sig_glo[h->sigs[i]-1]; break;
+            case SYS_GAL_RTK: sig[i]=msm_sig_gal[h->sigs[i]-1]; break;
+            case SYS_QZS_RTK: sig[i]=msm_sig_qzs[h->sigs[i]-1]; break;
+            case SYS_SBS_RTK: sig[i]=msm_sig_sbs[h->sigs[i]-1]; break;
+            case SYS_CMP_RTK: sig[i]=msm_sig_cmp[h->sigs[i]-1]; break;
             default: sig[i]=""; break;
         }
         /* signal to rinex obs type */
         code[i]=obs2code(sig[i],freq+i);
         
         /* freqency index for beidou and galileo */
-        if (sys==SYS_CMP) {
+        if (sys==SYS_CMP_RTK) {
             if      (freq[i]==5) freq[i]=2; /* B2 */
             else if (freq[i]==4) freq[i]=3; /* B3 */
         }
-        else if (sys==SYS_GAL) {
+        else if (sys==SYS_GAL_RTK) {
             if (freq[i]==5) freq[i]=2; /* E5b */
         }
         if (code[i]!=CODE_NONE) {
@@ -1849,8 +1849,8 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
     for (i=j=0;i<h->nsat;i++) {
         
         prn=h->sats[i];
-        if      (sys==SYS_QZS) prn+=MINPRNQZS-1;
-        else if (sys==SYS_SBS) prn+=MINPRNSBS-1;
+        if      (sys==SYS_QZS_RTK) prn+=MINPRNQZS-1;
+        else if (sys==SYS_SBS_RTK) prn+=MINPRNSBS-1;
         
         if ((sat=satno(sys,prn))) {
             tt=timediff(rtcm->obs.data[0].time,rtcm->time);
@@ -1871,10 +1871,10 @@ static void save_msm_obs(rtcm_t *rtcm, int sys, msm_h_t *h, const double *r,
                 wl=satwavelen(sat,freq[k]-1,&rtcm->nav);
                 
                 /* glonass wave length by extended info */
-                if (sys==SYS_GLO&&ex&&ex[i]<=13) {
+                if (sys==SYS_GLO_RTK&&ex&&ex[i]<=13) {
                     fn=ex[i]-7;
-                    wl=CLIGHT/((freq[k]==2?FREQ2_GLO:FREQ1_GLO)+
-                               (freq[k]==2?DFRQ2_GLO:DFRQ1_GLO)*fn);
+                    wl=CLIGHT_RTK/((freq[k]==2?FREQ2_GLO_RTK:FREQ1_GLO_RTK)+
+                               (freq[k]==2?DFRQ2_GLO_RTK:DFRQ1_GLO_RTK)*fn);
                 }
                 /* pseudorange (m) */
                 if (r[i]!=0.0&&pr[j]>-1E12) {
@@ -1912,12 +1912,12 @@ static int decode_msm_head(rtcm_t *rtcm, int sys, int *sync, int *iod,
     if (i+157<=rtcm->len*8) {
         staid     =getbitu(rtcm->buff,i,12);       i+=12;
         
-        if (sys==SYS_GLO) {
+        if (sys==SYS_GLO_RTK) {
             dow   =getbitu(rtcm->buff,i, 3);       i+= 3;
             tod   =getbitu(rtcm->buff,i,27)*0.001; i+=27;
             adjday_glot(rtcm,tod);
         }
-        else if (sys==SYS_CMP) {
+        else if (sys==SYS_CMP_RTK) {
             tow   =getbitu(rtcm->buff,i,30)*0.001; i+=30;
             tow+=14.0; /* BDT -> GPST */
             adjweek(rtcm,tow);
@@ -2017,11 +2017,11 @@ static int decode_msm4(rtcm_t *rtcm, int sys)
     /* decode signal data */
     for (j=0;j<ncell;j++) { /* pseudorange */
         prv=getbits(rtcm->buff,i,15); i+=15;
-        if (prv!=-16384) pr[j]=prv*P2_24*RANGE_MS;
+        if (prv!=-16384) pr[j]=prv*P2_24_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* phaserange */
         cpv=getbits(rtcm->buff,i,22); i+=22;
-        if (cpv!=-2097152) cp[j]=cpv*P2_29*RANGE_MS;
+        if (cpv!=-2097152) cp[j]=cpv*P2_29_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* lock time */
         lock[j]=getbitu(rtcm->buff,i,4); i+=4;
@@ -2080,11 +2080,11 @@ static int decode_msm5(rtcm_t *rtcm, int sys)
     /* decode signal data */
     for (j=0;j<ncell;j++) { /* pseudorange */
         prv=getbits(rtcm->buff,i,15); i+=15;
-        if (prv!=-16384) pr[j]=prv*P2_24*RANGE_MS;
+        if (prv!=-16384) pr[j]=prv*P2_24_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* phaserange */
         cpv=getbits(rtcm->buff,i,22); i+=22;
-        if (cpv!=-2097152) cp[j]=cpv*P2_29*RANGE_MS;
+        if (cpv!=-2097152) cp[j]=cpv*P2_29_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* lock time */
         lock[j]=getbitu(rtcm->buff,i,4); i+=4;
@@ -2137,11 +2137,11 @@ static int decode_msm6(rtcm_t *rtcm, int sys)
     /* decode signal data */
     for (j=0;j<ncell;j++) { /* pseudorange */
         prv=getbits(rtcm->buff,i,20); i+=20;
-        if (prv!=-524288) pr[j]=prv*P2_29*RANGE_MS;
+        if (prv!=-524288) pr[j]=prv*P2_29_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* phaserange */
         cpv=getbits(rtcm->buff,i,24); i+=24;
-        if (cpv!=-8388608) cp[j]=cpv*P2_31*RANGE_MS;
+        if (cpv!=-8388608) cp[j]=cpv*P2_31_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* lock time */
         lock[j]=getbitu(rtcm->buff,i,10); i+=10;
@@ -2200,11 +2200,11 @@ static int decode_msm7(rtcm_t *rtcm, int sys)
     /* decode signal data */
     for (j=0;j<ncell;j++) { /* pseudorange */
         prv=getbits(rtcm->buff,i,20); i+=20;
-        if (prv!=-524288) pr[j]=prv*P2_29*RANGE_MS;
+        if (prv!=-524288) pr[j]=prv*P2_29_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* phaserange */
         cpv=getbits(rtcm->buff,i,24); i+=24;
-        if (cpv!=-8388608) cp[j]=cpv*P2_31*RANGE_MS;
+        if (cpv!=-8388608) cp[j]=cpv*P2_31_RTK*RANGE_MS;
     }
     for (j=0;j<ncell;j++) { /* lock time */
         lock[j]=getbitu(rtcm->buff,i,10); i+=10;
@@ -2285,89 +2285,89 @@ extern int decode_rtcm3(rtcm_t *rtcm)
         case 1046: ret=decode_type1046(rtcm); break;
         case   63: ret=decode_type1042(rtcm); break; /* RTCM draft */
         case 1042: ret=decode_type1042(rtcm); break;
-        case 1057: ret=decode_ssr1(rtcm,SYS_GPS); break;
-        case 1058: ret=decode_ssr2(rtcm,SYS_GPS); break;
-        case 1059: ret=decode_ssr3(rtcm,SYS_GPS); break;
-        case 1060: ret=decode_ssr4(rtcm,SYS_GPS); break;
-        case 1061: ret=decode_ssr5(rtcm,SYS_GPS); break;
-        case 1062: ret=decode_ssr6(rtcm,SYS_GPS); break;
-        case 1063: ret=decode_ssr1(rtcm,SYS_GLO); break;
-        case 1064: ret=decode_ssr2(rtcm,SYS_GLO); break;
-        case 1065: ret=decode_ssr3(rtcm,SYS_GLO); break;
-        case 1066: ret=decode_ssr4(rtcm,SYS_GLO); break;
-        case 1067: ret=decode_ssr5(rtcm,SYS_GLO); break;
-        case 1068: ret=decode_ssr6(rtcm,SYS_GLO); break;
-        case 1071: ret=decode_msm0(rtcm,SYS_GPS); break; /* not supported */
-        case 1072: ret=decode_msm0(rtcm,SYS_GPS); break; /* not supported */
-        case 1073: ret=decode_msm0(rtcm,SYS_GPS); break; /* not supported */
-        case 1074: ret=decode_msm4(rtcm,SYS_GPS); break;
-        case 1075: ret=decode_msm5(rtcm,SYS_GPS); break;
-        case 1076: ret=decode_msm6(rtcm,SYS_GPS); break;
-        case 1077: ret=decode_msm7(rtcm,SYS_GPS); break;
-        case 1081: ret=decode_msm0(rtcm,SYS_GLO); break; /* not supported */
-        case 1082: ret=decode_msm0(rtcm,SYS_GLO); break; /* not supported */
-        case 1083: ret=decode_msm0(rtcm,SYS_GLO); break; /* not supported */
-        case 1084: ret=decode_msm4(rtcm,SYS_GLO); break;
-        case 1085: ret=decode_msm5(rtcm,SYS_GLO); break;
-        case 1086: ret=decode_msm6(rtcm,SYS_GLO); break;
-        case 1087: ret=decode_msm7(rtcm,SYS_GLO); break;
-        case 1091: ret=decode_msm0(rtcm,SYS_GAL); break; /* not supported */
-        case 1092: ret=decode_msm0(rtcm,SYS_GAL); break; /* not supported */
-        case 1093: ret=decode_msm0(rtcm,SYS_GAL); break; /* not supported */
-        case 1094: ret=decode_msm4(rtcm,SYS_GAL); break;
-        case 1095: ret=decode_msm5(rtcm,SYS_GAL); break;
-        case 1096: ret=decode_msm6(rtcm,SYS_GAL); break;
-        case 1097: ret=decode_msm7(rtcm,SYS_GAL); break;
-        case 1101: ret=decode_msm0(rtcm,SYS_SBS); break; /* not supported */
-        case 1102: ret=decode_msm0(rtcm,SYS_SBS); break; /* not supported */
-        case 1103: ret=decode_msm0(rtcm,SYS_SBS); break; /* not supported */
-        case 1104: ret=decode_msm4(rtcm,SYS_SBS); break;
-        case 1105: ret=decode_msm5(rtcm,SYS_SBS); break;
-        case 1106: ret=decode_msm6(rtcm,SYS_SBS); break;
-        case 1107: ret=decode_msm7(rtcm,SYS_SBS); break;
-        case 1111: ret=decode_msm0(rtcm,SYS_QZS); break; /* not supported */
-        case 1112: ret=decode_msm0(rtcm,SYS_QZS); break; /* not supported */
-        case 1113: ret=decode_msm0(rtcm,SYS_QZS); break; /* not supported */
-        case 1114: ret=decode_msm4(rtcm,SYS_QZS); break;
-        case 1115: ret=decode_msm5(rtcm,SYS_QZS); break;
-        case 1116: ret=decode_msm6(rtcm,SYS_QZS); break;
-        case 1117: ret=decode_msm7(rtcm,SYS_QZS); break;
-        case 1121: ret=decode_msm0(rtcm,SYS_CMP); break; /* not supported */
-        case 1122: ret=decode_msm0(rtcm,SYS_CMP); break; /* not supported */
-        case 1123: ret=decode_msm0(rtcm,SYS_CMP); break; /* not supported */
-        case 1124: ret=decode_msm4(rtcm,SYS_CMP); break;
-        case 1125: ret=decode_msm5(rtcm,SYS_CMP); break;
-        case 1126: ret=decode_msm6(rtcm,SYS_CMP); break;
-        case 1127: ret=decode_msm7(rtcm,SYS_CMP); break;
+        case 1057: ret=decode_ssr1(rtcm,SYS_GPS_RTK); break;
+        case 1058: ret=decode_ssr2(rtcm,SYS_GPS_RTK); break;
+        case 1059: ret=decode_ssr3(rtcm,SYS_GPS_RTK); break;
+        case 1060: ret=decode_ssr4(rtcm,SYS_GPS_RTK); break;
+        case 1061: ret=decode_ssr5(rtcm,SYS_GPS_RTK); break;
+        case 1062: ret=decode_ssr6(rtcm,SYS_GPS_RTK); break;
+        case 1063: ret=decode_ssr1(rtcm,SYS_GLO_RTK); break;
+        case 1064: ret=decode_ssr2(rtcm,SYS_GLO_RTK); break;
+        case 1065: ret=decode_ssr3(rtcm,SYS_GLO_RTK); break;
+        case 1066: ret=decode_ssr4(rtcm,SYS_GLO_RTK); break;
+        case 1067: ret=decode_ssr5(rtcm,SYS_GLO_RTK); break;
+        case 1068: ret=decode_ssr6(rtcm,SYS_GLO_RTK); break;
+        case 1071: ret=decode_msm0(rtcm,SYS_GPS_RTK); break; /* not supported */
+        case 1072: ret=decode_msm0(rtcm,SYS_GPS_RTK); break; /* not supported */
+        case 1073: ret=decode_msm0(rtcm,SYS_GPS_RTK); break; /* not supported */
+        case 1074: ret=decode_msm4(rtcm,SYS_GPS_RTK); break;
+        case 1075: ret=decode_msm5(rtcm,SYS_GPS_RTK); break;
+        case 1076: ret=decode_msm6(rtcm,SYS_GPS_RTK); break;
+        case 1077: ret=decode_msm7(rtcm,SYS_GPS_RTK); break;
+        case 1081: ret=decode_msm0(rtcm,SYS_GLO_RTK); break; /* not supported */
+        case 1082: ret=decode_msm0(rtcm,SYS_GLO_RTK); break; /* not supported */
+        case 1083: ret=decode_msm0(rtcm,SYS_GLO_RTK); break; /* not supported */
+        case 1084: ret=decode_msm4(rtcm,SYS_GLO_RTK); break;
+        case 1085: ret=decode_msm5(rtcm,SYS_GLO_RTK); break;
+        case 1086: ret=decode_msm6(rtcm,SYS_GLO_RTK); break;
+        case 1087: ret=decode_msm7(rtcm,SYS_GLO_RTK); break;
+        case 1091: ret=decode_msm0(rtcm,SYS_GAL_RTK); break; /* not supported */
+        case 1092: ret=decode_msm0(rtcm,SYS_GAL_RTK); break; /* not supported */
+        case 1093: ret=decode_msm0(rtcm,SYS_GAL_RTK); break; /* not supported */
+        case 1094: ret=decode_msm4(rtcm,SYS_GAL_RTK); break;
+        case 1095: ret=decode_msm5(rtcm,SYS_GAL_RTK); break;
+        case 1096: ret=decode_msm6(rtcm,SYS_GAL_RTK); break;
+        case 1097: ret=decode_msm7(rtcm,SYS_GAL_RTK); break;
+        case 1101: ret=decode_msm0(rtcm,SYS_SBS_RTK); break; /* not supported */
+        case 1102: ret=decode_msm0(rtcm,SYS_SBS_RTK); break; /* not supported */
+        case 1103: ret=decode_msm0(rtcm,SYS_SBS_RTK); break; /* not supported */
+        case 1104: ret=decode_msm4(rtcm,SYS_SBS_RTK); break;
+        case 1105: ret=decode_msm5(rtcm,SYS_SBS_RTK); break;
+        case 1106: ret=decode_msm6(rtcm,SYS_SBS_RTK); break;
+        case 1107: ret=decode_msm7(rtcm,SYS_SBS_RTK); break;
+        case 1111: ret=decode_msm0(rtcm,SYS_QZS_RTK); break; /* not supported */
+        case 1112: ret=decode_msm0(rtcm,SYS_QZS_RTK); break; /* not supported */
+        case 1113: ret=decode_msm0(rtcm,SYS_QZS_RTK); break; /* not supported */
+        case 1114: ret=decode_msm4(rtcm,SYS_QZS_RTK); break;
+        case 1115: ret=decode_msm5(rtcm,SYS_QZS_RTK); break;
+        case 1116: ret=decode_msm6(rtcm,SYS_QZS_RTK); break;
+        case 1117: ret=decode_msm7(rtcm,SYS_QZS_RTK); break;
+        case 1121: ret=decode_msm0(rtcm,SYS_CMP_RTK); break; /* not supported */
+        case 1122: ret=decode_msm0(rtcm,SYS_CMP_RTK); break; /* not supported */
+        case 1123: ret=decode_msm0(rtcm,SYS_CMP_RTK); break; /* not supported */
+        case 1124: ret=decode_msm4(rtcm,SYS_CMP_RTK); break;
+        case 1125: ret=decode_msm5(rtcm,SYS_CMP_RTK); break;
+        case 1126: ret=decode_msm6(rtcm,SYS_CMP_RTK); break;
+        case 1127: ret=decode_msm7(rtcm,SYS_CMP_RTK); break;
         case 1230: ret=decode_type1230(rtcm);     break; /* not supported */
-        case 1240: ret=decode_ssr1(rtcm,SYS_GAL); break;
-        case 1241: ret=decode_ssr2(rtcm,SYS_GAL); break;
-        case 1242: ret=decode_ssr3(rtcm,SYS_GAL); break;
-        case 1243: ret=decode_ssr4(rtcm,SYS_GAL); break;
-        case 1244: ret=decode_ssr5(rtcm,SYS_GAL); break;
-        case 1245: ret=decode_ssr6(rtcm,SYS_GAL); break;
-        case 1246: ret=decode_ssr1(rtcm,SYS_QZS); break;
-        case 1247: ret=decode_ssr2(rtcm,SYS_QZS); break;
-        case 1248: ret=decode_ssr3(rtcm,SYS_QZS); break;
-        case 1249: ret=decode_ssr4(rtcm,SYS_QZS); break;
-        case 1250: ret=decode_ssr5(rtcm,SYS_QZS); break;
-        case 1251: ret=decode_ssr6(rtcm,SYS_QZS); break;
-        case 1252: ret=decode_ssr1(rtcm,SYS_SBS); break;
-        case 1253: ret=decode_ssr2(rtcm,SYS_SBS); break;
-        case 1254: ret=decode_ssr3(rtcm,SYS_SBS); break;
-        case 1255: ret=decode_ssr4(rtcm,SYS_SBS); break;
-        case 1256: ret=decode_ssr5(rtcm,SYS_SBS); break;
-        case 1257: ret=decode_ssr6(rtcm,SYS_SBS); break;
-        case 1258: ret=decode_ssr1(rtcm,SYS_CMP); break;
-        case 1259: ret=decode_ssr2(rtcm,SYS_CMP); break;
-        case 1260: ret=decode_ssr3(rtcm,SYS_CMP); break;
-        case 1261: ret=decode_ssr4(rtcm,SYS_CMP); break;
-        case 1262: ret=decode_ssr5(rtcm,SYS_CMP); break;
-        case 1263: ret=decode_ssr6(rtcm,SYS_CMP); break;
-        case   11: ret=decode_ssr7(rtcm,SYS_GLO); break; /* tentative */
-        case   12: ret=decode_ssr7(rtcm,SYS_GAL); break; /* tentative */
-        case   13: ret=decode_ssr7(rtcm,SYS_QZS); break; /* tentative */
-        case   14: ret=decode_ssr7(rtcm,SYS_CMP); break; /* tentative */
+        case 1240: ret=decode_ssr1(rtcm,SYS_GAL_RTK); break;
+        case 1241: ret=decode_ssr2(rtcm,SYS_GAL_RTK); break;
+        case 1242: ret=decode_ssr3(rtcm,SYS_GAL_RTK); break;
+        case 1243: ret=decode_ssr4(rtcm,SYS_GAL_RTK); break;
+        case 1244: ret=decode_ssr5(rtcm,SYS_GAL_RTK); break;
+        case 1245: ret=decode_ssr6(rtcm,SYS_GAL_RTK); break;
+        case 1246: ret=decode_ssr1(rtcm,SYS_QZS_RTK); break;
+        case 1247: ret=decode_ssr2(rtcm,SYS_QZS_RTK); break;
+        case 1248: ret=decode_ssr3(rtcm,SYS_QZS_RTK); break;
+        case 1249: ret=decode_ssr4(rtcm,SYS_QZS_RTK); break;
+        case 1250: ret=decode_ssr5(rtcm,SYS_QZS_RTK); break;
+        case 1251: ret=decode_ssr6(rtcm,SYS_QZS_RTK); break;
+        case 1252: ret=decode_ssr1(rtcm,SYS_SBS_RTK); break;
+        case 1253: ret=decode_ssr2(rtcm,SYS_SBS_RTK); break;
+        case 1254: ret=decode_ssr3(rtcm,SYS_SBS_RTK); break;
+        case 1255: ret=decode_ssr4(rtcm,SYS_SBS_RTK); break;
+        case 1256: ret=decode_ssr5(rtcm,SYS_SBS_RTK); break;
+        case 1257: ret=decode_ssr6(rtcm,SYS_SBS_RTK); break;
+        case 1258: ret=decode_ssr1(rtcm,SYS_CMP_RTK); break;
+        case 1259: ret=decode_ssr2(rtcm,SYS_CMP_RTK); break;
+        case 1260: ret=decode_ssr3(rtcm,SYS_CMP_RTK); break;
+        case 1261: ret=decode_ssr4(rtcm,SYS_CMP_RTK); break;
+        case 1262: ret=decode_ssr5(rtcm,SYS_CMP_RTK); break;
+        case 1263: ret=decode_ssr6(rtcm,SYS_CMP_RTK); break;
+        case   11: ret=decode_ssr7(rtcm,SYS_GLO_RTK); break; /* tentative */
+        case   12: ret=decode_ssr7(rtcm,SYS_GAL_RTK); break; /* tentative */
+        case   13: ret=decode_ssr7(rtcm,SYS_QZS_RTK); break; /* tentative */
+        case   14: ret=decode_ssr7(rtcm,SYS_CMP_RTK); break; /* tentative */
     }
     if (ret>=0) {
         type-=1000;

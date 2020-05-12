@@ -6,11 +6,8 @@ namespace sixents
 {
     namespace Math
     {
-
-       CGNSSCoordinate::CGNSSCoordinate()
-       {
-
-       }
+        CGNSSCoordinate::CGNSSCoordinate()
+        {}
 
         CGNSSCoordinate::CGNSSCoordinate(const DOUBLE x,
                                          const DOUBLE y,
@@ -44,16 +41,16 @@ namespace sixents
             }
             else
             {
-                m_geoCoordinate.m_lat = 0;
-                m_geoCoordinate.m_lon = 0;
-                m_geoCoordinate.m_height = 0;
-                m_spaceCoordinate.m_x = 0;
-                m_spaceCoordinate.m_y = 0;
-                m_spaceCoordinate.m_z = 0;
+                m_geoCoordinate.m_lat = 0.0;
+                m_geoCoordinate.m_lon = 0.0;
+                m_geoCoordinate.m_height = 0.0;
+                m_spaceCoordinate.m_x = 0.0;
+                m_spaceCoordinate.m_y = 0.0;
+                m_spaceCoordinate.m_z = 0.0;
             }
-            m_stationCoordinate.m_east = 0;
-            m_stationCoordinate.m_north = 0;
-            m_stationCoordinate.m_up = 0;
+            m_stationCoordinate.m_east = 0.0;
+            m_stationCoordinate.m_north = 0.0;
+            m_stationCoordinate.m_up = 0.0;
         }
 
         void CGNSSCoordinate::SetXYZ(const SXYZ& coordinate)
@@ -94,9 +91,9 @@ namespace sixents
 
         INT32 CGNSSCoordinate::CalcLat(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lat) const
         {
-            DOUBLE tempLat1 = 0;
-            DOUBLE tempLat2 = 0;
-            DOUBLE N = 0;
+            DOUBLE tempLat1 = 0.0;
+            DOUBLE tempLat2 = 0.0;
+            DOUBLE N = 0.0;
             tempLat2 = atan(z / sqrt(x * x + y * y));
             while (true)
             {
@@ -141,7 +138,6 @@ namespace sixents
                 z = (N * (static_cast<DOUBLE>(NUM_ONE) - WGS84_FIRST_E2) + height) * sinLat;
                 iRet = RETURN_SUCCESS;
             } while (false);
-
             return iRet;
         }
 
@@ -160,9 +156,9 @@ namespace sixents
             else
             {
                 if (y > 0)
-                    lon = PI * 0.5;
+                    lon = PI * ZERO_POINT_FIVE;
                 else
-                    lon = PI * 1.5;
+                    lon = PI * ONE_POINT_FIVE;
             }
 
             //计算纬度，单位弧度
@@ -172,13 +168,14 @@ namespace sixents
             DOUBLE N =
                 WGS84_EARTH_LONG_RADIUS / sqrt(static_cast<DOUBLE>(NUM_ONE) - WGS84_FIRST_E2 * sin(lat) * sin(lat));
             //计算高程
-            height = sqrt(x * x + y * y) * cos(lat) + z * sin(lat) - N * (NUM_ONE - WGS84_FIRST_E2 * pow(sin(lat), 2));
+            height =
+                sqrt(x * x + y * y) * cos(lat) + z * sin(lat) - N * (NUM_ONE - WGS84_FIRST_E2 * pow(sin(lat), NUM_TWO));
 
             //弧度转换为角度
             lon = lon * R2D;
             lat = lat * R2D;
-            if (lon > 180.0)
-                lon = lon - 360.0;
+            if (lon > LONGITUDE_UPPER_LIMIT)
+                lon = lon - LONGITUDE_DOUBLE_UPPER_LIMIT;
             return RETURN_SUCCESS;
         }
 
@@ -193,9 +190,9 @@ namespace sixents
                                        DOUBLE& curUp)
         {
             //首先把目标点的xyz转为blh
-            DOUBLE refB = 0;
-            DOUBLE refL = 0;
-            DOUBLE refH = 0;
+            DOUBLE refB = 0.0;
+            DOUBLE refL = 0.0;
+            DOUBLE refH = 0.0;
             XYZ2BLH(refX, refY, refZ, refB, refL, refH);
             //定义向量
             SXYZ tmpXYZ;
@@ -222,9 +219,9 @@ namespace sixents
                                        DOUBLE& curY,
                                        DOUBLE& curZ)
         {
-            DOUBLE refB = 0;
-            DOUBLE refL = 0;
-            DOUBLE refH = 0;
+            DOUBLE refB = 0.0;
+            DOUBLE refL = 0.0;
+            DOUBLE refH = 0.0;
             XYZ2BLH(refX, refY, refZ, refB, refL, refH);
             DOUBLE lat = refB * D2R;
             DOUBLE lon = refL * D2R;

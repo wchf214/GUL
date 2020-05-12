@@ -36,7 +36,6 @@ namespace sixents
              * @exception   N/A
              * @return      N/A
              * @retval      N/A
-             * @note        坐标系类型为1代表地理坐标，坐标系类型为2代表空间直角坐标
              */
             CGNSSCoordinate();
 
@@ -130,12 +129,7 @@ namespace sixents
              * @note        N/A
              */
             INT32
-            BLH2XYZ(const DOUBLE lat,
-                    const DOUBLE lon,
-                    const DOUBLE height,
-                    DOUBLE& x,
-                    DOUBLE& y,
-                    DOUBLE& z);
+            BLH2XYZ(const DOUBLE lat, const DOUBLE lon, const DOUBLE height, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
             /**
              * @brief       空间直角坐标转大地坐标
@@ -152,12 +146,7 @@ namespace sixents
              * @note        N/A
              */
             INT32
-            XYZ2BLH(const DOUBLE x,
-                    const DOUBLE y,
-                    const DOUBLE z,
-                    DOUBLE& lat,
-                    DOUBLE& lon,
-                    DOUBLE& height);
+            XYZ2BLH(const DOUBLE x, const DOUBLE y, const DOUBLE z, DOUBLE& lat, DOUBLE& lon, DOUBLE& height);
 
             /**
              * @brief       空间直角坐标转站心坐标

@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * sbas.c : sbas functions
 *
 *          Copyright (C) 2007-2016 by T.TAKASU, All rights reserved.
@@ -132,13 +132,13 @@ static int decode_sbstype1(const sbsmsg_t *msg, sbssat_t *sbssat)
     
     for (i=1,n=0;i<=210&&n<MAXSAT;i++) {
         if (getbitu(msg->msg,13+i,1)) {
-           if      (i<= 37) sat=satno(SYS_GPS,i);    /*   0- 37: gps */
-           else if (i<= 61) sat=satno(SYS_GLO,i-37); /*  38- 61: glonass */
+           if      (i<= 37) sat=satno(SYS_GPS_RTK,i);    /*   0- 37: gps */
+           else if (i<= 61) sat=satno(SYS_GLO_RTK,i-37); /*  38- 61: glonass */
            else if (i<=119) sat=0;                   /*  62-119: future gnss */
-           else if (i<=138) sat=satno(SYS_SBS,i);    /* 120-138: geo/waas */
+           else if (i<=138) sat=satno(SYS_SBS_RTK,i);    /* 120-138: geo/waas */
            else if (i<=182) sat=0;                   /* 139-182: reserved */
-           else if (i<=192) sat=satno(SYS_SBS,i+10); /* 183-192: qzss ref [2] */
-           else if (i<=202) sat=satno(SYS_QZS,i);    /* 193-202: qzss ref [2] */
+           else if (i<=192) sat=satno(SYS_SBS_RTK,i+10); /* 183-192: qzss ref [2] */
+           else if (i<=202) sat=satno(SYS_QZS_RTK,i);    /* 193-202: qzss ref [2] */
            else             sat=0;                   /* 203-   : reserved */
            sbssat->sat[n++].sat=sat;
         }
@@ -227,7 +227,7 @@ static int decode_sbstype9(const sbsmsg_t *msg, nav_t *nav)
     
     trace(4,"decode_sbstype9:\n");
     
-    if (!(sat=satno(SYS_SBS,msg->prn))) {
+    if (!(sat=satno(SYS_SBS_RTK,msg->prn))) {
         trace(2,"invalid prn in sbas type 9: prn=%3d\n",msg->prn);
         return 0;
     }
@@ -250,8 +250,8 @@ static int decode_sbstype9(const sbsmsg_t *msg, nav_t *nav)
     seph.acc[1]=getbits(msg->msg,186,10)*0.0000125;
     seph.acc[2]=getbits(msg->msg,196,10)*0.0000625;
     
-    seph.af0=getbits(msg->msg,206,12)*P2_31;
-    seph.af1=getbits(msg->msg,218, 8)*P2_39/2.0;
+    seph.af0=getbits(msg->msg,206,12)*P2_31_RTK;
+    seph.af1=getbits(msg->msg,218, 8)*P2_39_RTK/2.0;
     
     i=msg->prn-MINPRNSBS;
     if (!nav->seph||fabs(timediff(nav->seph[i].t0,seph.t0))<1E-3) { /* not change */
@@ -306,7 +306,7 @@ static int decode_longcorr0(const sbsmsg_t *msg, int p, sbssat_t *sbssat)
         sbssat->sat[n-1].lcorr.dpos[i]=getbits(msg->msg,p+14+9*i,9)*0.125;
         sbssat->sat[n-1].lcorr.dvel[i]=0.0;
     }
-    sbssat->sat[n-1].lcorr.daf0=getbits(msg->msg,p+41,10)*P2_31;
+    sbssat->sat[n-1].lcorr.daf0=getbits(msg->msg,p+41,10)*P2_31_RTK;
     sbssat->sat[n-1].lcorr.daf1=0.0;
     sbssat->sat[n-1].lcorr.t0=gpst2time(msg->week,msg->tow);
     
@@ -326,10 +326,10 @@ static int decode_longcorr1(const sbsmsg_t *msg, int p, sbssat_t *sbssat)
     
     for (i=0;i<3;i++) {
         sbssat->sat[n-1].lcorr.dpos[i]=getbits(msg->msg,p+14+i*11,11)*0.125;
-        sbssat->sat[n-1].lcorr.dvel[i]=getbits(msg->msg,p+58+i* 8, 8)*P2_11;
+        sbssat->sat[n-1].lcorr.dvel[i]=getbits(msg->msg,p+58+i* 8, 8)*P2_11_RTK;
     }
-    sbssat->sat[n-1].lcorr.daf0=getbits(msg->msg,p+47,11)*P2_31;
-    sbssat->sat[n-1].lcorr.daf1=getbits(msg->msg,p+82, 8)*P2_39;
+    sbssat->sat[n-1].lcorr.daf0=getbits(msg->msg,p+47,11)*P2_31_RTK;
+    sbssat->sat[n-1].lcorr.daf1=getbits(msg->msg,p+82, 8)*P2_39_RTK;
     t=(int)getbitu(msg->msg,p+90,13)*16-(int)msg->tow%86400;
     if      (t<=-43200) t+=86400;
     else if (t>  43200) t-=86400;
@@ -800,12 +800,12 @@ static int sbslongcorr(gtime_t time, int sat, const sbssat_t *sbssat,
         *ddts=p->lcorr.daf0+p->lcorr.daf1*t;
         
         trace(5,"sbslongcorr: sat=%2d drs=%7.2f%7.2f%7.2f ddts=%7.2f\n",
-              sat,drs[0],drs[1],drs[2],*ddts*CLIGHT);
+              sat,drs[0],drs[1],drs[2],*ddts*CLIGHT_RTK);
         
         return 1;
     }
     /* if sbas satellite without correction, no correction applied */
-    if (satsys(sat,NULL)==SYS_SBS) return 1;
+    if (satsys(sat,NULL)==SYS_SBS_RTK) return 1;
     
     trace(2,"no sbas long-term correction: %s sat=%2d\n",time_str(time,0),sat);
     return 0;
@@ -876,10 +876,10 @@ extern int sbssatcorr(gtime_t time, int sat, const nav_t *nav, double *rs,
     }
     for (i=0;i<3;i++) rs[i]+=drs[i];
     
-    dts[0]+=dclk+prc/CLIGHT;
+    dts[0]+=dclk+prc/CLIGHT_RTK;
     
     trace(5,"sbssatcorr: sat=%2d drs=%6.3f %6.3f %6.3f dclk=%.3f %.3f var=%.3f\n",
-          sat,drs[0],drs[1],drs[2],dclk,prc/CLIGHT,*var);
+          sat,drs[0],drs[1],drs[2],dclk,prc/CLIGHT_RTK,*var);
     
     return 1;
 }

@@ -6,15 +6,27 @@
 #include <functional>
 
 class CTestFunc;
+class MainWindow;
 //typedef bool(CTestFunc::* TestFunc)(const QString , QString&);
 //using FuncList = std::vector<TestFunc>;
+namespace sixents {
+    struct SEphemeris;
+    struct SGlonassEphemeris;
+    namespace Math {
+        struct SEphemeris;
+        struct SGlonassEphemeris;
+    }
+}
+
+
 using FuncList = std::map <int, std::function<bool(CTestFunc&, const QString, QString&)>>;
+
 
 class CTestFunc
 {
 public:
-    explicit CTestFunc();
-    ~CTestFunc();
+    explicit CTestFunc(MainWindow* parent);
+    virtual ~CTestFunc();
 
     // 加载动态库
     bool LoadRtcmLib();
@@ -69,6 +81,8 @@ private:
     void FileConvertToBin(const QString& filePath, QString& outFilePath);
     // 为RTCM解码二进制星历电文
     void DecodeEph();
+    void RtcmEphToMathEph(sixents::SEphemeris* rtcmEph, sixents::Math::SEphemeris* gulEph);
+    void RtcmGloEphToMathGloEph(sixents::SGlonassEphemeris* rtcmEph, sixents::Math::SGlonassEphemeris* gulEph);
     // 生成文件名
     // 新生成的结果文件命名规则：接口名+当前时间（精确到秒）
     // 示例：FormatWeekSecTime20200416102203
@@ -86,6 +100,7 @@ private:
     QLibrary* mGULLibObj;
     QLibrary* mGULMathLibObj;
     FuncList mFuncs;
+    MainWindow* mParent;
 }; // end class TestFunc
 
 #endif // TESTFUNC_H

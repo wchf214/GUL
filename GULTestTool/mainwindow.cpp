@@ -4,6 +4,7 @@
 #include "TestFunc.h"
 
 #include <QFileDialog>
+#include <QMessageBox>       // for show error message
 #include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -19,6 +20,15 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::showInfomationdlg(const QString &title, const QString &content)
+{
+    QString defaultTitle("Tips Info");
+    if (!title.isEmpty()) {
+        defaultTitle = title;
+    }
+    QMessageBox::information(this, defaultTitle, content, QMessageBox::Ok);
 }
 
 void MainWindow::InitializeUI()
@@ -142,7 +152,7 @@ void MainWindow::ExecTest()
     }
 
     // 执行测试用例
-    CTestFunc testFunc;
+    CTestFunc testFunc(this);
     testFunc.ExecuteTest(testData, ui->comboTestIF->currentIndex(), result);
 
     // 输出测试结果

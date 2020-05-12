@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * preceph.c : precise ephemeris and clock functions
 *
 *          Copyright (C) 2007-2017 by T.TAKASU, All rights reserved.
@@ -54,13 +54,13 @@
 /* satellite code to satellite system ----------------------------------------*/
 static int code2sys(char code)
 {
-    if (code=='G'||code==' ') return SYS_GPS;
-    if (code=='R') return SYS_GLO;
-    if (code=='E') return SYS_GAL; /* extension to sp3-c */
-    if (code=='J') return SYS_QZS; /* extension to sp3-c */
-    if (code=='C') return SYS_CMP; /* extension to sp3-c */
-    if (code=='L') return SYS_LEO; /* extension to sp3-c */
-    return SYS_NONE;
+    if (code=='G'||code==' ') return SYS_GPS_RTK;
+    if (code=='R') return SYS_GLO_RTK;
+    if (code=='E') return SYS_GAL_RTK; /* extension to sp3-c */
+    if (code=='J') return SYS_QZS_RTK; /* extension to sp3-c */
+    if (code=='C') return SYS_CMP_RTK; /* extension to sp3-c */
+    if (code=='L') return SYS_LEO_RTK; /* extension to sp3-c */
+    return SYS_NONE_RTK;
 }
 /* read sp3 header -----------------------------------------------------------*/
 static int readsp3h(FILE *fp, gtime_t *time, char *type, int *sats,
@@ -155,10 +155,10 @@ static void readsp3b(FILE *fp, char type, int *sats, int ns, double *bfact,
             
             if (strlen(buff)<4||(buff[0]!='P'&&buff[0]!='V')) continue;
             
-            sys=buff[1]==' '?SYS_GPS:code2sys(buff[1]);
+            sys=buff[1]==' '?SYS_GPS_RTK:code2sys(buff[1]);
             prn=(int)str2num(buff,2,2);
-            if      (sys==SYS_SBS) prn+=100;
-            else if (sys==SYS_QZS) prn+=192; /* extension to sp3-c */
+            if      (sys==SYS_SBS_RTK) prn+=100;
+            else if (sys==SYS_QZS_RTK) prn+=192; /* extension to sp3-c */
             
             if (!(sat=satno(sys,prn))) continue;
             
@@ -348,11 +348,11 @@ static int readdcbf(const char *file, nav_t *nav, const sta_t *sta)
             }
             if (i<MAXRCV) {
                 j=!strcmp(str1,"G")?0:1;
-                nav->rbias[i][j][type-1]=cbias*1E-9*CLIGHT; /* ns -> m */
+                nav->rbias[i][j][type-1]=cbias*1E-9*CLIGHT_RTK; /* ns -> m */
             }
         }
         else if ((sat=satid2no(str1))) { /* satellite dcb */
-            nav->cbias[sat-1][type-1]=cbias*1E-9*CLIGHT; /* ns -> m */
+            nav->cbias[sat-1][type-1]=cbias*1E-9*CLIGHT_RTK; /* ns -> m */
         }
     }
     fclose(fp);
@@ -575,12 +575,12 @@ static int pephpos(gtime_t time, int sat, const nav_t *nav, double *rs,
     
     if (t[0]<=0.0) {
         if ((dts[0]=c[0])!=0.0) {
-            std=nav->peph[index].std[sat-1][3]*CLIGHT-EXTERR_CLK*t[0];
+            std=nav->peph[index].std[sat-1][3]*CLIGHT_RTK-EXTERR_CLK*t[0];
         }
     }
     else if (t[1]>=0.0) {
         if ((dts[0]=c[1])!=0.0) {
-            std=nav->peph[index+1].std[sat-1][3]*CLIGHT+EXTERR_CLK*t[1];
+            std=nav->peph[index+1].std[sat-1][3]*CLIGHT_RTK+EXTERR_CLK*t[1];
         }
     }
     else if (c[0]!=0.0&&c[1]!=0.0) {
@@ -624,16 +624,16 @@ static int pephclk(gtime_t time, int sat, const nav_t *nav, double *dts,
     
     if (t[0]<=0.0) {
         if ((dts[0]=c[0])==0.0) return 0;
-        std=nav->pclk[index].std[sat-1][0]*CLIGHT-EXTERR_CLK*t[0];
+        std=nav->pclk[index].std[sat-1][0]*CLIGHT_RTK-EXTERR_CLK*t[0];
     }
     else if (t[1]>=0.0) {
         if ((dts[0]=c[1])==0.0) return 0;
-        std=nav->pclk[index+1].std[sat-1][0]*CLIGHT+EXTERR_CLK*t[1];
+        std=nav->pclk[index+1].std[sat-1][0]*CLIGHT_RTK+EXTERR_CLK*t[1];
     }
     else if (c[0]!=0.0&&c[1]!=0.0) {
         dts[0]=(c[1]*t[0]-c[0]*t[1])/(t[0]-t[1]);
         i=t[0]<-t[1]?0:1;
-        std=nav->pclk[index+i].std[sat-1][0]*CLIGHT+EXTERR_CLK*fabs(t[i]);
+        std=nav->pclk[index+i].std[sat-1][0]*CLIGHT_RTK+EXTERR_CLK*fabs(t[i]);
     }
     else {
         trace(3,"prec clock outage %s sat=%2d\n",time_str(time,0),sat);
@@ -676,7 +676,7 @@ extern void satantoff(gtime_t time, const double *rs, int sat, const nav_t *nav,
     if (!normv3(r,ey)) return;
     cross3(ey,ez,ex);
     
-    if (NFREQ>=3&&(satsys(sat,NULL)&(SYS_GAL|SYS_SBS))) k=2;
+    if (NFREQ>=3&&(satsys(sat,NULL)&(SYS_GAL_RTK|SYS_SBS_RTK))) k=2;
     
     if (NFREQ<2||lam[j]==0.0||lam[k]==0.0) return;
     
@@ -738,7 +738,7 @@ extern int peph2pos(gtime_t time, int sat, const nav_t *nav, int opt,
     }
     /* relativistic effect correction */
     if (dtss[0]!=0.0) {
-        dts[0]=dtss[0]-2.0*dot(rs,rs+3,3)/CLIGHT/CLIGHT;
+        dts[0]=dtss[0]-2.0*dot(rs,rs+3,3)/CLIGHT_RTK/CLIGHT_RTK;
         dts[1]=(dtst[0]-dtss[0])/tt;
     }
     else { /* no precise clock */

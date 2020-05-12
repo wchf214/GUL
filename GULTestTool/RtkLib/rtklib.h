@@ -66,8 +66,8 @@ extern "C" {
 #define PI          3.1415926535897932  /* pi */
 #define D2R         (PI/180.0)          /* deg to rad */
 #define R2D         (180.0/PI)          /* rad to deg */
-#define CLIGHT      299792458.0         /* speed of light (m/s) */
-#define SC2RAD      3.1415926535898     /* semi-circle to radian (IS-GPS) */
+#define CLIGHT_RTK      299792458.0         /* speed of light (m/s) */
+#define SC2RAD_RTK      3.1415926535898     /* semi-circle to radian (IS-GPS) */
 #define AU          149597870691.0      /* 1 AU (m) */
 #define AS2R        (D2R/3600.0)        /* arc sec to radian */
 
@@ -80,21 +80,21 @@ extern "C" {
 
 #define MAXFREQ     7                   /* max NFREQ */
 
-#define FREQ1       1.57542E9           /* L1/E1  frequency (Hz) */
-#define FREQ2       1.22760E9           /* L2     frequency (Hz) */
-#define FREQ5       1.17645E9           /* L5/E5a frequency (Hz) */
-#define FREQ6       1.27875E9           /* E6/LEX frequency (Hz) */
-#define FREQ7       1.20714E9           /* E5b    frequency (Hz) */
-#define FREQ8       1.191795E9          /* E5a+b  frequency (Hz) */
-#define FREQ9       2.492028E9          /* S      frequency (Hz) */
-#define FREQ1_GLO   1.60200E9           /* GLONASS G1 base frequency (Hz) */
-#define DFRQ1_GLO   0.56250E6           /* GLONASS G1 bias frequency (Hz/n) */
-#define FREQ2_GLO   1.24600E9           /* GLONASS G2 base frequency (Hz) */
-#define DFRQ2_GLO   0.43750E6           /* GLONASS G2 bias frequency (Hz/n) */
-#define FREQ3_GLO   1.202025E9          /* GLONASS G3 frequency (Hz) */
-#define FREQ1_CMP   1.561098E9          /* BeiDou B1 frequency (Hz) */
-#define FREQ2_CMP   1.20714E9           /* BeiDou B2 frequency (Hz) */
-#define FREQ3_CMP   1.26852E9           /* BeiDou B3 frequency (Hz) */
+#define FREQ1_RTK       1.57542E9           /* L1/E1  frequency (Hz) */
+#define FREQ2_RTK       1.22760E9           /* L2     frequency (Hz) */
+#define FREQ5_RTK       1.17645E9           /* L5/E5a frequency (Hz) */
+#define FREQ6_RTK       1.27875E9           /* E6/LEX frequency (Hz) */
+#define FREQ7_RTK       1.20714E9           /* E5b    frequency (Hz) */
+#define FREQ8_RTK       1.191795E9          /* E5a+b  frequency (Hz) */
+#define FREQ9_RTK       2.492028E9          /* S      frequency (Hz) */
+#define FREQ1_GLO_RTK   1.60200E9           /* GLONASS G1 base frequency (Hz) */
+#define DFRQ1_GLO_RTK   0.56250E6           /* GLONASS G1 bias frequency (Hz/n) */
+#define FREQ2_GLO_RTK   1.24600E9           /* GLONASS G2 base frequency (Hz) */
+#define DFRQ2_GLO_RTK   0.43750E6           /* GLONASS G2 bias frequency (Hz/n) */
+#define FREQ3_GLO_RTK   1.202025E9          /* GLONASS G3 frequency (Hz) */
+#define FREQ1_CMP_RTK   1.561098E9          /* BeiDou B1 frequency (Hz) */
+#define FREQ2_CMP_RTK   1.20714E9           /* BeiDou B2 frequency (Hz) */
+#define FREQ3_CMP_RTK   1.26852E9           /* BeiDou B3 frequency (Hz) */
 
 #define EFACT_GPS   1.0                 /* error factor: GPS */
 #define EFACT_GLO   1.5                 /* error factor: GLONASS */
@@ -104,16 +104,16 @@ extern "C" {
 #define EFACT_IRN   1.5                 /* error factor: IRNSS */
 #define EFACT_SBS   3.0                 /* error factor: SBAS */
 
-#define SYS_NONE    0x00                /* navigation system: none */
-#define SYS_GPS     0x01                /* navigation system: GPS */
-#define SYS_SBS     0x02                /* navigation system: SBAS */
-#define SYS_GLO     0x04                /* navigation system: GLONASS */
-#define SYS_GAL     0x08                /* navigation system: Galileo */
-#define SYS_QZS     0x10                /* navigation system: QZSS */
-#define SYS_CMP     0x20                /* navigation system: BeiDou */
-#define SYS_IRN     0x40                /* navigation system: IRNS */
-#define SYS_LEO     0x80                /* navigation system: LEO */
-#define SYS_ALL     0xFF                /* navigation system: all */
+#define SYS_NONE_RTK    0x00                /* navigation system: none */
+#define SYS_GPS_RTK     0x01                /* navigation system: GPS */
+#define SYS_SBS_RTK     0x02                /* navigation system: SBAS */
+#define SYS_GLO_RTK     0x04                /* navigation system: GLONASS */
+#define SYS_GAL_RTK     0x08                /* navigation system: Galileo */
+#define SYS_QZS_RTK     0x10                /* navigation system: QZSS */
+#define SYS_CMP_RTK     0x20                /* navigation system: BeiDou */
+#define SYS_IRN_RTK     0x40                /* navigation system: IRNS */
+#define SYS_LEO_RTK     0x80                /* navigation system: LEO */
+#define SYS_ALL_RTK     0xFF                /* navigation system: all */
 
 #define TSYS_GPS    0                   /* time system: GPS time */
 #define TSYS_UTC    1                   /* time system: UTC */
@@ -482,30 +482,30 @@ extern "C" {
 
 #define IMUFMT_KVH  1                   /* imu data format KVH */
 
-#define P2_5        0.03125             /* 2^-5 */
-#define P2_6        0.015625            /* 2^-6 */
-#define P2_11       4.882812500000000E-04 /* 2^-11 */
-#define P2_15       3.051757812500000E-05 /* 2^-15 */
-#define P2_17       7.629394531250000E-06 /* 2^-17 */
-#define P2_19       1.907348632812500E-06 /* 2^-19 */
-#define P2_20       9.536743164062500E-07 /* 2^-20 */
-#define P2_21       4.768371582031250E-07 /* 2^-21 */
-#define P2_23       1.192092895507810E-07 /* 2^-23 */
-#define P2_24       5.960464477539063E-08 /* 2^-24 */
-#define P2_27       7.450580596923828E-09 /* 2^-27 */
-#define P2_29       1.862645149230957E-09 /* 2^-29 */
-#define P2_30       9.313225746154785E-10 /* 2^-30 */
-#define P2_31       4.656612873077393E-10 /* 2^-31 */
-#define P2_32       2.328306436538696E-10 /* 2^-32 */
-#define P2_33       1.164153218269348E-10 /* 2^-33 */
-#define P2_35       2.910383045673370E-11 /* 2^-35 */
-#define P2_38       3.637978807091710E-12 /* 2^-38 */
-#define P2_39       1.818989403545856E-12 /* 2^-39 */
-#define P2_40       9.094947017729280E-13 /* 2^-40 */
-#define P2_43       1.136868377216160E-13 /* 2^-43 */
-#define P2_48       3.552713678800501E-15 /* 2^-48 */
-#define P2_50       8.881784197001252E-16 /* 2^-50 */
-#define P2_55       2.775557561562891E-17 /* 2^-55 */
+#define P2_5_RTK        0.03125             /* 2^-5 */
+#define P2_6_RTK        0.015625            /* 2^-6 */
+#define P2_11_RTK       4.882812500000000E-04 /* 2^-11 */
+#define P2_15_RTK       3.051757812500000E-05 /* 2^-15 */
+#define P2_17_RTK       7.629394531250000E-06 /* 2^-17 */
+#define P2_19_RTK       1.907348632812500E-06 /* 2^-19 */
+#define P2_20_RTK       9.536743164062500E-07 /* 2^-20 */
+#define P2_21_RTK       4.768371582031250E-07 /* 2^-21 */
+#define P2_23_RTK       1.192092895507810E-07 /* 2^-23 */
+#define P2_24_RTK       5.960464477539063E-08 /* 2^-24 */
+#define P2_27_RTK       7.450580596923828E-09 /* 2^-27 */
+#define P2_29_RTK       1.862645149230957E-09 /* 2^-29 */
+#define P2_30_RTK       9.313225746154785E-10 /* 2^-30 */
+#define P2_31_RTK       4.656612873077393E-10 /* 2^-31 */
+#define P2_32_RTK       2.328306436538696E-10 /* 2^-32 */
+#define P2_33_RTK       1.164153218269348E-10 /* 2^-33 */
+#define P2_35_RTK       2.910383045673370E-11 /* 2^-35 */
+#define P2_38_RTK       3.637978807091710E-12 /* 2^-38 */
+#define P2_39_RTK       1.818989403545856E-12 /* 2^-39 */
+#define P2_40_RTK       9.094947017729280E-13 /* 2^-40 */
+#define P2_43_RTK       1.136868377216160E-13 /* 2^-43 */
+#define P2_48_RTK       3.552713678800501E-15 /* 2^-48 */
+#define P2_50_RTK       8.881784197001252E-16 /* 2^-50 */
+#define P2_55_RTK       2.775557561562891E-17 /* 2^-55 */
 
 #ifdef WIN32
 #define thread_t    HANDLE
@@ -981,8 +981,8 @@ typedef struct {        /* RTCM control struct type */
     unsigned short lock[MAXSAT][NFREQ+NEXOBS]; /* lock time */
     unsigned short loss[MAXSAT][NFREQ+NEXOBS]; /* loss of lock count */
     gtime_t lltime[MAXSAT][NFREQ+NEXOBS]; /* last lock time */
-    int nbyte;          /* number of bytes in message buffer */ 
-    int nbit;           /* number of bits in word buffer */ 
+    int nbyte;          /* number of bytes in message buffer */
+    int nbit;           /* number of bits in word buffer */
     int len;            /* message length (bytes) */
     unsigned char buff[1200]; /* message buffer */
     unsigned int word;  /* word buffer for rtcm 2 */
@@ -1242,7 +1242,7 @@ typedef struct {        /* receiver raw data control type */
     double prCA[MAXSAT],dpCA[MAXSAT]; /* L1/CA pseudrange/doppler for javad */
     unsigned char halfc[MAXSAT][NFREQ+NEXOBS]; /* half-cycle add flag */
     char freqn[MAXOBS]; /* frequency number for javad */
-    int nbyte;          /* number of bytes in message buffer */ 
+    int nbyte;          /* number of bytes in message buffer */
     int len;            /* message length (bytes) */
     int iod;            /* issue of data */
     int tod;            /* time of day (ms) */
@@ -1252,7 +1252,7 @@ typedef struct {        /* receiver raw data control type */
     unsigned char buff[MAXRAWLEN]; /* message buffer */
     char opt[256];      /* receiver dependent options */
     half_cyc_t *half_cyc; /* half-cycle correction list */
-    
+
     int format;         /* receiver stream format */
     void *rcv_data;     /* receiver dependent data */
 } raw_t;

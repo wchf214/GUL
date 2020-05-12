@@ -19,6 +19,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void showInfomationdlg(const QString &title, const QString &content); // 显示信息提示框
+
 public Q_SLOTS:
     // 路径
     void OpenFileDlg();

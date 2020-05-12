@@ -12,8 +12,8 @@
 #define GNSS_ANGLE_H
 #include <string>
 
-#include "../DllMain/GNSSDataStruct.h"
 #include "../DllMain/GNSSCommonDef.h"
+#include "../DllMain/GNSSDataStruct.h"
 
 namespace sixents
 {
@@ -28,7 +28,18 @@ namespace sixents
         class CGNSSAngle
         {
         public:
-
+            /**
+             * @brief       角度构造函数
+             * @author      pengshupan@sixents.com
+             * @param[in]   angleVal        角度/弧度
+             * @param[in]   angleType       角度传入类型
+             * @param[out]  N/A
+             * @exception   N/A
+             * @return      N/A
+             * @retval      N/A
+             * @note        传入类型为true代表角度，false代表弧度
+             */
+            CGNSSAngle();
 
             /**
              * @brief       角度构造函数
@@ -107,7 +118,7 @@ namespace sixents
              */
             void SetDMS(const INT32 degree, const UINT32 minute, const DOUBLE second);
 
-         /**
+            /**
              * @brief       获取DMS
              * @author      pengshupan@sixents.com
              * @param[in]   N/A
@@ -118,7 +129,6 @@ namespace sixents
              * @note        N/A
              */
             SDMS GetDMS() const;
-
 
             /**
              * @brief       角度格式化
@@ -134,7 +144,7 @@ namespace sixents
              */
             INT32 DegToString(std::string& angleString, const BOOL_T formatType) const;
 
-private:
+        private:
             /**
              * @brief       角度形式转化为度分秒形式
              * @author      pengshupan@sixents.com

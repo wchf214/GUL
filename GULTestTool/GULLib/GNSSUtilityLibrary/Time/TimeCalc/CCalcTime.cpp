@@ -1,4 +1,4 @@
-#include "CCalcTime.h"
+﻿#include "CCalcTime.h"
 #include "../TimeSys/CTimeFactory.h"
 
 namespace sixents
@@ -88,6 +88,11 @@ namespace sixents
                     retTimeSec = static_cast<INT64>(srcTime) + static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
+                if (timeObj == nullptr)
+                {
+                    retTime = 0;
+                    break;
+                }
                 const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
                 const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_ONE]);
                 const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_TWO]);
@@ -137,9 +142,15 @@ namespace sixents
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
+                if (timeObj == nullptr)
+                {
+                    retTime = 0;
+                    break;
+                }
+
                 const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
-                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][1]);
-                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][2]);
+                const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_ONE]);
+                const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_TWO]);
                 const UINT32 hour = 0;
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;
@@ -171,9 +182,14 @@ namespace sixents
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
+                if (timeObj == nullptr)
+                {
+                    retTime = 0;
+                    break;
+                }
                 const UINT32 year = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][0]);
-                const UINT32 month = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][1]);
-                const UINT32 day = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][2]);
+                const UINT32 month = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][NUM_ONE]);
+                const UINT32 day = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][NUM_TWO]);
                 const UINT32 hour = 0;
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;
@@ -220,6 +236,7 @@ namespace sixents
 
         DOUBLE CCalcTime::GSTGPSTConvert(const DOUBLE srcTime, const BOOL_T isGps)
         {
+            UNREFERENCED_PARAMETER(isGps);
             return srcTime;
         }
     } // end namespace Math

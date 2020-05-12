@@ -182,7 +182,7 @@ namespace sixents
                 Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
                     const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
 
-                //行列式不能为0 并且必须是满秩矩阵
+                //行列式不能为0=满秩矩阵
                 if (inMtx.determinant() == 0)
                 {
                     ret = RETURN_ZERO_DETERMINANT;

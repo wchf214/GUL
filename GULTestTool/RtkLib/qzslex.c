@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * qzslex.c : qzss lex functions
 *
 * references :
@@ -80,8 +80,8 @@ static int decode_lexhealth(const unsigned char *buff, int i, gtime_t tof,
     for (j=0;j<35;j++) {
         health=getbitu(buff,i,5); i+= 5;
         
-        if (j<3) sat=satno(SYS_QZS,j+193);
-        else     sat=satno(SYS_GPS,j-2);
+        if (j<3) sat=satno(SYS_QZS_RTK,j+193);
+        else     sat=satno(SYS_GPS_RTK,j-2);
         if (!sat) continue;
         
         nav->lexeph[sat-1].tof=tof;
@@ -104,28 +104,28 @@ static int decode_lexeph(const unsigned char *buff, int i, gtime_t toe,
     
     prn        =getbitu(buff,i, 8);       i+= 8;
     eph.ura    =getbitu(buff,i, 4);       i+= 4;
-    eph.pos [0]=getbits_33(buff,i)*P2_6;  i+=33;
-    eph.pos [1]=getbits_33(buff,i)*P2_6;  i+=33;
-    eph.pos [2]=getbits_33(buff,i)*P2_6;  i+=33;
-    eph.vel [0]=getbits(buff,i,28)*P2_15; i+=28;
-    eph.vel [1]=getbits(buff,i,28)*P2_15; i+=28;
-    eph.vel [2]=getbits(buff,i,28)*P2_15; i+=28;
-    eph.acc [0]=getbits(buff,i,24)*P2_24; i+=24;
-    eph.acc [1]=getbits(buff,i,24)*P2_24; i+=24;
-    eph.acc [2]=getbits(buff,i,24)*P2_24; i+=24;
-    eph.jerk[0]=getbits(buff,i,20)*P2_32; i+=20;
-    eph.jerk[1]=getbits(buff,i,20)*P2_32; i+=20;
-    eph.jerk[2]=getbits(buff,i,20)*P2_32; i+=20;
-    eph.af0    =getbits(buff,i,26)*P2_35; i+=26;
-    eph.af1    =getbits(buff,i,20)*P2_48; i+=20;
-    eph.tgd    =getbits(buff,i,13)*P2_35; i+=13;
+    eph.pos [0]=getbits_33(buff,i)*P2_6_RTK;  i+=33;
+    eph.pos [1]=getbits_33(buff,i)*P2_6_RTK;  i+=33;
+    eph.pos [2]=getbits_33(buff,i)*P2_6_RTK;  i+=33;
+    eph.vel [0]=getbits(buff,i,28)*P2_15_RTK; i+=28;
+    eph.vel [1]=getbits(buff,i,28)*P2_15_RTK; i+=28;
+    eph.vel [2]=getbits(buff,i,28)*P2_15_RTK; i+=28;
+    eph.acc [0]=getbits(buff,i,24)*P2_24_RTK; i+=24;
+    eph.acc [1]=getbits(buff,i,24)*P2_24_RTK; i+=24;
+    eph.acc [2]=getbits(buff,i,24)*P2_24_RTK; i+=24;
+    eph.jerk[0]=getbits(buff,i,20)*P2_32_RTK; i+=20;
+    eph.jerk[1]=getbits(buff,i,20)*P2_32_RTK; i+=20;
+    eph.jerk[2]=getbits(buff,i,20)*P2_32_RTK; i+=20;
+    eph.af0    =getbits(buff,i,26)*P2_35_RTK; i+=26;
+    eph.af1    =getbits(buff,i,20)*P2_48_RTK; i+=20;
+    eph.tgd    =getbits(buff,i,13)*P2_35_RTK; i+=13;
     for (j=0;j<7;j++) {
-        eph.isc[j]=getbits(buff,i,13)*P2_35; i+=13;
+        eph.isc[j]=getbits(buff,i,13)*P2_35_RTK; i+=13;
     }
     if (prn==255) return i; /* no satellite */
     
-    if      (  1<=prn&&prn<= 32) sat=satno(SYS_GPS,prn);
-    else if (193<=prn&&prn<=195) sat=satno(SYS_QZS,prn);
+    if      (  1<=prn&&prn<= 32) sat=satno(SYS_GPS_RTK,prn);
+    else if (193<=prn&&prn<=195) sat=satno(SYS_QZS_RTK,prn);
     else {
         trace(2,"lex ephemeris prn error prn=%d\n",prn);
         return i;
@@ -581,7 +581,7 @@ extern int lexeph2pos(gtime_t time, int sat, const nav_t *nav, double *rs,
     dts[1]=eph->af1;
     
     /* relativistic effect correction */
-    dts[0]-=2.0*dot(rs,rs+3,3)/CLIGHT/CLIGHT;
+    dts[0]-=2.0*dot(rs,rs+3,3)/CLIGHT_RTK/CLIGHT_RTK;
     
     *var=vareph(eph->ura);
     return 1;

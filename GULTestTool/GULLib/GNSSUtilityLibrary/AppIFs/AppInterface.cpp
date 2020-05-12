@@ -96,10 +96,10 @@ namespace sixents
                 timeObj->SetTime(curTime);
                 std::string timeStr("");
                 timeObj->Format(timeStr);
-                const INT32 NULL_CHAR_LEN = 1;
-                if (len != static_cast<INT32>(timeStr.size()) + NULL_CHAR_LEN)
+                const UINT32 NULL_CHAR_LEN = 1;
+                if (len != static_cast<UINT32>(timeStr.size()) + NULL_CHAR_LEN)
                 {
-                    len = static_cast<INT32>(timeStr.size()) + NULL_CHAR_LEN;
+                    len = static_cast<UINT32>(timeStr.size()) + NULL_CHAR_LEN;
                     retVal = RETURN_SUCCESS;
                     break;
                 }
@@ -165,7 +165,8 @@ namespace sixents
 
                 SStandardTime srcTimeData = {srcYear, srcMonth, srcDay, srcHour, srcMinute, srcSecond, srcTimeType};
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
-                if (srcTime == nullptr)
+                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
+                if (srcTime == nullptr || destTime == nullptr)
                 {
                     retVal = RETURN_NEW_PTR_FAILED;
                     break;
@@ -175,12 +176,7 @@ namespace sixents
                 srcTime->GetTime(curSec);
                 DOUBLE retSec = CCalcTime::TimeConvert(
                     curSec, static_cast<TIME_TYPE>(srcTimeType), static_cast<TIME_TYPE>(destTimeType));
-                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
-                if (destTime == nullptr)
-                {
-                    retVal = RETURN_NEW_PTR_FAILED;
-                    break;
-                }
+
                 destTime->SetTime(retSec);
                 SStandardTime destTimeData;
                 destTime->GetTime(destTimeData);
@@ -211,7 +207,7 @@ namespace sixents
             do
             {
                 // srcTimeType, destTimeType,判断
-                if (sec < 0 || sec >= WEEK_SEC)
+                if (second < 0 || second >= WEEK_SEC)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
                     break;
@@ -231,7 +227,9 @@ namespace sixents
 
                 SGNSSTime srcTimeData = {week, second, gnssTimeType};
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(gnssTimeType));
-                if (srcTime == nullptr)
+                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
+
+                if (srcTime == nullptr || destTime == nullptr)
                 {
                     retVal = RETURN_NEW_PTR_FAILED;
                     break;
@@ -241,12 +239,7 @@ namespace sixents
                 srcTime->GetTime(curSec);
                 DOUBLE retSec = CCalcTime::TimeConvert(
                     curSec, static_cast<TIME_TYPE>(gnssTimeType), static_cast<TIME_TYPE>(standardTimeType));
-                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
-                if (destTime == nullptr)
-                {
-                    retVal = RETURN_NEW_PTR_FAILED;
-                    break;
-                }
+
                 destTime->SetTime(retSec);
                 SStandardTime destTimeData;
                 destTime->GetTime(destTimeData);
@@ -299,7 +292,9 @@ namespace sixents
 
                 SStandardTime srcTimeData = {year, month, day, hour, minute, second, standardTimeType};
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
-                if (srcTime == nullptr)
+                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(gnssTimeType));
+
+                if (srcTime == nullptr || destTime == nullptr)
                 {
                     retVal = RETURN_NEW_PTR_FAILED;
                     break;
@@ -311,12 +306,7 @@ namespace sixents
                     curSec, static_cast<TIME_TYPE>(standardTimeType), static_cast<TIME_TYPE>(gnssTimeType));
 
                 // retSec <0判断
-                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(gnssTimeType));
-                if (destTime == nullptr)
-                {
-                    retVal = RETURN_NEW_PTR_FAILED;
-                    break;
-                }
+
                 destTime->SetTime(retSec);
                 SGNSSTime destTimeData;
                 destTime->GetTime(destTimeData);
@@ -358,7 +348,9 @@ namespace sixents
 
                 SGNSSTime srcTimeData = {srcWeek, srcSec, srcTimeType};
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
-                if (srcTime == nullptr)
+
+                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
+                if (srcTime == nullptr || destTime == nullptr)
                 {
                     retVal = RETURN_NEW_PTR_FAILED;
                     break;
@@ -369,27 +361,16 @@ namespace sixents
                 DOUBLE retSec = CCalcTime::TimeConvert(
                     curSec, static_cast<TIME_TYPE>(srcTimeType), static_cast<TIME_TYPE>(destTimeType));
 
-                if (retSec < 0)
+                destTime->SetTime(retSec);
+                SGNSSTime destTimeData;
+                destTime->GetTime(destTimeData);
+                if (destTimeData.m_week < 0 || destTimeData.m_secAndMsec < 0)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
                     break;
                 }
-
-                IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
-                if (destTime == nullptr)
-                {
-                    return RETURN_NEW_PTR_FAILED;
-                }
-                destTime->SetTime(retSec);
-
-                SGNSSTime destTimeData;
-                destTime->GetTime(destTimeData);
                 destWeek = destTimeData.m_week;
                 destSec = destTimeData.m_secAndMsec;
-                if (destWeek < 0 || destSec < 0)
-                {
-                    retVal = RETURN_ERROR_PARAMETER;
-                }
                 retVal = RETURN_SUCCESS;
             } while (false);
             return retVal;
@@ -403,6 +384,7 @@ namespace sixents
                 if (week < 0 || second < 0 || second >= WEEK_SEC)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
+                    break;
                 }
 
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
@@ -431,6 +413,7 @@ namespace sixents
                     || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
+                    break;
                 }
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
                 SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
@@ -529,23 +512,31 @@ namespace sixents
                                            UINT32& len,
                                            const BOOL_T formatType)
         {
-            INT32 iRet = RETURN_FAIL;
-            do 
+            INT32 retVal = RETURN_FAIL;
+            do
             {
                 std::string result = "";
                 CGNSSAngle angleObj(degree);
-                angleObj.DegToString(result, true);
+                angleObj.DegToString(result, formatType);
 
-                if (len != result.size() + 1 || formatString == nullptr)
+                const UINT32 NULL_CHAR_LEN = 1;
+                if (len != static_cast<UINT32>(result.size()) + NULL_CHAR_LEN)
                 {
-                    len = result.size() + 1;
-                    iRet= RETURN_ERROR_PARAMETER;
+                    len = static_cast<UINT32>(result.size()) + NULL_CHAR_LEN;
+                    retVal = RETURN_SUCCESS;
+                    break;
                 }
-                formatString = const_cast<char*>(result.c_str());
-                iRet = RETURN_SUCCESS;
+
+                if (formatString == nullptr)
+                {
+                    retVal = RETURN_NULL_PTR;
+                    break;
+                }
+
+                memcpy(formatString, result.c_str(), static_cast<size_t>(len));
+                retVal = RETURN_SUCCESS;
             } while (false);
-            return iRet;
-         
+            return retVal;
         }
 
         INT32 CAppInterface::FormatAngleByDMS(const INT32 degree,
@@ -555,22 +546,36 @@ namespace sixents
                                               UINT32& len,
                                               const BOOL_T formatType)
         {
-            INT32 iRet = RETURN_FAIL;
+            INT32 retVal = RETURN_FAIL;
             do
             {
-                std::string result = "";
-                CGNSSAngle angleObj(degree, minute,sec);
-                angleObj.DegToString(result, false);
-
-                if (len != result.size() + 1 || formatString == nullptr)
+                if (sec < 0.0)
                 {
-                    len = result.size() + 1;
-                    iRet = RETURN_ERROR_PARAMETER;
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
                 }
-                formatString = const_cast<char*>(result.c_str());
-                iRet = RETURN_SUCCESS;
+                std::string result = "";
+                CGNSSAngle angleObj(degree, minute, sec);
+                angleObj.DegToString(result, formatType);
+
+                const UINT32 NULL_CHAR_LEN = 1;
+                if (len != static_cast<UINT32>(result.size()) + NULL_CHAR_LEN)
+                {
+                    len = static_cast<UINT32>(result.size()) + NULL_CHAR_LEN;
+                    retVal = RETURN_SUCCESS;
+                    break;
+                }
+
+                if (formatString == nullptr)
+                {
+                    retVal = RETURN_NULL_PTR;
+                    break;
+                }
+
+                memcpy(formatString, result.c_str(), static_cast<size_t>(len));
+                retVal = RETURN_SUCCESS;
             } while (false);
-            return iRet;
+            return retVal;
         }
 
         INT32 CAppInterface::Deg2Rad(const DOUBLE degree, DOUBLE& radian)
@@ -584,16 +589,16 @@ namespace sixents
             INT32 iRet = RETURN_FAIL;
             do
             {
-                if (minute < 0 || minute >= 60 || sec < 0 || sec >= 60)
+                if (minute < 0 || minute >= BASE_60 || sec < 0 || sec >= BASE_60)
                 {
                     iRet = RETURN_ERROR_PARAMETER;
+                    break;
                 }
                 CGNSSAngle dms(degree, minute, sec);
                 CAppInterface::Deg2Rad(dms.GetDeg(), radian);
                 iRet = RETURN_SUCCESS;
             } while (false);
             return iRet;
-           
         }
 
         INT32 CAppInterface::Rad2Deg(const DOUBLE radian, DOUBLE& degree)

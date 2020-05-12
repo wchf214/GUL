@@ -93,7 +93,7 @@
 *           2013/06/02 1.23 add #ifdef for undefined CLOCK_MONOTONIC_RAW
 *           2013/09/01 1.24 fix bug on interpolation of satellite antenna pcv
 *           2013/09/06 1.25 fix bug on extrapolation of erp
-*           2014/04/27 1.26 add SYS_LEO for satellite system
+*           2014/04/27 1.26 add SYS_LEO_RTK for satellite system
 *                           add BDS L1 code for RINEX 3.02 and RTCM 3.2
 *                           support BDS L1 in satwavelen()
 *           2014/05/29 1.27 fix bug on obs2code() to search obs code table
@@ -183,11 +183,11 @@ const double chisqr[100]={      /* chi-sqr(n) (alpha=0.001) */
     138 ,139 ,140 ,142 ,143 ,144 ,145 ,147 ,148 ,149
 };
 const double lam_carr[MAXFREQ]={ /* carrier wave length (m) */
-    CLIGHT/FREQ1,CLIGHT/FREQ2,CLIGHT/FREQ5,CLIGHT/FREQ6,CLIGHT/FREQ7,
-    CLIGHT/FREQ8,CLIGHT/FREQ9
+    CLIGHT_RTK/FREQ1_RTK,CLIGHT_RTK/FREQ2_RTK,CLIGHT_RTK/FREQ5_RTK,CLIGHT_RTK/FREQ6_RTK,CLIGHT_RTK/FREQ7_RTK,
+    CLIGHT_RTK/FREQ8_RTK,CLIGHT_RTK/FREQ9_RTK
 };
 const prcopt_t prcopt_default={ /* defaults processing options */
-    PMODE_SINGLE,0,2,SYS_GPS,   /* mode,soltype,nf,navsys */
+    PMODE_SINGLE,0,2,SYS_GPS_RTK,   /* mode,soltype,nf,navsys */
     15.0*D2R,{{0,0}},           /* elmin,snrmask */
     0,1,1,1,                    /* sateph,modear,glomodear,bdsmodear */
     5,0,10,1,                   /* maxout,minlock,minfix,armaxiter */
@@ -382,7 +382,7 @@ extern void add_fatal(fatalfunc_t *func)
 }
 /* satellite system+prn/slot number to satellite number ------------------------
 * convert satellite system+prn/slot number to satellite number
-* args   : int    sys       I   satellite system (SYS_GPS,SYS_GLO,...)
+* args   : int    sys       I   satellite system (SYS_GPS_RTK,SYS_GLO_RTK,...)
 *          int    prn       I   satellite prn/slot number
 * return : satellite number (0:error)
 *-----------------------------------------------------------------------------*/
@@ -390,29 +390,29 @@ extern int satno(int sys, int prn)
 {
     if (prn<=0) return 0;
     switch (sys) {
-        case SYS_GPS:
+        case SYS_GPS_RTK:
             if (prn<MINPRNGPS||MAXPRNGPS<prn) return 0;
             return prn-MINPRNGPS+1;
-        case SYS_GLO:
+        case SYS_GLO_RTK:
             if (prn<MINPRNGLO||MAXPRNGLO<prn) return 0;
             return NSATGPS+prn-MINPRNGLO+1;
-        case SYS_GAL:
+        case SYS_GAL_RTK:
             if (prn<MINPRNGAL||MAXPRNGAL<prn) return 0;
             return NSATGPS+NSATGLO+prn-MINPRNGAL+1;
-        case SYS_QZS:
+        case SYS_QZS_RTK:
             if (prn<MINPRNQZS||MAXPRNQZS<prn) return 0;
             return NSATGPS+NSATGLO+NSATGAL+prn-MINPRNQZS+1;
-        case SYS_CMP:
+        case SYS_CMP_RTK:
             if (prn<MINPRNCMP||MAXPRNCMP<prn) return 0;
             return NSATGPS+NSATGLO+NSATGAL+NSATQZS+prn-MINPRNCMP+1;
-        case SYS_IRN:
+        case SYS_IRN_RTK:
             if (prn<MINPRNIRN||MAXPRNIRN<prn) return 0;
             return NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+prn-MINPRNIRN+1;
-        case SYS_LEO:
+        case SYS_LEO_RTK:
             if (prn<MINPRNLEO||MAXPRNLEO<prn) return 0;
             return NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+NSATIRN+
                    prn-MINPRNLEO+1;
-        case SYS_SBS:
+        case SYS_SBS_RTK:
             if (prn<MINPRNSBS||MAXPRNSBS<prn) return 0;
             return NSATGPS+NSATGLO+NSATGAL+NSATQZS+NSATCMP+NSATIRN+NSATLEO+
                    prn-MINPRNSBS+1;
@@ -423,35 +423,35 @@ extern int satno(int sys, int prn)
 * convert satellite number to satellite system
 * args   : int    sat       I   satellite number (1-MAXSAT)
 *          int    *prn      IO  satellite prn/slot number (NULL: no output)
-* return : satellite system (SYS_GPS,SYS_GLO,...)
+* return : satellite system (SYS_GPS_RTK,SYS_GLO_RTK,...)
 *-----------------------------------------------------------------------------*/
 extern int satsys(int sat, int *prn)
 {
-    int sys=SYS_NONE;
+    int sys=SYS_NONE_RTK;
     if (sat<=0||MAXSAT<sat) sat=0;
     else if (sat<=NSATGPS) {
-        sys=SYS_GPS; sat+=MINPRNGPS-1;
+        sys=SYS_GPS_RTK; sat+=MINPRNGPS-1;
     }
     else if ((sat-=NSATGPS)<=NSATGLO) {
-        sys=SYS_GLO; sat+=MINPRNGLO-1;
+        sys=SYS_GLO_RTK; sat+=MINPRNGLO-1;
     }
     else if ((sat-=NSATGLO)<=NSATGAL) {
-        sys=SYS_GAL; sat+=MINPRNGAL-1;
+        sys=SYS_GAL_RTK; sat+=MINPRNGAL-1;
     }
     else if ((sat-=NSATGAL)<=NSATQZS) {
-        sys=SYS_QZS; sat+=MINPRNQZS-1; 
+        sys=SYS_QZS_RTK; sat+=MINPRNQZS-1;
     }
     else if ((sat-=NSATQZS)<=NSATCMP) {
-        sys=SYS_CMP; sat+=MINPRNCMP-1; 
+        sys=SYS_CMP_RTK; sat+=MINPRNCMP-1;
     }
     else if ((sat-=NSATCMP)<=NSATIRN) {
-        sys=SYS_IRN; sat+=MINPRNIRN-1; 
+        sys=SYS_IRN_RTK; sat+=MINPRNIRN-1;
     }
     else if ((sat-=NSATIRN)<=NSATLEO) {
-        sys=SYS_LEO; sat+=MINPRNLEO-1; 
+        sys=SYS_LEO_RTK; sat+=MINPRNLEO-1;
     }
     else if ((sat-=NSATLEO)<=NSATSBS) {
-        sys=SYS_SBS; sat+=MINPRNSBS-1; 
+        sys=SYS_SBS_RTK; sat+=MINPRNSBS-1;
     }
     else sat=0;
     if (prn) *prn=sat;
@@ -469,23 +469,23 @@ extern int satid2no(const char *id)
     char code;
     
     if (sscanf(id,"%d",&prn)==1) {
-        if      (MINPRNGPS<=prn&&prn<=MAXPRNGPS) sys=SYS_GPS;
-        else if (MINPRNSBS<=prn&&prn<=MAXPRNSBS) sys=SYS_SBS;
-        else if (MINPRNQZS<=prn&&prn<=MAXPRNQZS) sys=SYS_QZS;
+        if      (MINPRNGPS<=prn&&prn<=MAXPRNGPS) sys=SYS_GPS_RTK;
+        else if (MINPRNSBS<=prn&&prn<=MAXPRNSBS) sys=SYS_SBS_RTK;
+        else if (MINPRNQZS<=prn&&prn<=MAXPRNQZS) sys=SYS_QZS_RTK;
         else return 0;
         return satno(sys,prn);
     }
     if (sscanf(id,"%c%d",&code,&prn)<2) return 0;
     
     switch (code) {
-        case 'G': sys=SYS_GPS; prn+=MINPRNGPS-1; break;
-        case 'R': sys=SYS_GLO; prn+=MINPRNGLO-1; break;
-        case 'E': sys=SYS_GAL; prn+=MINPRNGAL-1; break;
-        case 'J': sys=SYS_QZS; prn+=MINPRNQZS-1; break;
-        case 'C': sys=SYS_CMP; prn+=MINPRNCMP-1; break;
-        case 'I': sys=SYS_IRN; prn+=MINPRNIRN-1; break;
-        case 'L': sys=SYS_LEO; prn+=MINPRNLEO-1; break;
-        case 'S': sys=SYS_SBS; prn+=100; break;
+        case 'G': sys=SYS_GPS_RTK; prn+=MINPRNGPS-1; break;
+        case 'R': sys=SYS_GLO_RTK; prn+=MINPRNGLO-1; break;
+        case 'E': sys=SYS_GAL_RTK; prn+=MINPRNGAL-1; break;
+        case 'J': sys=SYS_QZS_RTK; prn+=MINPRNQZS-1; break;
+        case 'C': sys=SYS_CMP_RTK; prn+=MINPRNCMP-1; break;
+        case 'I': sys=SYS_IRN_RTK; prn+=MINPRNIRN-1; break;
+        case 'L': sys=SYS_LEO_RTK; prn+=MINPRNLEO-1; break;
+        case 'S': sys=SYS_SBS_RTK; prn+=100; break;
         default: return 0;
     }
     return satno(sys,prn);
@@ -500,14 +500,14 @@ extern void satno2id(int sat, char *id)
 {
     int prn;
     switch (satsys(sat,&prn)) {
-        case SYS_GPS: sprintf(id,"G%02d",prn-MINPRNGPS+1); return;
-        case SYS_GLO: sprintf(id,"R%02d",prn-MINPRNGLO+1); return;
-        case SYS_GAL: sprintf(id,"E%02d",prn-MINPRNGAL+1); return;
-        case SYS_QZS: sprintf(id,"J%02d",prn-MINPRNQZS+1); return;
-        case SYS_CMP: sprintf(id,"C%02d",prn-MINPRNCMP+1); return;
-        case SYS_IRN: sprintf(id,"I%02d",prn-MINPRNIRN+1); return;
-        case SYS_LEO: sprintf(id,"L%02d",prn-MINPRNLEO+1); return;
-        case SYS_SBS: sprintf(id,"%03d" ,prn); return;
+        case SYS_GPS_RTK: sprintf(id,"G%02d",prn-MINPRNGPS+1); return;
+        case SYS_GLO_RTK: sprintf(id,"R%02d",prn-MINPRNGLO+1); return;
+        case SYS_GAL_RTK: sprintf(id,"E%02d",prn-MINPRNGAL+1); return;
+        case SYS_QZS_RTK: sprintf(id,"J%02d",prn-MINPRNQZS+1); return;
+        case SYS_CMP_RTK: sprintf(id,"C%02d",prn-MINPRNCMP+1); return;
+        case SYS_IRN_RTK: sprintf(id,"I%02d",prn-MINPRNIRN+1); return;
+        case SYS_LEO_RTK: sprintf(id,"L%02d",prn-MINPRNLEO+1); return;
+        case SYS_SBS_RTK: sprintf(id,"%03d" ,prn); return;
     }
     strcpy(id,"");
 }
@@ -530,7 +530,7 @@ extern int satexclude(int sat, double var, int svh, const prcopt_t *opt)
         if (opt->exsats[sat-1]==2) return 0; /* included satellite */
         if (!(sys&opt->navsys)) return 1; /* unselected sat sys */
     }
-    if (sys==SYS_QZS) svh&=0xFE; /* mask QZSS LEX health */
+    if (sys==SYS_QZS_RTK) svh&=0xFE; /* mask QZSS LEX health */
     if (svh) {
         trace(3,"unhealthy satellite: sat=%3d svh=%02X\n",sat,svh);
         return 1;
@@ -614,13 +614,13 @@ extern void setcodepri(int sys, int freq, const char *pri)
     trace(3,"setcodepri:sys=%d freq=%d pri=%s\n",sys,freq,pri);
     
     if (freq<=0||MAXFREQ<freq) return;
-    if (sys&SYS_GPS) strcpy(codepris[0][freq-1],pri);
-    if (sys&SYS_GLO) strcpy(codepris[1][freq-1],pri);
-    if (sys&SYS_GAL) strcpy(codepris[2][freq-1],pri);
-    if (sys&SYS_QZS) strcpy(codepris[3][freq-1],pri);
-    if (sys&SYS_SBS) strcpy(codepris[4][freq-1],pri);
-    if (sys&SYS_CMP) strcpy(codepris[5][freq-1],pri);
-    if (sys&SYS_IRN) strcpy(codepris[6][freq-1],pri);
+    if (sys&SYS_GPS_RTK) strcpy(codepris[0][freq-1],pri);
+    if (sys&SYS_GLO_RTK) strcpy(codepris[1][freq-1],pri);
+    if (sys&SYS_GAL_RTK) strcpy(codepris[2][freq-1],pri);
+    if (sys&SYS_QZS_RTK) strcpy(codepris[3][freq-1],pri);
+    if (sys&SYS_SBS_RTK) strcpy(codepris[4][freq-1],pri);
+    if (sys&SYS_CMP_RTK) strcpy(codepris[5][freq-1],pri);
+    if (sys&SYS_IRN_RTK) strcpy(codepris[6][freq-1],pri);
 }
 /* get code priority -----------------------------------------------------------
 * get code priority for multiple codes in a frequency
@@ -636,13 +636,13 @@ extern int getcodepri(int sys, unsigned char code, const char *opt)
     int i,j;
     
     switch (sys) {
-        case SYS_GPS: i=0; optstr="-GL%2s"; break;
-        case SYS_GLO: i=1; optstr="-RL%2s"; break;
-        case SYS_GAL: i=2; optstr="-EL%2s"; break;
-        case SYS_QZS: i=3; optstr="-JL%2s"; break;
-        case SYS_SBS: i=4; optstr="-SL%2s"; break;
-        case SYS_CMP: i=5; optstr="-CL%2s"; break;
-        case SYS_IRN: i=6; optstr="-IL%2s"; break;
+        case SYS_GPS_RTK: i=0; optstr="-GL%2s"; break;
+        case SYS_GLO_RTK: i=1; optstr="-RL%2s"; break;
+        case SYS_GAL_RTK: i=2; optstr="-EL%2s"; break;
+        case SYS_QZS_RTK: i=3; optstr="-JL%2s"; break;
+        case SYS_SBS_RTK: i=4; optstr="-SL%2s"; break;
+        case SYS_CMP_RTK: i=5; optstr="-CL%2s"; break;
+        case SYS_IRN_RTK: i=6; optstr="-IL%2s"; break;
         default: return 0;
     }
     obs=code2obs(code,&j);
@@ -1621,7 +1621,7 @@ extern void time2str(gtime_t t, char *s, int n)
     double ep[6];
     
     if (n<0) n=0; else if (n>12) n=12;
-    if (1.0-t.sec<0.5/pow(10.0,n)) {t.time++; t.sec=0.0;};
+    if (1.0-t.sec<0.5/pow(10.0,n)) {t.time++; t.sec=0.0;}
     time2epoch(t,ep);
     sprintf(s,"%04.0f/%02.0f/%02.0f %02.0f:%02.0f:%0*.*f",ep[0],ep[1],ep[2],
             ep[3],ep[4],n<=0?2:n+3,n<=0?0:n,ep[5]);
@@ -2725,7 +2725,7 @@ extern int readnav(const char *file, nav_t *nav)
         }
         if ((p=strchr(buff,','))) *p='\0'; else continue;
         if (!(sat=satid2no(buff))) continue;
-        if (satsys(sat,&prn)==SYS_GLO) {
+        if (satsys(sat,&prn)==SYS_GLO_RTK) {
             nav->geph[prn-1]=geph0;
             nav->geph[prn-1].sat=sat;
             toe_time=tof_time=0;
@@ -3315,39 +3315,39 @@ extern int reppaths(const char *path, char *rpath[], int nmax, gtime_t ts,
 *-----------------------------------------------------------------------------*/
 extern double satwavelen(int sat, int frq, const nav_t *nav)
 {
-    const double freq_glo[]={FREQ1_GLO,FREQ2_GLO};
-    const double dfrq_glo[]={DFRQ1_GLO,DFRQ2_GLO};
+    const double freq_glo[]={FREQ1_GLO_RTK,FREQ2_GLO_RTK};
+    const double dfrq_glo[]={DFRQ1_GLO_RTK,DFRQ2_GLO_RTK};
     int i,sys=satsys(sat,NULL);
     
-    if (sys==SYS_GLO) {
+    if (sys==SYS_GLO_RTK) {
         if (0<=frq&&frq<=1) { /* L1,L2 */
             for (i=0;i<nav->ng;i++) {
                 if (nav->geph[i].sat!=sat) continue;
-                return CLIGHT/(freq_glo[frq]+dfrq_glo[frq]*nav->geph[i].frq);
+                return CLIGHT_RTK/(freq_glo[frq]+dfrq_glo[frq]*nav->geph[i].frq);
             }
         }
         else if (frq==2) { /* L3 */
-            return CLIGHT/FREQ3_GLO;
+            return CLIGHT_RTK/FREQ3_GLO_RTK;
         }
     }
-    else if (sys==SYS_CMP) {
-        if      (frq==0) return CLIGHT/FREQ1_CMP; /* B1 */
-        else if (frq==1) return CLIGHT/FREQ2_CMP; /* B2 */
-        else if (frq==2) return CLIGHT/FREQ3_CMP; /* B3 */
+    else if (sys==SYS_CMP_RTK) {
+        if      (frq==0) return CLIGHT_RTK/FREQ1_CMP_RTK; /* B1 */
+        else if (frq==1) return CLIGHT_RTK/FREQ2_CMP_RTK; /* B2 */
+        else if (frq==2) return CLIGHT_RTK/FREQ3_CMP_RTK; /* B3 */
     }
-    else if (sys==SYS_GAL) {
-        if      (frq==0) return CLIGHT/FREQ1; /* E1 */
-        else if (frq==1) return CLIGHT/FREQ7; /* E5b */
-        else if (frq==2) return CLIGHT/FREQ5; /* E5a */
-        else if (frq==3) return CLIGHT/FREQ6; /* E6 */
-        else if (frq==5) return CLIGHT/FREQ8; /* E5ab */
+    else if (sys==SYS_GAL_RTK) {
+        if      (frq==0) return CLIGHT_RTK/FREQ1_RTK; /* E1 */
+        else if (frq==1) return CLIGHT_RTK/FREQ7_RTK; /* E5b */
+        else if (frq==2) return CLIGHT_RTK/FREQ5_RTK; /* E5a */
+        else if (frq==3) return CLIGHT_RTK/FREQ6_RTK; /* E6 */
+        else if (frq==5) return CLIGHT_RTK/FREQ8_RTK; /* E5ab */
     }
     else { /* GPS,QZS */
-        if      (frq==0) return CLIGHT/FREQ1; /* L1 */
-        else if (frq==1) return CLIGHT/FREQ2; /* L2 */
-        else if (frq==2) return CLIGHT/FREQ5; /* L5 */
-        else if (frq==3) return CLIGHT/FREQ6; /* L6/LEX */
-        else if (frq==6) return CLIGHT/FREQ9; /* S */
+        if      (frq==0) return CLIGHT_RTK/FREQ1_RTK; /* L1 */
+        else if (frq==1) return CLIGHT_RTK/FREQ2_RTK; /* L2 */
+        else if (frq==2) return CLIGHT_RTK/FREQ5_RTK; /* L5 */
+        else if (frq==3) return CLIGHT_RTK/FREQ6_RTK; /* L6/LEX */
+        else if (frq==6) return CLIGHT_RTK/FREQ9_RTK; /* S */
     }
     return 0.0;
 }
@@ -3368,7 +3368,7 @@ extern double geodist(const double *rs, const double *rr, double *e)
     for (i=0;i<3;i++) e[i]=rs[i]-rr[i];
     r=norm(e,3);
     for (i=0;i<3;i++) e[i]/=r;
-    return r+OMGE*(rs[0]*rr[1]-rs[1]*rr[0])/CLIGHT;
+    return r+OMGE*(rs[0]*rr[1]-rs[1]*rr[0])/CLIGHT_RTK;
 }
 /* satellite azimuth/elevation angle -------------------------------------------
 * compute satellite azimuth/elevation angle
@@ -3474,7 +3474,7 @@ extern double ionmodel(gtime_t t, const double *ion, const double *pos,
     per=per<72000.0?72000.0:per;
     x=2.0*PI*(tt-50400.0)/per;
     
-    return CLIGHT*f*(fabs(x)<1.57?5E-9+amp*(1.0+x*x*(-0.5+x*x/24.0)):5E-9);
+    return CLIGHT_RTK*f*(fabs(x)<1.57?5E-9+amp*(1.0+x*x*(-0.5+x*x/24.0)):5E-9);
 }
 /* ionosphere mapping function -------------------------------------------------
 * compute ionospheric delay mapping function by single layer model
