@@ -1,4 +1,5 @@
 #include "CGNSSCoord.h"
+#include <cmath>
 #include "../Angle/CGNSSAngle.h"
 #include "../DllMain/GNSSCommonDef.h"
 

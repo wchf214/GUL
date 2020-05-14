@@ -29,8 +29,6 @@ public:
     virtual ~CTestFunc();
 
     // 加载动态库
-    bool LoadRtcmLib();
-    void UnloadRtcmLib();
     bool LoadGULMathLib();
     void UnloadGULMathLib();
     bool LoadGULLib();
@@ -78,7 +76,7 @@ private:
     // 读写矩阵文件
     void WriteTxtFile(const QString& filePath, const QString& data);
     // 读星历文件
-    void FileConvertToBin(const QString& filePath, QString& outFilePath);
+    void FileConvertToBin(const QByteArray& data, const QString& fileName, QString& outFilePath);
     // 为RTCM解码二进制星历电文
     void DecodeEph();
     void RtcmEphToMathEph(sixents::SEphemeris* rtcmEph, sixents::Math::SEphemeris* gulEph);
@@ -96,7 +94,6 @@ private:
     bool mLoadRtkLibFlag;
     bool mLoadGULLibFlag;
     bool mLoadGULMathLibFlag;
-    QLibrary* mRtcmLibObj;
     QLibrary* mGULLibObj;
     QLibrary* mGULMathLibObj;
     FuncList mFuncs;

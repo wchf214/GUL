@@ -488,7 +488,7 @@ namespace sixents
          */
         struct SDMS
         {
-            INT32 m_degree; ///< 度，必须为整数
+            INT32 m_degree;  ///< 度，必须为整数
             UINT32 m_minute; ///< 分，在[0,60]的范围内
             DOUBLE m_second; ///< 秒，精确到小数点后6后
         };

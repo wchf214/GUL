@@ -1,5 +1,6 @@
-#include "AppInterface.h"
+﻿#include "AppInterface.h"
 #include <cstring>
+#include <fstream>
 #include "../Angle/CGNSSAngle.h"
 #include "../Coordinate/CGNSSCoord.h"
 #include "../DllMain/GNSSCommonDef.h"
@@ -75,9 +76,8 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
-                if ((month <= 0 || month > MONTH_IN_YEAR) || (day <= 0 || day > MAX_DAY_IN_MONTH)
-                    || (hour < 0 || hour >= MAX_HOUR_IN_DAY) || (minute < 0 || minute >= BASE_60)
-                    || (second < 0 || second > BASE_60))
+                if ((month == 0 || month > MONTH_IN_YEAR) || (day == 0 || day > MAX_DAY_IN_MONTH)
+                    || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60) || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -135,9 +135,8 @@ namespace sixents
             do
             {
                 // srcTimeType, destTimeType,判断
-                if ((srcMonth <= 0 || srcMonth > MONTH_IN_YEAR) || (srcDay <= 0 || srcDay > MAX_DAY_IN_MONTH)
-                    || (srcHour < 0 || srcHour >= MAX_HOUR_IN_DAY) || (srcMinute < 0 || srcMinute >= BASE_60)
-                    || (srcSecond < 0 || srcSecond > BASE_60))
+                if ((srcMonth == 0 || srcMonth > MONTH_IN_YEAR) || (srcDay == 0 || srcDay > MAX_DAY_IN_MONTH)
+                    || (srcHour >= MAX_HOUR_IN_DAY) || (srcMinute >= BASE_60) || (srcSecond < 0 || srcSecond > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -270,9 +269,8 @@ namespace sixents
             do
             {
                 // srcTimeType, destTimeType,判断
-                if ((month <= 0 || month > MONTH_IN_YEAR) || (day <= 0 || day > MAX_DAY_IN_MONTH)
-                    || (hour < 0 || hour >= MAX_HOUR_IN_DAY) || (minute < 0 || minute >= BASE_60)
-                    || (second < 0 || second > BASE_60))
+                if ((month == 0 || month > MONTH_IN_YEAR) || (day == 0 || day > MAX_DAY_IN_MONTH)
+                    || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60) || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -381,7 +379,7 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
-                if (week < 0 || second < 0 || second >= WEEK_SEC)
+                if (second < 0 || second >= WEEK_SEC)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
                     break;

@@ -17,7 +17,7 @@
 #include <mutex>
 #include <string>
 
-#include "BasicType.h"
+#include "../Platform/BasicType.h"
 
 namespace sixents
 {

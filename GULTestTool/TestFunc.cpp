@@ -13,11 +13,11 @@
 #include "GULLib/GNSSMathUtilityLib/DllMain/GNSSMathInterface.h"
 #include "GULLib/GNSSMathUtilityLib/DllMain/GNSSCommonStruct.h"
 // rtcm lib
-#include "RtcmLib/include/BasicType.h"
-#include "RtcmLib/include/Constants.h"
-#include "RtcmLib/include/CParam.h"
-#include "RtcmLib/include/IGnssDataInterface.h"
-#include "RtcmLib/include/IAppOpt.h"
+#include "RtcmLib/Platform/BasicType.h"
+#include "RtcmLib/Framework/Constants.h"
+#include "RtcmLib/Framework/CParam.h"
+#include "RtcmLib/GnssData/IGnssDataInterface.h"
+#include "RtcmLib/Codec/IAppOpt.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -270,6 +270,10 @@ EXPORT void eph2pos (gtime_t time, const eph_t  *eph,  double *rs, double *dts,
                      double *var);
 EXPORT void geph2pos(gtime_t time, const geph_t *geph, double *rs, double *dts,
                      double *var);
+EXPORT int init_rtcm   (rtcm_t *rtcm);
+EXPORT void free_rtcm  (rtcm_t *rtcm);
+EXPORT int input_rtcm3 (rtcm_t *rtcm, unsigned char data);
+EXPORT int input_rtcm3f(rtcm_t *rtcm, FILE *fp);
 
 // 矩阵
 // 乘法
@@ -283,7 +287,6 @@ CTestFunc::CTestFunc(MainWindow* parent)
     : mLoadRtkLibFlag(false)
     , mLoadGULLibFlag(false)
     , mLoadGULMathLibFlag(false)
-    , mRtcmLibObj(nullptr)
     , mGULLibObj(nullptr)
     , mGULMathLibObj(nullptr)
 {
@@ -293,11 +296,6 @@ CTestFunc::CTestFunc(MainWindow* parent)
 
 CTestFunc::~CTestFunc()
 {
-    if (mRtcmLibObj) {
-        delete mRtcmLibObj;
-        mRtcmLibObj = nullptr;
-    }
-
     if (mGULLibObj) {
         delete mGULLibObj;
         mGULLibObj = nullptr;
@@ -306,38 +304,6 @@ CTestFunc::~CTestFunc()
     if (mGULMathLibObj != nullptr) {
         delete mGULMathLibObj;
         mGULMathLibObj = nullptr;
-    }
-}
-
-bool CTestFunc::LoadRtcmLib()
-{
-    mLoadRtkLibFlag = false;
-    if (mRtcmLibObj) {
-        delete mRtcmLibObj;
-        mRtcmLibObj = nullptr;
-    }
-
-    do {
-        mRtcmLibObj = new QLibrary(RtcmLibName);
-        if (mRtcmLibObj == nullptr) {
-            break;
-        }
-        if (!mRtcmLibObj->load()) {
-            break;
-        }
-        mLoadRtkLibFlag = true;
-    } while(false);
-
-    return mLoadRtkLibFlag;
-}
-
-void CTestFunc::UnloadRtcmLib()
-{
-    if (!mLoadRtkLibFlag && nullptr == mRtcmLibObj) {
-        return;
-    }
-    if (mRtcmLibObj->unload()) {
-        mLoadRtkLibFlag = false;
     }
 }
 
@@ -412,7 +378,9 @@ int CTestFunc::ExecuteTest(const QString testData, const int testFunc, QString &
         return -1;
     }
     QString curTestData = static_cast<QString>(testData);
-    if (testFunc >= 1 && testFunc <= 18) {
+    const int FIRST_TIME_FUNC_IDX = 1;
+    const int LAST_TIME_FUNC_IDX = 18;
+    if (testFunc >= FIRST_TIME_FUNC_IDX && testFunc <= LAST_TIME_FUNC_IDX) {
         ExecuteTestTime(curTestData, testFunc);
     }
 
@@ -470,7 +438,7 @@ void CTestFunc::ExecuteTestTime(QString& testData, const int testFunc)
     default:
         break;
     }
-    testData = testData + ";" + flag;
+    testData = testData + SEMICOLON + flag;
 }
 
 void CTestFunc::InitFuncMap()
@@ -517,2073 +485,2323 @@ void CTestFunc::InitFuncMap()
 
 bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    int flag = testDatas[1].toInt();
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-    int week = weekSecData[0].toInt();
-    double sec = weekSecData[1].toDouble();
-
-    char* outStr = nullptr;
-    unsigned int outStrLen = 0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
-                                               outStr, outStrLen);
-    if (outStrLen == 0) {
-        return false;
-    }
-    outStr = new char[static_cast<unsigned long long>(outStrLen)];
-    memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outStrLen));
-    sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
-                                               outStr, outStrLen);
-    QString gulRet = outStr;
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        int flag = testDatas[1].toInt();
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+        int week = weekSecData[0].toInt();
+        double sec = weekSecData[1].toDouble();
+
+        char* outStr = nullptr;
+        unsigned int outStrLen = 0;
+        // 执行Rtk接口，未实现该接口
+
+        // 执行GUL接口
+        int retGul = sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+                                                      outStr, outStrLen);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        outStr = new char[static_cast<unsigned long long>(outStrLen)];
+        memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outStrLen));
+        sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+                                                   outStr, outStrLen);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = outStr + COMMA + QString::number(retGul);
+        delete [] outStr;
+        outStr = nullptr;
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::FormatStandardTime(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-
-    QStringList dayTime = weekSecData[0].split("-");
-    if (dayTime.count() != 3) {
-        return false;
-    }
-
-    QStringList hourTime = weekSecData[1].split(":");
-    if (hourTime.count() != 3) {
-        return false;
-    }
-
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
-    double sec = hourTime[2].toDouble();
-
-    char* outStr = nullptr;
-    unsigned int outStrLen = 0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
-                                                static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
-                                                static_cast<unsigned int>(minute), sec, outStr, outStrLen);
-    if (outStrLen == 0) {
-        return false;
-    }
-    outStr = new char[static_cast<unsigned long long>(outStrLen)];
-    memset(outStr, 0, sizeof (char)* static_cast<unsigned long long>(outStrLen));
-    sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
-                                                static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
-                                                static_cast<unsigned int>(minute), sec, outStr, outStrLen);
-    QString gulRet = outStr;
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+
+        QStringList dayTime = weekSecData[0].split(DASH_LINE);
+        if (dayTime.count() != 3) {
+            break;
+        }
+
+        QStringList hourTime = weekSecData[1].split(COLON);
+        if (hourTime.count() != 3) {
+            break;
+        }
+
+        int year = dayTime[0].toInt();
+        int month = dayTime[1].toInt();
+        int day = dayTime[2].toInt();
+        int hour = hourTime[0].toInt();
+        int minute = hourTime[1].toInt();
+        double sec = hourTime[2].toDouble();
+
+        char* outStr = nullptr;
+        unsigned int outStrLen = 0;
+        // 执行Rtk接口，未实现该接口
+
+        // 执行GUL接口
+        int retGul = sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                    static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                    static_cast<unsigned int>(minute), sec, outStr, outStrLen);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        outStr = new char[static_cast<unsigned long long>(outStrLen)];
+        memset(outStr, 0, sizeof (char)* static_cast<unsigned long long>(outStrLen));
+        retGul = sixents::Math::FormatStandardTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                    static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                    static_cast<unsigned int>(minute), sec, outStr, outStrLen);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = outStr + COMMA + QString::number(retGul);
+        delete [] outStr;
+        outStr = nullptr;
+        retFunc = true;
+    } while(false);
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    int flag = testDatas[1].toInt();
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-    int week = weekSecData[0].toInt();
-    double sec = weekSecData[1].toDouble();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        int flag = testDatas[1].toInt();
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+        int week = weekSecData[0].toInt();
+        double sec = weekSecData[1].toDouble();
 
-    unsigned int year = 0;
-    unsigned int month = 0;
-    unsigned int day = 0;
-    unsigned int hour = 0;
-    unsigned int minute = 0;
-    double second = 0.0;
-    // 执行Rtk接口，未实现该结果
-    // 调用Rtk时间接口
-    gtime_t rtkTime;
-    switch (flag) {
-    case 2:    // GPS时间
-        rtkTime = gpst2time(week, sec);
-        break;
-    case 4:    // Galileo时间
-        rtkTime = gst2time(week, sec);
-        break;
-    case 5:    // BD时间
-        rtkTime = bdt2time(week, sec);
-        rtkTime = bdt2gpst(rtkTime);
-        break;
-    default:
-        break;
-    }
-    gtime_t rtkRetTime = gpst2utc(rtkTime);
-    char* chRet = new char[1000];
-    memset(chRet, 0, sizeof (char)*1000);
-    int n = MSEC_ACCURACY;
-    time2str(rtkRetTime, chRet, n);
-    if (chRet == nullptr) {
-        return false;
-    }
-    QString rtkRet(chRet);
-    // 执行GUL接口
-    sixents::Math::GNSSTimeToUTCTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
-                                               year, month, day, hour, minute, second);
-    QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " "
-            + QString::number(hour) + ":" + QString::number(minute) + ":" + QString::number(second, 'f', MSEC_ACCURACY);
+        unsigned int year = 0;
+        unsigned int month = 0;
+        unsigned int day = 0;
+        unsigned int hour = 0;
+        unsigned int minute = 0;
+        double second = 0.0;
+
+        // 执行Rtk接口
+        gtime_t rtkTime;
+        switch (flag) {
+        case 2:    // GPS时间
+            rtkTime = gpst2time(week, sec);
+            break;
+        case 4:    // Galileo时间
+            rtkTime = gst2time(week, sec);
+            break;
+        case 5:    // BD时间
+            rtkTime = bdt2time(week, sec);
+            rtkTime = bdt2gpst(rtkTime);
+            break;
+        default:
+            break;
+        }
+        gtime_t rtkRetTime = gpst2utc(rtkTime);
+        char* chRet = new char[1000];
+        memset(chRet, 0, sizeof (char)*1000);
+        int n = MSEC_ACCURACY;
+        time2str(rtkRetTime, chRet, n);
+        if (chRet == nullptr) {
+            break;
+        }
+        rtkRet = chRet;
+        delete [] chRet;
+        chRet = nullptr;
+
+        // 执行GUL接口
+        int retGul = sixents::Math::GNSSTimeToUTCTime(static_cast<unsigned int>(week), sec,
+                                                      static_cast<unsigned int>(flag),
+                                                      year, month, day, hour, minute, second);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        QString gulRet = QString::number(year) + DASH_LINE + QString::number(month) + DASH_LINE + QString::number(day) +
+                         SPACE + QString::number(hour) + COLON + QString::number(minute) + COLON +
+                         QString::number(second, 'f', MSEC_ACCURACY);
+        gulRet += COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::UTCTimeToGNSSTime(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    int flag = testDatas[1].toInt();
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        int flag = testDatas[1].toInt();
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
 
-    QStringList dayTime = weekSecData[0].split("-");
-    if (dayTime.count() != 3) {
-        return false;
-    }
+        QStringList dayTime = weekSecData[0].split(DASH_LINE);
+        if (dayTime.count() != 3) {
+            break;
+        }
 
-    QStringList hourTime = weekSecData[1].split(":");
-    if (hourTime.count() != 3) {
-        return false;
-    }
+        QStringList hourTime = weekSecData[1].split(COLON);
+        if (hourTime.count() != 3) {
+            break;
+        }
 
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
-    double sec = hourTime[2].toDouble();
+        int year = dayTime[0].toInt();
+        int month = dayTime[1].toInt();
+        int day = dayTime[2].toInt();
+        int hour = hourTime[0].toInt();
+        int minute = hourTime[1].toInt();
+        double sec = hourTime[2].toDouble();
 
-    double standTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                           static_cast<double>(hour), static_cast<double>(minute), sec};
-    gtime_t rtkTime = epoch2time(standTime);
-    gtime_t gpsTime = utc2gpst(rtkTime);
-    int rtkWeek = 0;
-    double rtkSecond = 0.0;
-    // 执行Rtk接口，未实现该结果
-    switch (flag) {
-    case 2:    // GPS时间
-    {
-        rtkSecond = time2gpst(gpsTime, &rtkWeek);
-        break;
-    }
-    case 4:    // Galileo时间
-    {
-        rtkSecond = time2gst(gpsTime, &rtkWeek);
-        break;
-    }
-    case 5:    // BD时间
-    {
-        gtime_t bdTime = gpst2bdt(gpsTime);
-        rtkSecond = time2bdt(bdTime, &rtkWeek);
-        break;
-    }
-    default:
-        break;
-    }
+        double standTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), sec};
+        gtime_t rtkTime = epoch2time(standTime);
+        gtime_t gpsTime = utc2gpst(rtkTime);
+        int rtkWeek = 0;
+        double rtkSecond = 0.0;
 
-    QString rtkRet = QString::number(rtkWeek) + "," + QString::number(rtkSecond, 'f', MSEC_ACCURACY);
-    // 执行GUL接口
-    unsigned int week = 0;
-    double second = 0.0;
-    sixents::Math::UTCTimeToGNSSTime(static_cast<UINT32>(year),
-                                               static_cast<UINT32>(month),
-                                               static_cast<UINT32>(day),
-                                               static_cast<UINT32>(hour),
-                                               static_cast<UINT32>(minute),
-                                               sec, static_cast<UINT32>(flag), week, second);
-    QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
+        // 执行Rtk接口
+        switch (flag) {
+        case 2:    // GPS时间
+        {
+            rtkSecond = time2gpst(gpsTime, &rtkWeek);
+            break;
+        }
+        case 4:    // Galileo时间
+        {
+            rtkSecond = time2gst(gpsTime, &rtkWeek);
+            break;
+        }
+        case 5:    // BD时间
+        {
+            gtime_t bdTime = gpst2bdt(gpsTime);
+            rtkSecond = time2bdt(bdTime, &rtkWeek);
+            break;
+        }
+        default:
+            break;
+        }
+        rtkRet = QString::number(rtkWeek) + COMMA + QString::number(rtkSecond, 'f', MSEC_ACCURACY);
+
+        // 执行GUL接口
+        unsigned int week = 0;
+        double second = 0.0;
+        int retGul = sixents::Math::UTCTimeToGNSSTime(static_cast<UINT32>(year), static_cast<UINT32>(month),
+                                         static_cast<UINT32>(day), static_cast<UINT32>(hour),
+                                         static_cast<UINT32>(minute), sec, static_cast<UINT32>(flag),
+                                         week, second);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+
+        gulRet = QString::number(week) + COMMA + QString::number(second, 'f', MSEC_ACCURACY)
+                + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::GNSSTimeConvert(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    if (testDatas.count() != 2) {
-        return false;
-    }
-
-    QStringList flagList = testDatas[1].split(",");
-    if (flagList.count() != 2) {
-        return false;
-    }
-    int srcType = flagList[0].toInt();
-    int destType = flagList[1].toInt();
-
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-    int srcWeek = weekSecData[0].toInt();
-    double srcSec = weekSecData[1].toDouble();
-
-    int destRtkWeek = 0;
-    double destRtkSec = 0.0;
-    // 执行Rtk接口，未实现该结果
-    if (srcType == 2) {  // GPS to BD or Galileo
-        gtime_t gpsTime = gpst2time(srcWeek, srcSec);
-        if (destType == 4) { // to Galileo
-            destRtkSec = time2gst(gpsTime, &destRtkWeek);
-        } else if (destType == 5){ // to BD
-            gtime_t bdTime = gpst2bdt(gpsTime);
-            destRtkSec = time2bdt(bdTime, &destRtkWeek);
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-    } else if (destType == 2) { // BD or Galileo to GPS
-        if (srcType == 4) {
-            gtime_t gstTime = gst2time(srcWeek, srcSec);
-            destRtkSec = time2gpst(gstTime, &destRtkWeek);
-        } else if (srcType == 5) {
-            gtime_t bdTime = bdt2time(srcWeek, srcSec);
-            gtime_t gpsTime = bdt2gpst(bdTime);
-            destRtkSec = time2gpst(gpsTime, &destRtkWeek);
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        if (testDatas.count() != 2) {
+            break;
         }
-    }
-    QString rtkRet = QString::number(destRtkWeek) + "," + QString::number(destRtkSec, 'f', MSEC_ACCURACY);
 
-    // 执行GUL接口
-    unsigned int destWeek = 0;
-    double destSec = 0.0;
-    sixents::Math::GNSSTimeConvert(static_cast<UINT32>(srcWeek), srcSec, static_cast<UINT32>(srcType),
-                                             destWeek, destSec, static_cast<UINT32>(destType));
-    QString gulRet = QString::number(destWeek) + "," + QString::number(destSec, 'f', MSEC_ACCURACY);
+        QStringList flagList = testDatas[1].split(COMMA);
+        if (flagList.count() != 2) {
+            break;
+        }
+        int srcType = flagList[0].toInt();
+        int destType = flagList[1].toInt();
+
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+        int srcWeek = weekSecData[0].toInt();
+        double srcSec = weekSecData[1].toDouble();
+
+        int destRtkWeek = 0;
+        double destRtkSec = 0.0;
+        // 执行Rtk接口
+        if (srcType == 2) {  // GPS to BD or Galileo
+            gtime_t gpsTime = gpst2time(srcWeek, srcSec);
+            if (destType == 4) { // to Galileo
+                destRtkSec = time2gst(gpsTime, &destRtkWeek);
+            } else if (destType == 5){ // to BD
+                gtime_t bdTime = gpst2bdt(gpsTime);
+                destRtkSec = time2bdt(bdTime, &destRtkWeek);
+            }
+        } else if (destType == 2) { // BD or Galileo to GPS
+            if (srcType == 4) {
+                gtime_t gstTime = gst2time(srcWeek, srcSec);
+                destRtkSec = time2gpst(gstTime, &destRtkWeek);
+            } else if (srcType == 5) {
+                gtime_t bdTime = bdt2time(srcWeek, srcSec);
+                gtime_t gpsTime = bdt2gpst(bdTime);
+                destRtkSec = time2gpst(gpsTime, &destRtkWeek);
+            }
+        }
+        rtkRet = QString::number(destRtkWeek) + COMMA + QString::number(destRtkSec, 'f', MSEC_ACCURACY);
+
+        // 执行GUL接口
+        unsigned int destWeek = 0;
+        double destSec = 0.0;
+        int retGul = sixents::Math::GNSSTimeConvert(static_cast<UINT32>(srcWeek), srcSec, static_cast<UINT32>(srcType),
+                                                 destWeek, destSec, static_cast<UINT32>(destType));
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(destWeek) + COMMA + QString::number(destSec, 'f', MSEC_ACCURACY)
+                 + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    if (testDatas.count() != 2) {
-        return false;
-    }
-
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-
-    QStringList dayTime = weekSecData[0].split("-");
-    if (dayTime.count() != 3) {
-        return false;
-    }
-
-    QStringList hourTime = weekSecData[1].split(":");
-    if (hourTime.count() != 3) {
-        return false;
-    }
-
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
-    double sec = hourTime[2].toDouble();
-    unsigned int utcYear = 0;
-    unsigned int utcMonth = 0;
-    unsigned int utcDay = 0;
-    unsigned int utcHour = 0;
-    unsigned int utcMinute = 0;
-    double utcSec = 0.0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::GlonassTimeToUTCTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
-                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
-                                                  static_cast<unsigned int>(minute), sec,
-                                                  utcYear, utcMonth, utcDay, utcHour, utcMinute, utcSec);
-    QString gulRet = QString::number(utcYear) + "-" + QString::number(utcMonth) + "-" + QString::number(utcDay) + " " +
-                     QString::number(utcHour) + ":" + QString::number(utcMinute) + ":" +
-                     QString::number(utcSec, 'f', MSEC_ACCURACY);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        if (testDatas.count() != 2) {
+            break;
+        }
+
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+
+        QStringList dayTime = weekSecData[0].split(DASH_LINE);
+        if (dayTime.count() != 3) {
+            break;
+        }
+
+        QStringList hourTime = weekSecData[1].split(COLON);
+        if (hourTime.count() != 3) {
+            break;
+        }
+
+        int year = dayTime[0].toInt();
+        int month = dayTime[1].toInt();
+        int day = dayTime[2].toInt();
+        int hour = hourTime[0].toInt();
+        int minute = hourTime[1].toInt();
+        double sec = hourTime[2].toDouble();
+        unsigned int utcYear = 0;
+        unsigned int utcMonth = 0;
+        unsigned int utcDay = 0;
+        unsigned int utcHour = 0;
+        unsigned int utcMinute = 0;
+        double utcSec = 0.0;
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        int retGul = sixents::Math::GlonassTimeToUTCTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                      static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                      static_cast<unsigned int>(minute), sec,
+                                                      utcYear, utcMonth, utcDay, utcHour, utcMinute, utcSec);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+
+        QString gulRet = QString::number(utcYear) + DASH_LINE + QString::number(utcMonth) + DASH_LINE +
+                         QString::number(utcDay) + SPACE +
+                         QString::number(utcHour) + COLON + QString::number(utcMinute) + COLON +
+                         QString::number(utcSec, 'f', MSEC_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while (false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::UTCToGlonass(const QString testData, QString &result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    if (testDatas.count() != 2) {
-        return false;
-    }
-
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-
-    QStringList dayTime = weekSecData[0].split("-");
-    if (dayTime.count() != 3) {
-        return false;
-    }
-
-    QStringList hourTime = weekSecData[1].split(":");
-    if (hourTime.count() != 3) {
-        return false;
-    }
-
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
-    double sec = hourTime[2].toDouble();
-    unsigned int gloYear = 0;
-    unsigned int gloMonth = 0;
-    unsigned int gloDay = 0;
-    unsigned int gloHour = 0;
-    unsigned int gloMinute = 0;
-    double gloSec = 0.0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::UTCTimeToGlonassTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
-                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
-                                                  static_cast<unsigned int>(minute), sec,
-                                                  gloYear, gloMonth, gloDay, gloHour, gloMinute, gloSec);
-    QString gulRet = QString::number(gloYear) + "-" + QString::number(gloMonth) + "-" + QString::number(gloDay) + " " +
-                     QString::number(gloHour) + ":" + QString::number(gloMinute) + ":" + QString::number(gloSec, 'f', MSEC_ACCURACY);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            return false;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        if (testDatas.count() != 2) {
+            return false;
+        }
+
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            return false;
+        }
+
+        QStringList dayTime = weekSecData[0].split(DASH_LINE);
+        if (dayTime.count() != 3) {
+            return false;
+        }
+
+        QStringList hourTime = weekSecData[1].split(COLON);
+        if (hourTime.count() != 3) {
+            return false;
+        }
+
+        int year = dayTime[0].toInt();
+        int month = dayTime[1].toInt();
+        int day = dayTime[2].toInt();
+        int hour = hourTime[0].toInt();
+        int minute = hourTime[1].toInt();
+        double sec = hourTime[2].toDouble();
+        unsigned int gloYear = 0;
+        unsigned int gloMonth = 0;
+        unsigned int gloDay = 0;
+        unsigned int gloHour = 0;
+        unsigned int gloMinute = 0;
+        double gloSec = 0.0;
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        int retGul = sixents::Math::UTCTimeToGlonassTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                                         static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                                         static_cast<unsigned int>(minute), sec,
+                                                         gloYear, gloMonth, gloDay, gloHour, gloMinute, gloSec);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+
+        gulRet = QString::number(gloYear) + DASH_LINE + QString::number(gloMonth) + DASH_LINE +
+                 QString::number(gloDay) + SPACE +
+                 QString::number(gloHour) + COLON + QString::number(gloMinute) + COLON +
+                 QString::number(gloSec, 'f', MSEC_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::GlonassToGPS(const QString testData, QString &result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    if (testDatas.count() != 2) {
-        return false;
-    }
-
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-
-    QStringList dayTime = weekSecData[0].split("-");
-    if (dayTime.count() != 3) {
-        return false;
-    }
-
-    QStringList hourTime = weekSecData[1].split(":");
-    if (hourTime.count() != 3) {
-        return false;
-    }
-
-    int year = dayTime[0].toInt();
-    int month = dayTime[1].toInt();
-    int day = dayTime[2].toInt();
-    int hour = hourTime[0].toInt();
-    int minute = hourTime[1].toInt();
-    double sec = hourTime[2].toDouble();
-
-    unsigned int week = 0;
-    double second = 0.0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::GlonassTimeToGPSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
-                                                  static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
-                                                  static_cast<unsigned int>(minute), sec, week, second);
-    QString gulRet = QString::number(week) + "," + QString::number(second, 'f', MSEC_ACCURACY);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        if (testDatas.count() != 2) {
+            break;
+        }
+
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+
+        QStringList dayTime = weekSecData[0].split(DASH_LINE);
+        if (dayTime.count() != 3) {
+            break;
+        }
+
+        QStringList hourTime = weekSecData[1].split(COLON);
+        if (hourTime.count() != 3) {
+            break;
+        }
+
+        int year = dayTime[0].toInt();
+        int month = dayTime[1].toInt();
+        int day = dayTime[2].toInt();
+        int hour = hourTime[0].toInt();
+        int minute = hourTime[1].toInt();
+        double sec = hourTime[2].toDouble();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        unsigned int week = 0;
+        double second = 0.0;
+        int retGul = sixents::Math::GlonassTimeToGPSTime(static_cast<unsigned int>(year),
+                                                         static_cast<unsigned int>(month),
+                                                         static_cast<unsigned int>(day),
+                                                         static_cast<unsigned int>(hour),
+                                                         static_cast<unsigned int>(minute),
+                                                         sec, week, second);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(week) + COMMA + QString::number(second, 'f', MSEC_ACCURACY) +
+                 COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::GPSToGlonass(const QString testData, QString &result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 拆分参数
-    QStringList testDatas = testData.split(";");
-    if (testDatas.count() != 2) {
-        return false;
-    }
-
-    QStringList weekSecData = testDatas[0].split(",");
-    if (weekSecData.count() != 2) {
-        return false;
-    }
-    int week = weekSecData[0].toInt();
-    double second = weekSecData[1].toDouble();
-
-    unsigned int year = 0;
-    unsigned int month = 0;
-    unsigned int day = 0;
-    unsigned int hour = 0;
-    unsigned int minute = 0;
-    double sec = 0.0;
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    sixents::Math::GPSTimeToGlonassTime(static_cast<unsigned int>(week), second,
-                                                  year, month, day, hour, minute, sec);
-    QString gulRet = QString::number(year) + "-" + QString::number(month) + "-" + QString::number(day) + " " +
-                     QString::number(hour) + ":" + QString::number(minute) + ":" +
-                     QString::number(sec, 'f', MSEC_ACCURACY);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 拆分参数
+        QStringList testDatas = testData.split(SEMICOLON);
+        if (testDatas.count() != 2) {
+            break;
+        }
+
+        QStringList weekSecData = testDatas[0].split(COMMA);
+        if (weekSecData.count() != 2) {
+            break;
+        }
+        int week = weekSecData[0].toInt();
+        double second = weekSecData[1].toDouble();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        unsigned int year = 0;
+        unsigned int month = 0;
+        unsigned int day = 0;
+        unsigned int hour = 0;
+        unsigned int minute = 0;
+        double sec = 0.0;
+
+        int retGul = sixents::Math::GPSTimeToGlonassTime(static_cast<unsigned int>(week), second,
+                                                         year, month, day, hour, minute, sec);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(year) + DASH_LINE + QString::number(month) + DASH_LINE +
+                 QString::number(day) + SPACE +
+                 QString::number(hour) + COLON + QString::number(minute) + COLON +
+                 QString::number(sec, 'f', MSEC_ACCURACY) +
+                 COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::XYZ2BLH(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(",");
-    if (srcTestData.count() != 3) {
-        return false;
-    }
-    double xyz[3];
-    double blh[3];
-    memset(blh, 0, sizeof(blh));
-    memset(xyz, 0, sizeof(blh));
-    for (int idx = 0; idx < srcTestData.count(); ++idx) {
-        xyz[idx] = srcTestData.at(idx).toDouble();
-    }
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(COMMA);
+        if (srcTestData.count() != 3) {
+            break;
+        }
+        double xyz[3];
+        memset(xyz, 0, sizeof(xyz));
+        for (int idx = 0; idx < srcTestData.count(); ++idx) {
+            xyz[idx] = srcTestData.at(idx).toDouble();
+        }
 
-    // 执行Rtk接口，未实现该结果
-    ecef2pos(xyz, blh);
-    // blh值转角度
-    double lat = blh[0] * R2D;
-    double lon = blh[1] * R2D;
-    QString rtkRet = QString::number(lat, 'f', BLH_ACCURACY) + "," +
-                     QString::number(lon, 'f', BLH_ACCURACY) + "," +
-                     QString::number(blh[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double b = 0;
-    double l = 0;
-    double h = 0;
-    sixents::Math::XYZ2BLH(xyz[0], xyz[1], xyz[2], b, l, h);
-    QString gulRet = QString::number(b, 'f', BLH_ACCURACY) + "," +
-                     QString::number(l, 'f', BLH_ACCURACY) + "," +
-                     QString::number(h, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口
+        double blh[3];
+        memset(blh, 0, sizeof(blh));
+        ecef2pos(xyz, blh);
+        // blh值转角度
+        double lat = blh[0] * R2D;
+        double lon = blh[1] * R2D;
+        rtkRet = QString::number(lat, 'f', BLH_ACCURACY) + COMMA +
+                 QString::number(lon, 'f', BLH_ACCURACY) + COMMA +
+                 QString::number(blh[2], 'f', COORDINATE_ACCURACY);
+
+        // 执行GUL接口
+        double b = 0;
+        double l = 0;
+        double h = 0;
+        int retGul = sixents::Math::XYZ2BLH(xyz[0], xyz[1], xyz[2], b, l, h);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+
+        gulRet = QString::number(b, 'f', BLH_ACCURACY) + COMMA +
+                 QString::number(l, 'f', BLH_ACCURACY) + COMMA +
+                 QString::number(h, 'f', COORDINATE_ACCURACY) +
+                 COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::BLH2XYZ(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(",");
-    if (srcTestData.count() != 3) {
-        return false;
-    }
-    double blh[3];
-    double xyz[3];
-    memset(blh, 0, sizeof(blh));
-    memset(xyz, 0, sizeof(xyz));
-    for (int idx = 0; idx < srcTestData.count(); ++idx) {
-        blh[idx] = srcTestData.at(idx).toDouble();
-    }
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(COMMA);
+        if (srcTestData.count() != 3) {
+            break;
+        }
+        double blh[3];
+        memset(blh, 0, sizeof(blh));
+        for (int idx = 0; idx < srcTestData.count(); ++idx) {
+            blh[idx] = srcTestData.at(idx).toDouble();
+        }
 
-    // 执行Rtk接口，未实现该结果
-    // blh进行角度转弧度
-    double lat = blh[0] * D2R;
-    double lon = blh[1] * D2R;
-    double rtkBLH[3] = {lat, lon, blh[2]};
-    pos2ecef(rtkBLH, xyz);
-    QString rtkRet = QString::number(xyz[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(xyz[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(xyz[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    sixents::Math::BLH2XYZ(blh[0], blh[1], blh[2], x, y, z);
-    QString gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(y, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(z, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口，未实现该结果
+        // blh进行角度转弧度
+        double xyz[3];
+        memset(xyz, 0, sizeof(xyz));
+        double lat = blh[0] * D2R;
+        double lon = blh[1] * D2R;
+        double rtkBLH[3] = {lat, lon, blh[2]};
+        pos2ecef(rtkBLH, xyz);
+        rtkRet = QString::number(xyz[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(xyz[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(xyz[2], 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        int retGul = sixents::Math::BLH2XYZ(blh[0], blh[1], blh[2], x, y, z);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::XYZ2ENU(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QStringList srcXYZList = srcTestData[0].split(COMMA);
+        QStringList refXYZList = srcTestData[1].split(COMMA);
 
-        return false;
-    }
-    QStringList srcXYZList = srcTestData[0].split(",");
-    QStringList refXYZList = srcTestData[1].split(",");
+        double srcXYZ[3];
+        double refXYZ[3];
+        memset(srcXYZ, 0, sizeof(srcXYZ));
+        memset(refXYZ, 0, sizeof(refXYZ));
 
-    double srcXYZ[3];
-    double refXYZ[3];
-    double enu[3];
-    memset(srcXYZ, 0, sizeof(srcXYZ));
-    memset(refXYZ, 0, sizeof(refXYZ));
-    memset(enu, 0, sizeof(enu));
+        for (int idx = 0; idx < srcXYZList.count(); ++idx) {
+            srcXYZ[idx] = srcXYZList.at(idx).toDouble();
+        }
 
-    for (int idx = 0; idx < srcXYZList.count(); ++idx) {
-        srcXYZ[idx] = srcXYZList.at(idx).toDouble();
-    }
+        for (int idx = 0; idx < refXYZList.count(); ++idx) {
+            refXYZ[idx] = refXYZList.at(idx).toDouble();
+        }
 
-    for (int idx = 0; idx < refXYZList.count(); ++idx) {
-        refXYZ[idx] = refXYZList.at(idx).toDouble();
-    }
+        // 执行Rtk接口，未实现该结果
+        // 参考站的空间直角坐标转大地坐标
+        double enu[3];
+        memset(enu, 0, sizeof(enu));
+        double refBLH[3];
+        memset(refBLH, 0, sizeof(refBLH));
+        ecef2pos(refXYZ, refBLH);
 
-    // 执行Rtk接口，未实现该结果
-    // 参考站的空间直角坐标转大地坐标
-    double refBLH[3];
-    memset(refBLH, 0, sizeof(refBLH));
-    ecef2pos(refXYZ, refBLH);
+        // 计算向量
+        double r[3];
+        memset(r, 0, sizeof (r));
+        r[0] = srcXYZ[0] - refXYZ[0];
+        r[1] = srcXYZ[1] - refXYZ[1];
+        r[2] = srcXYZ[2] - refXYZ[2];
+        // 计算ENU
+        ecef2enu(refBLH, r, enu);
 
-    // 计算向量
-    double r[3];
-    memset(r, 0, sizeof (r));
-    r[0] = srcXYZ[0] - refXYZ[0];
-    r[1] = srcXYZ[1] - refXYZ[1];
-    r[2] = srcXYZ[2] - refXYZ[2];
-    // 计算ENU
-    ecef2enu(refBLH, r, enu);
+        rtkRet = QString::number(enu[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(enu[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(enu[2], 'f', COORDINATE_ACCURACY);
 
-    QString rtkRet = QString::number(enu[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(enu[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(enu[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double e = 0;
-    double n = 0;
-    double u = 0;
-    sixents::Math::XYZ2ENU(srcXYZ[0], srcXYZ[1], srcXYZ[2], refXYZ[0], refXYZ[1], refXYZ[2],
-                                     e, n, u);
-    QString gulRet = QString::number(e, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(n, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(u, 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        double e = 0;
+        double n = 0;
+        double u = 0;
+        int retGul = sixents::Math::XYZ2ENU(srcXYZ[0], srcXYZ[1], srcXYZ[2],
+                                            refXYZ[0], refXYZ[1], refXYZ[2],
+                                            e, n, u);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(e, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(n, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(u, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::ENU2XYZ(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
 
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QStringList srcENUList = srcTestData[0].split(COMMA);
+        QStringList refXYZList = srcTestData[1].split(COMMA);
 
-        return false;
-    }
-    QStringList srcENUList = srcTestData[0].split(",");
-    QStringList refXYZList = srcTestData[1].split(",");
+        double srcENU[3];
+        double refXYZ[3];
+        memset(srcENU, 0, sizeof(srcENU));
+        memset(refXYZ, 0, sizeof(refXYZ));
 
-    double srcENU[3];
-    double refXYZ[3];
-    double refBLH[3];
-    double srcXYZ[3];
-    double r[3];
-    memset(srcENU, 0, sizeof(srcENU));
-    memset(refXYZ, 0, sizeof(refXYZ));
-    memset(refBLH, 0, sizeof(refBLH));
-    memset(srcXYZ, 0, sizeof(srcXYZ));
-    memset(r, 0, sizeof (r));
+        for (int idx = 0; idx < srcENUList.count(); ++idx) {
+            srcENU[idx] = srcENUList.at(idx).toDouble();
+        }
 
-    for (int idx = 0; idx < srcENUList.count(); ++idx) {
-        srcENU[idx] = srcENUList.at(idx).toDouble();
-    }
+        for (int idx = 0; idx < refXYZList.count(); ++idx) {
+            refXYZ[idx] = refXYZList.at(idx).toDouble();
+        }
 
-    for (int idx = 0; idx < refXYZList.count(); ++idx) {
-        refXYZ[idx] = refXYZList.at(idx).toDouble();
-    }
+        // 执行Rtk接口，未实现该结果
+        double refBLH[3];
+        double srcXYZ[3];
+        double r[3];
+        memset(refBLH, 0, sizeof(refBLH));
+        memset(srcXYZ, 0, sizeof(srcXYZ));
+        memset(r, 0, sizeof (r));
+        // 参考站的空间直角坐标转大地坐标
+        ecef2pos(refXYZ, refBLH);
+        // 计算向量
+        enu2ecef(refBLH, srcENU, r);
+        // 计算坐标
+        srcXYZ[0] =  refXYZ[0] + r[0];
+        srcXYZ[1] =  refXYZ[1] + r[1];
+        srcXYZ[2] =  refXYZ[2] + r[2];
 
-    // 执行Rtk接口，未实现该结果
-    // 参考站的空间直角坐标转大地坐标
-    ecef2pos(refXYZ, refBLH);
-    // 计算向量
-    enu2ecef(refBLH, srcENU, r);
-    // 计算坐标
-    srcXYZ[0] =  refXYZ[0] + r[0];
-    srcXYZ[1] =  refXYZ[1] + r[1];
-    srcXYZ[2] =  refXYZ[2] + r[2];
+        rtkRet = QString::number(srcXYZ[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(srcXYZ[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(srcXYZ[2], 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        int retGul = sixents::Math::ENU2XYZ(srcENU[0], srcENU[1], srcENU[2],
+                                            refXYZ[0], refXYZ[1], refXYZ[2],
+                                            x, y, z);
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(retGul);
+        retFunc = true;
+    } while(false);
 
-    QString rtkRet = QString::number(srcXYZ[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(srcXYZ[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(srcXYZ[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    sixents::Math::ENU2XYZ(srcENU[0], srcENU[1], srcENU[2], refXYZ[0], refXYZ[1], refXYZ[2],
-                                     x, y, z);
-    QString gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(y, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(z, 'f', COORDINATE_ACCURACY);
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-
-        return false;
-    }
-    QString testDataFilePath = srcTestData[0];
-    QStringList testTimeList = srcTestData[1].split(",");
-    if (testTimeList.count() != 2) {
-        return false;
-    }
-
-    QStringList dateList = testTimeList[0].split("-");
-    if (dateList.count() != 3) {
-        return false;
-    }
-    int year = dateList[0].toInt();
-    int month = dateList[1].toInt();
-    int day = dateList[2].toInt();
-
-    QStringList timeList = testTimeList[1].split(":");
-    if (timeList.count() != 3) {
-        return false;
-    }
-    int hour = timeList[0].toInt();
-    int minute = timeList[1].toInt();
-    double second = timeList[2].toDouble();
-
-    // 从文件中读取星历电文
-    QString binFilePath("");
-    FileConvertToBin(testDataFilePath, binFilePath);
-    FILE *rtkFP = new FILE();
-    std::string temp = binFilePath.toStdString();
-    const char* fileName = temp.c_str();
-    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-    if (openFlag != 0) {
-        return false;
-    }
-    // 文本文件转二进制文件
-    rtcm_t rtcm;
-    init_rtcm(&rtcm);
-    int ret = input_rtcm3f(&rtcm, rtkFP);
-    if (ret < 0) {
-        return false;
-    }
-    fclose(rtkFP);
-    // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口解算
-    gtime_t rtkClk;
-    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                           static_cast<double>(hour), static_cast<double>(minute), second};
-    gtime_t tTemp = epoch2time(epochTime);
-    rtkClk = utc2gpst(tTemp);
-    double rtkClkRet = geph2clk(rtkClk, rtcm.nav.geph);
-    free_rtcm(&rtcm);
-    QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    // 调用RTCM接口，解码星历电文
-
-
-    sixents::Math::SGlonassEphemeris glonassEphemeris;
-
-    glonassEphemeris.m_dbGammaTb=2.72848e-12;
-    glonassEphemeris.m_dbGmDeltaTn=0;
-    glonassEphemeris.m_dbGmTGps=0;
-    glonassEphemeris.m_dbTc=0;
-    glonassEphemeris.m_dbTnTb=-0.0018718;
-    glonassEphemeris.m_dbXnTb=-9490.91;
-    glonassEphemeris.m_dbXnTbFirstDerivative=-7.3524;
-    glonassEphemeris.m_dbXnTbSecondDerivative=9.31323e-10;
-    glonassEphemeris.m_dbYnTb=8989.82;
-    glonassEphemeris.m_dbYnTbFirstDerivative=0.35082;
-    glonassEphemeris.m_dbYnTbSecondDerivative=0;
-    glonassEphemeris.m_dbZnTb=-27565.3;
-    glonassEphemeris.m_dbZnTbFirstDerivative=3.48408;
-    glonassEphemeris.m_dbZnTbSecondDerivative=0;
-    glonassEphemeris.m_ui16GmNt=1422;
-    glonassEphemeris.m_ui16MsgType=1020;
-    glonassEphemeris.m_ui16NA=0;
-    glonassEphemeris.m_ui16Tb=375;
-    glonassEphemeris.m_ui16Tk=768;
-    glonassEphemeris.m_ui8AHAI=0;
-    glonassEphemeris.m_ui8AOAD=0;
-    glonassEphemeris.m_ui8AlmanacHealth=0;
-    glonassEphemeris.m_ui8En=0;
-    glonassEphemeris.m_ui8GmFt=0;
-    glonassEphemeris.m_ui8GmLn3=0;
-    glonassEphemeris.m_ui8GmLn5=0;
-    glonassEphemeris.m_ui8GmM=0;
-    glonassEphemeris.m_ui8GmN4=0;
-    glonassEphemeris.m_ui8GmP=0;
-    glonassEphemeris.m_ui8GmP4=0;
-    glonassEphemeris.m_ui8MsbOfBn=0;
-    glonassEphemeris.m_ui8P1=0;
-    glonassEphemeris.m_ui8P2=0;
-    glonassEphemeris.m_ui8P3=0;
-    glonassEphemeris.m_ui8Reserved=0;
-    glonassEphemeris.m_ui8SatFrequencyChannelNumber=6;
-    glonassEphemeris.m_ui8SatId=12;
-
-    // 调用GUL接口解算
+    QString rtkRet("null");
     QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString testDataFilePath = srcTestData[0];
+        QStringList testTimeList = srcTestData[1].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
+
+        QStringList dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int year = dateList[0].toInt();
+        int month = dateList[1].toInt();
+        int day = dateList[2].toInt();
+
+        QStringList timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int hour = timeList[0].toInt();
+        int minute = timeList[1].toInt();
+        double second = timeList[2].toDouble();
+
+        // 从文件中读取星历电文
+        QString binFilePath("");
+//        FileConvertToBin(testDataFilePath, binFilePath);
+        FILE *rtkFP = new FILE();
+        std::string temp = binFilePath.toStdString();
+        const char* fileName = temp.c_str();
+        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+        if (openFlag != 0) {
+            break;
+        }
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = input_rtcm3f(&rtcm, rtkFP);
+        if (ret < 0) {
+            break;
+        }
+        fclose(rtkFP);
+        delete rtkFP;
+        rtkFP = nullptr;
+        // 执行Rtk接口，未实现该结果
+        // 调用Rtk接口解算
+        gtime_t rtkClk;
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t tTemp = epoch2time(epochTime);
+        rtkClk = utc2gpst(tTemp);
+        double rtkClkRet = geph2clk(rtkClk, rtcm.nav.geph);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
+
+        // 执行GUL接口
+        // 调用RTCM接口，解码星历电文
+        //sixents::Math::SGlonassEphemeris glonassEphemeris;
+
+        // 调用GUL接口解算
+        gulRet = "null";
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-
-        return false;
-    }
-    QString testDataFilePath = srcTestData[0];
-    QStringList testTimeList = srcTestData[1].split(",");
-    if (testTimeList.count() != 2) {
-        return false;
-    }
-
-    QStringList dateList = testTimeList[0].split("-");
-    if (dateList.count() != 3) {
-        return false;
-    }
-    int year = dateList[0].toInt();
-    int month = dateList[1].toInt();
-    int day = dateList[2].toInt();
-
-    QStringList timeList = testTimeList[1].split(":");
-    if (timeList.count() != 3) {
-        return false;
-    }
-    int hour = timeList[0].toInt();
-    int minute = timeList[1].toInt();
-    double second = timeList[2].toDouble();
-
-    // 从文件中读取星历电文
-    QString binFilePath("");
-    FileConvertToBin(testDataFilePath, binFilePath);
-    FILE *rtkFP = new FILE();
-    std::string temp = binFilePath.toStdString();
-    const char* fileName = temp.c_str();
-    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-    if (openFlag != 0) {
-        return false;
-    }
-    // 文本文件转二进制文件
-    rtcm_t rtcm;
-    init_rtcm(&rtcm);
-    int ret = input_rtcm3f(&rtcm, rtkFP);
-    if (ret < 0) {
-        return false;
-    }
-    fclose(rtkFP);
-    // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口解算
-    gtime_t rtkClk;
-    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                           static_cast<double>(hour), static_cast<double>(minute), second};
-    gtime_t rtkSecTime = epoch2time(epochTime);
-    rtkClk = utc2gpst(rtkSecTime);
-    double rtkClkRet = eph2clk(rtkClk, rtcm.nav.eph);
-    free_rtcm(&rtcm);
-    QString rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
-
-    // 执行GUL接口
-    // 调用RTCM接口，解码星历电文
-    // 加载RtcmLib库
-    if(!LoadRtcmLib()) {
-        return false;
-    }
-
-    // 初始化RTCM
-    sixents::CParam paramInForInit;
-    sixents::CParam paramOutForInit;
-    INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
-    if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
-        qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
-        return false;
-    }
-
-    // 读取星历电文
-    QFile fileObj(testDataFilePath);
-    if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
-        return false;
-    }
-    QByteArray ephHexText = fileObj.readAll();// 原始电文
-    // 从所有电文中读取星历电文
-    UINT32 msgType = 0;
-    UINT32 msgPos = 0;
-    UINT32 expectLen = 0;
-    QByteArray msg;
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
     do {
-        INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
-                                         static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
-        if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
-            ephHexText.clear();
-            msgPos = 0;
+        if (testData.isEmpty()) {
             break;
-        } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
-            ephHexText.remove(0, static_cast<int>(msgPos));
-            msgPos = 0;
-            break;
-        } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
-            if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
-                msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
-                break;
-            }
-            int startPos = 0;    // 删除时的起始位置
-            int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
-            ephHexText.remove(startPos, delLength);
-            msgPos = 0;
-            msgType = 0;
         }
-        qDebug() << "ephHexText length:" << ephHexText.length();
-    } while (!ephHexText.isEmpty());
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString testDataFilePath = srcTestData[0];
+        QStringList testTimeList = srcTestData[1].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
 
-    // 解星历电文
-    if (msg.isEmpty()) { // 当前指针不能为空指针
-        return false;
-    }
-    // 1、AddValue,把电文添加到入参
-    sixents::CParam paramInForDecode;
-    int msgLen = static_cast<int>(msg.count());
-    paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
-                              reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
-                              reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
-    // 2、Decode
-    sixents::CParam paramOutForDecode;
-    INT32 retDecode = RtcmDecode(paramInForDecode, paramOutForDecode);
-    if (retDecode == sixents::common::rtcm::RETURN_SUCCESS) {
-        return false;
-    }
+        QStringList dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int year = dateList[0].toInt();
+        int month = dateList[1].toInt();
+        int day = dateList[2].toInt();
 
-    // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
-    // 注：最后一步处理，不对返回值进行判断
-    sixents::IGnssDataInterface *gnssData = nullptr;
-    sixents::Math::SEphemeris ephemeris;
-    sixents::SEphemeris ephTemp;
-    bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
-    if (!retGetValue || !gnssData) {
-        return false;
-    }
-    sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
-    if (dataType == sixents::IGnssDataInterface::GDT_EPH) {
-        sixents::CEphemeris *ephObj = dynamic_cast<sixents::CEphemeris *>(gnssData);
-        ephTemp = ephObj->GetEphemeris();
-    } else {
-        return false;
-    }
-    RtcmEphToMathEph(&ephTemp, &ephemeris);
-    // 将当前时间转为double时间
-    double clock=0;
-    double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        QStringList timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int hour = timeList[0].toInt();
+        int minute = timeList[1].toInt();
+        double second = timeList[2].toDouble();
 
-    sixents::Math::CalcEphSatClock(gulSecTime, ephemeris, clock);
-    // 释放RTCM对象
-    sixents::RtcmFinal();
-    // 卸载RTCM Lib
-    UnloadRtcmLib();
-    // 调用GUL接口解算
-    QString gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY);
+        // 读取星历电文
+        QFile fileObj(testDataFilePath);
+        if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
+            break;
+        }
+        QByteArray ephHexText = fileObj.readAll();// 原始电文
+        // 从所有电文中读取星历电文
+        UINT32 msgType = 0;
+        UINT32 msgPos = 0;
+        UINT32 expectLen = 0;
+        QByteArray msg;
+        do {
+            INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
+                                             static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
+            if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
+                ephHexText.clear();
+                msgPos = 0;
+                break;
+            } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
+                ephHexText.remove(0, static_cast<int>(msgPos));
+                msgPos = 0;
+                break;
+            } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
+                if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
+                    msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
+                    break;
+                }
+                int startPos = 0;    // 删除时的起始位置
+                int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
+                ephHexText.remove(startPos, delLength);
+                msgPos = 0;
+                msgType = 0;
+            }
+        } while (!ephHexText.isEmpty());
+
+        // 解星历电文
+        if (msg.isEmpty()) { // 当前指针不能为空指针
+            break;
+        }
+
+        // 执行Rtk接口
+        // 从文件中读取星历电文
+        QString binFilePath("");
+        FileConvertToBin(msg, testDataFilePath, binFilePath);
+        FILE *rtkFP = new FILE();
+        std::string temp = binFilePath.toStdString();
+        const char* fileName = temp.c_str();
+        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+        if (openFlag != 0) {
+            break;
+        }
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = input_rtcm3f(&rtcm, rtkFP);
+        if (ret < 0) {
+            break;
+        }
+        fclose(rtkFP);
+        delete rtkFP;
+        rtkFP = nullptr;
+
+        // 调用Rtk接口解算
+        gtime_t rtkClk;
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t rtkSecTime = epoch2time(epochTime);
+        rtkClk = utc2gpst(rtkSecTime);
+        double rtkClkRet = eph2clk(rtkClk, rtcm.nav.eph);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
+
+        // 执行GUL接口
+        // 调用RTCM接口，解码星历电文
+        // 初始化RTCM
+        sixents::CParam paramInForInit;
+        sixents::CParam paramOutForInit;
+        INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
+        if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
+            qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
+            break;
+        }
+
+        // 1、AddValue,把电文添加到入参
+        sixents::CParam paramInForDecode;
+        int msgLen = static_cast<int>(msg.count());
+        paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
+                                  reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
+                                  reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
+        // 2、Decode
+        sixents::CParam paramOutForDecode;
+        INT32 retDecode = sixents::RtcmDecode(paramInForDecode, paramOutForDecode);
+        if (retDecode != sixents::common::rtcm::RETURN_SUCCESS) {
+            break;
+        }
+
+        // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
+        // 注：最后一步处理，不对返回值进行判断
+        sixents::IGnssDataInterface *gnssData = nullptr;
+        sixents::Math::SEphemeris ephemeris;
+        sixents::SEphemeris ephTemp;
+        bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
+        if (!retGetValue || !gnssData) {
+            break;
+        }
+        sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
+        if (dataType == sixents::IGnssDataInterface::GDT_EPH) {
+            sixents::CEphemeris *ephObj = dynamic_cast<sixents::CEphemeris *>(gnssData);
+            ephTemp = ephObj->GetEphemeris();
+        } else {
+            break;
+        }
+        RtcmEphToMathEph(&ephTemp, &ephemeris);
+        // 将当前时间转为double时间
+        double clock=0;
+        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+
+        int retGul = sixents::Math::CalcEphSatClock(gulSecTime, ephemeris, clock);
+        // 释放RTCM对象
+        sixents::RtcmFinal();
+
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while (false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-
-        return false;
-    }
-    QString testDataFilePath = srcTestData[0];
-    QStringList testTimeList = srcTestData[1].split(",");
-    if (testTimeList.count() != 2) {
-        return false;
-    }
-
-    QStringList dateList = testTimeList[0].split("-");
-    if (dateList.count() != 3) {
-        return false;
-    }
-    int year = dateList[0].toInt();
-    int month = dateList[1].toInt();
-    int day = dateList[2].toInt();
-
-    QStringList timeList = testTimeList[1].split(":");
-    if (timeList.count() != 3) {
-        return false;
-    }
-    int hour = timeList[0].toInt();
-    int minute = timeList[1].toInt();
-    double second = timeList[2].toDouble();
-
-    // 从文件中读取星历电文
-    QString binFilePath("");
-    FileConvertToBin(testDataFilePath, binFilePath);
-    FILE *rtkFP = new FILE();
-    std::string temp = binFilePath.toStdString();
-    const char* fileName = temp.c_str();
-    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-    if (openFlag != 0) {
-        return false;
-    }
-    // 文本文件转二进制文件
-    rtcm_t rtcm;
-    init_rtcm(&rtcm);
-    int ret = input_rtcm3f(&rtcm, rtkFP);
-    if (ret < 0) {
-        return false;
-    }
-    fclose(rtkFP);
-    // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口解算
-    gtime_t rtkClk;
-    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                           static_cast<double>(hour), static_cast<double>(minute), second};
-    gtime_t timeTemp = epoch2time(epochTime);
-    rtkClk = utc2gpst(timeTemp);
-    double rtkClkRet = 0.0;
-    double rtkPos[3] = {0.0, 0.0, 0.0};
-    double rtkVar = 0.0;
-    geph2pos(rtkClk, rtcm.nav.geph, rtkPos, &rtkClkRet, &rtkVar);
-    free_rtcm(&rtcm);
-    QString rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    // 调用RTCM接口，解码星历电文
-
-    // 调用GUL接口解算
+    QString rtkRet("null");
     QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString testDataFilePath = srcTestData[0];
+        QStringList testTimeList = srcTestData[1].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
+
+        QStringList dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int year = dateList[0].toInt();
+        int month = dateList[1].toInt();
+        int day = dateList[2].toInt();
+
+        QStringList timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int hour = timeList[0].toInt();
+        int minute = timeList[1].toInt();
+        double second = timeList[2].toDouble();
+
+        // 从文件中读取星历电文
+        QString binFilePath("");
+//        FileConvertToBin(testDataFilePath, binFilePath);
+        FILE *rtkFP = new FILE();
+        std::string temp = binFilePath.toStdString();
+        const char* fileName = temp.c_str();
+        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+        if (openFlag != 0) {
+            break;
+        }
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = input_rtcm3f(&rtcm, rtkFP);
+        if (ret < 0) {
+            break;
+        }
+        fclose(rtkFP);
+        delete rtkFP;
+        rtkFP = nullptr;
+        // 执行Rtk接口，未实现该结果
+        // 调用Rtk接口解算
+        gtime_t rtkClk;
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t timeTemp = epoch2time(epochTime);
+        rtkClk = utc2gpst(timeTemp);
+        double rtkClkRet = 0.0;
+        double rtkPos[3] = {0.0, 0.0, 0.0};
+        double rtkVar = 0.0;
+        geph2pos(rtkClk, rtcm.nav.geph, rtkPos, &rtkClkRet, &rtkVar);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        // 调用RTCM接口，解码星历电文
+
+        // 调用GUL接口解算
+
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-
-        return false;
-    }
-    QString testDataFilePath = srcTestData[0];
-    QStringList testTimeList = srcTestData[1].split(",");
-    if (testTimeList.count() != 2) {
-        return false;
-    }
-
-    QStringList dateList = testTimeList[0].split("-");
-    if (dateList.count() != 3) {
-        return false;
-    }
-    int year = dateList[0].toInt();
-    int month = dateList[1].toInt();
-    int day = dateList[2].toInt();
-
-    QStringList timeList = testTimeList[1].split(":");
-    if (timeList.count() != 3) {
-        return false;
-    }
-    int hour = timeList[0].toInt();
-    int minute = timeList[1].toInt();
-    double second = timeList[2].toDouble();
-
-    // 从文件中读取星历电文
-    QString binFilePath("");
-    FileConvertToBin(testDataFilePath, binFilePath);
-    FILE *rtkFP = new FILE();
-    std::string temp = binFilePath.toStdString();
-    const char* fileName = temp.c_str();
-    errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-    if (openFlag != 0) {
-        return false;
-    }
-    // 文本文件转二进制文件
-    rtcm_t rtcm;
-    init_rtcm(&rtcm);
-    int ret = input_rtcm3f(&rtcm, rtkFP);
-    if (ret < 0) {
-        return false;
-    }
-    fclose(rtkFP);
-    // 执行Rtk接口，未实现该结果
-    // 调用Rtk接口解算
-    gtime_t rtkClk;
-    double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                           static_cast<double>(hour), static_cast<double>(minute), second};
-    gtime_t timeTemp = epoch2time(epochTime);
-    rtkClk = utc2gpst(timeTemp);
-    double rtkClkRet = 0.0;
-    double rtkPos[3] = {0.0, 0.0, 0.0};
-    double rtkVar = 0.0;
-    eph2pos(rtkClk, rtcm.nav.eph, rtkPos, &rtkClkRet, &rtkVar);
-    free_rtcm(&rtcm);
-    QString rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    // 调用RTCM接口，解码星历电文
-
-    // 调用GUL接口解算
+    QString rtkRet("null");
     QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString testDataFilePath = srcTestData[0];
+        QStringList testTimeList = srcTestData[1].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
+
+        QStringList dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int year = dateList[0].toInt();
+        int month = dateList[1].toInt();
+        int day = dateList[2].toInt();
+
+        QStringList timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int hour = timeList[0].toInt();
+        int minute = timeList[1].toInt();
+        double second = timeList[2].toDouble();
+
+        // 从文件中读取星历电文
+        QString binFilePath("");
+//        FileConvertToBin(testDataFilePath, binFilePath);
+        FILE *rtkFP = new FILE();
+        std::string temp = binFilePath.toStdString();
+        const char* fileName = temp.c_str();
+        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
+        if (openFlag != 0) {
+            break;
+        }
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = input_rtcm3f(&rtcm, rtkFP);
+        if (ret < 0) {
+            break;
+        }
+        fclose(rtkFP);
+        delete rtkFP;
+        rtkFP = nullptr;
+        // 执行Rtk接口，未实现该结果
+        // 调用Rtk接口解算
+        gtime_t rtkClk;
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t timeTemp = epoch2time(epochTime);
+        rtkClk = utc2gpst(timeTemp);
+        double rtkClkRet = 0.0;
+        double rtkPos[3] = {0.0, 0.0, 0.0};
+        double rtkVar = 0.0;
+        eph2pos(rtkClk, rtcm.nav.eph, rtkPos, &rtkClkRet, &rtkVar);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                         QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        // 调用RTCM接口，解码星历电文
+
+        // 调用GUL接口解算
+
+        retFunc = true;
+    } while(false);
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    double deg = testData.toDouble();
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    char* gulChRet = nullptr;
-    unsigned int len = 0;
-    sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        double deg = testData.toDouble();
 
-    gulChRet=new char[len + 1];
-    sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+        // 执行Rtk接口，未实现该结果
 
-    QString gulRet = gulChRet;
+        // 执行GUL接口
+        char* gulChRet = nullptr;
+        unsigned int len = 0;
+        int retGul = sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+
+        gulChRet=new char[len];
+        memset(gulChRet, 0, sizeof (char)*len);
+        retGul = sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = gulChRet + COMMA + QString::number(retGul);
+        delete [] gulChRet;
+        gulChRet = nullptr;
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList dmsList = testData.split(",");
-    if (dmsList.count() != 3) {
-        return false;
-    }
-    int degree = dmsList[0].toInt();
-    unsigned int minute = static_cast<unsigned int>(dmsList[1].toInt());
-    double sec = dmsList[2].toDouble();
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("null");
-    // 执行GUL接口
-    char* gulChRet = nullptr;
-    unsigned int len = 0;
-    sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList dmsList = testData.split(COMMA);
+        if (dmsList.count() != 3) {
+            break;
+        }
+        int degree = dmsList[0].toInt();
+        unsigned int minute = static_cast<unsigned int>(dmsList[1].toInt());
+        double sec = dmsList[2].toDouble();
 
-    gulChRet=new char[len + 1];
-    sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+        // 执行Rtk接口，未实现该结果
 
-    QString gulRet = gulChRet;
+        // 执行GUL接口
+        char* gulChRet = nullptr;
+        unsigned int len = 0;
+        int retGul = sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulChRet=new char[len + 1];
+        retGul = sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = gulChRet + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::Deg2Rad(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    double deg = testData.toDouble();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        double deg = testData.toDouble();
 
-    // 执行Rtk接口
-    double rtkRad = deg * (D2R);
-    QString rtkRet = QString::number(rtkRad, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口
+        double rtkRad = deg * (D2R);
+        rtkRet = QString::number(rtkRad, 'f', COORDINATE_ACCURACY);
 
-    // 执行GUL接口
-    double gulRad = 0.0;
-    sixents::Math::Deg2Rad(deg, gulRad);
-    QString gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        double gulRad = 0.0;
+        int retGul = sixents::Math::Deg2Rad(deg, gulRad);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::DMS2Rad(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList dmsList = testData.split(",");
-    if (dmsList.count() != 3) {
-        return false;
-    }
-    int degree = dmsList[0].toInt();
-    int minute = dmsList[1].toInt();
-    double sec = dmsList[2].toDouble();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        QStringList dmsList = testData.split(COMMA);
+        if (dmsList.count() != 3) {
+            break;
+        }
+        int degree = dmsList[0].toInt();
+        int minute = dmsList[1].toInt();
+        double sec = dmsList[2].toDouble();
 
-    // 执行Rtk接口
-    double dmsArr[3] = {static_cast<double>(degree), static_cast<double>(minute), sec};
-    double rtkDeg = dms2deg(dmsArr);
-    double rtkRad = rtkDeg * (D2R);
-    QString rtkRet = QString::number(rtkRad, 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double gulRad = 0.0;
-    sixents::Math::DMS2Rad(degree, static_cast<unsigned int>(minute), sec, gulRad);
-    QString gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口
+        double dmsArr[3] = {static_cast<double>(degree), static_cast<double>(minute), sec};
+        double rtkDeg = dms2deg(dmsArr);
+        double rtkRad = rtkDeg * (D2R);
+        rtkRet = QString::number(rtkRad, 'f', COORDINATE_ACCURACY);
+
+        // 执行GUL接口
+        double gulRad = 0.0;
+        int retGul = sixents::Math::DMS2Rad(degree, static_cast<unsigned int>(minute), sec, gulRad);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(gulRad, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::Rad2Deg(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    double rad = testData.toDouble();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        double rad = testData.toDouble();
 
-    // 执行Rtk接口
-    double rtkDeg = rad * (R2D);
-    QString rtkRet = QString::number(rtkDeg, 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    double gulDeg = 0.0;
-    sixents::Math::Rad2Deg(rad, gulDeg);
-    QString gulRet = QString::number(gulDeg, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口
+        double rtkDeg = rad * (R2D);
+        rtkRet = QString::number(rtkDeg, 'f', COORDINATE_ACCURACY);
+        // 执行GUL接口
+        double gulDeg = 0.0;
+        int retGul = sixents::Math::Rad2Deg(rad, gulDeg);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(gulDeg, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::Rad2DMS(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    double rad = testData.toDouble();
+    QString rtkRet("null");
+    QString gulRet("null");
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
+        }
+        result.clear();
+        // 解析testData
+        double rad = testData.toDouble();
 
-    // 执行Rtk接口，未实现该结果
-    double rtkDeg = rad * (R2D);
-    double rtkDMSArr[3];
-    memset(rtkDMSArr, 0, sizeof (double)*3);
-    deg2dms(rtkDeg, rtkDMSArr, 3);
-    QString rtkRet = QString::number(rtkDMSArr[0], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkDMSArr[1], 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(rtkDMSArr[2], 'f', COORDINATE_ACCURACY);
-    // 执行GUL接口
-    int gulDegree = 0;
-    unsigned int gulMinute = 0;
-    double gulSec = 0.0;
-    sixents::Math::Rad2DMS(rad, gulDegree, gulMinute, gulSec);
-    QString gulRet = QString::number(gulDegree, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(gulMinute, 'f', COORDINATE_ACCURACY) + "," +
-                     QString::number(gulSec, 'f', COORDINATE_ACCURACY);
+        // 执行Rtk接口，未实现该结果
+        double rtkDeg = rad * (R2D);
+        double rtkDMSArr[3];
+        memset(rtkDMSArr, 0, sizeof (double)*3);
+        deg2dms(rtkDeg, rtkDMSArr, 3);
+        rtkRet = QString::number(rtkDMSArr[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rtkDMSArr[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rtkDMSArr[2], 'f', COORDINATE_ACCURACY);
+
+        // 执行GUL接口
+        int gulDegree = 0;
+        unsigned int gulMinute = 0;
+        double gulSec = 0.0;
+        int retGul = sixents::Math::Rad2DMS(rad, gulDegree, gulMinute, gulSec);
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(gulDegree, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(gulMinute, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(gulSec, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+        retFunc = true;
+    } while(false);
+
     // 组装结果
-    result = rtkRet + ";" + gulRet;
-    return true;
+    result = rtkRet + SEMICOLON + gulRet;
+    return retFunc;
 }
 
 bool CTestFunc::MatrixAdd(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count()!= 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString twoMatrixData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = twoMatrixData.split(";");
-    if (allData.count() != 2) {
-        return false;
-    }
-
-    QStringList srcData = allData[0].split("\n");
-    if (srcData.count() < 2) {
-        return false;
-    }
-    QStringList srcRowAndCol = srcData[0].trimmed().split(",");
-    if (srcRowAndCol.count() != 2) {
-        return false;
-    }
-    int srcRow = srcRowAndCol[0].toInt();
-    const int srcCol = srcRowAndCol[1].toInt();
-
-    QStringList destData = allData[1].split("\n");
-    if (destData.count() < 3) {
-        return false;
-    }
-    if (destData[0].isEmpty()) {
-        destData.removeAt(0);
-    }
-    QStringList destRowAndCol = destData[0].trimmed().split(",");
-    if (destRowAndCol.count() != 2) {
-        return false;
-    }
-    int destRow = destRowAndCol[0].toInt();
-    const int destCol = destRowAndCol[1].toInt();
-
-    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
-    memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
-    int dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; rowIdx++) {
-        QStringList colDatas = srcData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < srcCol; colIdx++) {
-            srcMatrixData[dataIdx] = colDatas[colIdx].toDouble();
-            dataIdx++;
-        }
-    }
-
-    double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
-    memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; rowIdx++) {
-        QStringList colDatas = destData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < destCol; colIdx++) {
-            destMatrixData[dataIdx] = colDatas[colIdx].toDouble();
-            dataIdx++;
-        }
-    }
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
-    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
-    dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        QStringList colData = srcData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
-            leftMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            return false;
         }
-        ++dataIdx;
-    }
-
-    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
-    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
-    dataIdx = 1;
-    srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
-        QStringList colData = destData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            rightMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count()!= 2) {
+            return false;
         }
-        ++dataIdx;
-    }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            return false;
+        }
 
-    unsigned int outRow = static_cast<unsigned int>(srcRow);
-    unsigned int outCol = static_cast<unsigned int>(destCol);
-    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
-    UINT32 timeGulBeg = GetTickCount();
-    sixents::Math::MatrixAdd(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
-                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outRow, outCol, outMatrix);
-    UINT32 timeGulEnd = GetTickCount();
-    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
-    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
-            "\nEnd Time:" + QString::number(timeGulEnd) +
-            "\nUse Time:" + QString::number(gulUseTime) + "\n";
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
-                gulRet += ",";
+        QString twoMatrixData = ReadTxtFile(srcDataFilePath);
+        QStringList allData = twoMatrixData.split(SEMICOLON);
+        if (allData.count() != 2) {
+            return false;
+        }
+
+        QStringList srcData = allData[0].split("\n");
+        if (srcData.count() < 2) {
+            return false;
+        }
+        QStringList srcRowAndCol = srcData[0].trimmed().split(COMMA);
+        if (srcRowAndCol.count() != 2) {
+            return false;
+        }
+        int srcRow = srcRowAndCol[0].toInt();
+        const int srcCol = srcRowAndCol[1].toInt();
+
+        QStringList destData = allData[1].split("\n");
+        if (destData.count() < 3) {
+            return false;
+        }
+        if (destData[0].isEmpty()) {
+            destData.removeAt(0);
+        }
+        QStringList destRowAndCol = destData[0].trimmed().split(COMMA);
+        if (destRowAndCol.count() != 2) {
+            return false;
+        }
+        int destRow = destRowAndCol[0].toInt();
+        const int destCol = destRowAndCol[1].toInt();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+        memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+            QStringList colData = srcData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+                leftMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+        memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+        dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+            QStringList colData = destData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+                rightMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
+            }
+        }
+
+        unsigned int outRow = static_cast<unsigned int>(srcRow);
+        unsigned int outCol = static_cast<unsigned int>(destCol);
+        DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+        memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        UINT32 timeGulBeg = GetTickCount();
+        int retGul = sixents::Math::MatrixAdd(leftMatrix,
+                                              static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                              rightMatrix,
+                                              static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                              outRow, outCol, outMatrix);
+        UINT32 timeGulEnd = GetTickCount();
+        UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+        gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+                  "\nEnd Time:" + QString::number(timeGulEnd) +
+                  "\nUse Time:" + QString::number(gulUseTime) + "\n";
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != static_cast<unsigned int>(outCol) - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+        // 写文件
+        result = rtkRet + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+
+        retFunc = true;
+    } while(false);
+    return retFunc;
 }
 
 bool CTestFunc::MatrixSub(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString twoMatrixData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = twoMatrixData.split(";");
-    if (allData.count() != 2) {
-        return false;
-    }
-
-    QStringList srcData = allData[0].split("\n");
-    if (srcData.count() < 2) {
-        return false;
-    }
-    QStringList srcRowAndCol = srcData[0].trimmed().split(",");
-    if (srcRowAndCol.count() != 2) {
-        return false;
-    }
-    int srcRow = srcRowAndCol[0].toInt();
-    const int srcCol = srcRowAndCol[1].toInt();
-
-    QStringList destData = allData[1].split("\n");
-    if (destData.count() < 3) {
-        return false;
-    }
-    if (destData[0].isEmpty()) {
-        destData.removeAt(0);
-    }
-    QStringList destRowAndCol = destData[0].trimmed().split(",");
-    if (destRowAndCol.count() != 2) {
-        return false;
-    }
-    int destRow = destRowAndCol[0].toInt();
-    const int destCol = destRowAndCol[1].toInt();
-
-    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
-    memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
-    int dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
-        QStringList colDatas = srcData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
-            srcMatrixData[dataIdx] = colDatas[colIdx].toDouble();
-            dataIdx++;
-        }
-    }
-
-    double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
-    memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
-        QStringList colDatas = destData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < destCol; ++colIdx) {
-            destMatrixData[dataIdx] = colDatas[colIdx].toDouble();
-            dataIdx++;
-        }
-    }
-
-    double* resultMatrixData = new double[static_cast<unsigned long long>(srcRow * destCol)];
-    memset(resultMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * destCol));
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
-    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
-    dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        QStringList colData = srcData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
-            leftMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-        ++dataIdx;
-    }
-
-    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
-    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
-    dataIdx = 1;
-    srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
-        QStringList colData = destData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            rightMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
         }
-        ++dataIdx;
-    }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            break;
+        }
 
-    unsigned int outRow = static_cast<unsigned int>(srcRow);
-    unsigned int outCol = static_cast<unsigned int>(destCol);
-    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
-    UINT32 timeGulBeg = GetTickCount();
-    sixents::Math::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
-                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outRow, outCol, outMatrix);
-    UINT32 timeGulEnd = GetTickCount();
-    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
-    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
-            "\nEnd Time:" + QString::number(timeGulEnd) +
-            "\nUse Time:" + QString::number(gulUseTime) + "\n";
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
-                gulRet += ",";
+        QString twoMatrixData = ReadTxtFile(srcDataFilePath);
+        QStringList allData = twoMatrixData.split(SEMICOLON);
+        if (allData.count() != 2) {
+            break;
+        }
+
+        QStringList srcData = allData[0].split("\n");
+        if (srcData.count() < 2) {
+            break;
+        }
+        QStringList srcRowAndCol = srcData[0].trimmed().split(COMMA);
+        if (srcRowAndCol.count() != 2) {
+            break;
+        }
+        int srcRow = srcRowAndCol[0].toInt();
+        const int srcCol = srcRowAndCol[1].toInt();
+
+        QStringList destData = allData[1].split("\n");
+        if (destData.count() < 3) {
+            break;
+        }
+        if (destData[0].isEmpty()) {
+            destData.removeAt(0);
+        }
+        QStringList destRowAndCol = destData[0].trimmed().split(COMMA);
+        if (destRowAndCol.count() != 2) {
+            break;
+        }
+        int destRow = destRowAndCol[0].toInt();
+        const int destCol = destRowAndCol[1].toInt();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+        memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+            QStringList colData = srcData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+                leftMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+        memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+        dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+            QStringList colData = destData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+                rightMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
+            }
+        }
+
+        unsigned int outRow = static_cast<unsigned int>(srcRow);
+        unsigned int outCol = static_cast<unsigned int>(destCol);
+        DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+        memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        UINT32 timeGulBeg = GetTickCount();
+        int retGul = sixents::Math::MatrixSub(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                               rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                               outRow, outCol, outMatrix);
+        UINT32 timeGulEnd = GetTickCount();
+        UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+        gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+                "\nEnd Time:" + QString::number(timeGulEnd) +
+                "\nUse Time:" + QString::number(gulUseTime) + "\n";
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != static_cast<unsigned int>(outCol) - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+        retFunc = true;
+    } while(false);
+
+    return retFunc;
 }
 
 bool CTestFunc::MatrixMul(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString twoMatrixData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = twoMatrixData.split(";");
-    if (allData.count() != 2) {
-        return false;
-    }
-
-    QStringList srcData = allData[0].split("\n");
-    if (srcData.count() < 2) {
-        return false;
-    }
-    QStringList srcRowAndCol = srcData[0].trimmed().split(",");
-    if (srcRowAndCol.count() != 2) {
-        return false;
-    }
-    int srcRow = srcRowAndCol[0].toInt();
-    int srcCol = srcRowAndCol[1].toInt();
-
-    QStringList destData = allData[1].split("\n");
-    if (destData.count() < 3) {
-        return false;
-    }
-    if (destData[0].isEmpty()) {
-        destData.removeAt(0);
-    }
-    QStringList destRowAndCol = destData[0].trimmed().split(",");
-    if (destRowAndCol.count() != 2) {
-        return false;
-    }
-    int destRow = destRowAndCol[0].toInt();
-    int destCol = destRowAndCol[1].toInt();
-    if (srcCol != destRow) {
-        return false;
-    }
-
-    double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
-    memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
-    int dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
-        QStringList colDatas = srcData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
-            srcMatrixData[rowIdx + colIdx * srcRow] = colDatas[colIdx].toDouble();
-//            srcMatrixData[dataIdx++] = colDatas[colIdx].toDouble();
-        }
-    }
-
-    double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
-    memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
-    dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
-        QStringList colDatas = destData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < destCol; ++colIdx) {
-            destMatrixData[rowIdx + colIdx * destRow] = colDatas[colIdx].toDouble();
-//            destMatrixData[dataIdx++] = colDatas[colIdx].toDouble();
-        }
-    }
-
-    double* resultMatrixData = new double[static_cast<unsigned long long>(srcRow * destCol)];
-    memset(resultMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * destCol));
-
-    double alpha = 1.0;
-    double beta = 0.0;
-    // 执行Rtk接口，未实现该结果
-    UINT32 timeRtkBeg = GetTickCount();
-    matmul("NN", srcRow, destCol, srcCol, alpha, srcMatrixData, destMatrixData, beta, resultMatrixData);
-    UINT32 timeRtkEnd = GetTickCount();
-    UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
     QString rtkRet("Rtk Result\n");
-    rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
-            "\nEnd Time:" + QString::number(timeRtkEnd) +
-            "\nUse Time:" +QString::number(rtkUseTime) + "\n";
-    rtkRet += QString::number(srcRow) + "," + QString::number(destCol) + "\n";
-    dataIdx = 0;
-    for (int rIdx = 0; rIdx < srcRow; rIdx ++) {
-        for (int cIdx = 0; cIdx < destCol; cIdx++) {
-            rtkRet += QString::number(resultMatrixData[rIdx + cIdx * srcRow], 'f', MATRIX_ACCURACY);
-            if (cIdx != destCol - 1) {
-                rtkRet += ",";
-            }
-            dataIdx ++;
-        }
-        rtkRet = rtkRet + "\n";
-    }
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
-    memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
-    dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
-        QStringList colData = srcData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
-            leftMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-        ++dataIdx;
-    }
-
-    DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
-    memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
-    dataIdx = 1;
-    srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
-        QStringList colData = destData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
-            rightMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
         }
-        ++dataIdx;
-    }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            break;
+        }
 
-    unsigned int outRow = static_cast<unsigned int>(srcRow);
-    unsigned int outCol = static_cast<unsigned int>(destCol);
-    DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(outMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        QString twoMatrixData = ReadTxtFile(srcDataFilePath);
+        QStringList allData = twoMatrixData.split(SEMICOLON);
+        if (allData.count() != 2) {
+            break;
+        }
 
+        QStringList srcData = allData[0].split("\n");
+        if (srcData.count() < 2) {
+            break;
+        }
+        QStringList srcRowAndCol = srcData[0].trimmed().split(COMMA);
+        if (srcRowAndCol.count() != 2) {
+            break;
+        }
+        int srcRow = srcRowAndCol[0].toInt();
+        int srcCol = srcRowAndCol[1].toInt();
 
-    UINT32 timeGulBeg = GetTickCount();
-    sixents::Math::MatrixMul(leftMatrix, static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
-                                           rightMatrix, static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
-                                           outRow, outCol, outMatrix);
-    UINT32 timeGulEnd = GetTickCount();
-    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
-    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
-            "\nEnd Time:" + QString::number(timeGulEnd) +
-            "\nUse Time:" + QString::number(gulUseTime) + "\n";
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
-                gulRet += ",";
+        QStringList destData = allData[1].split("\n");
+        if (destData.count() < 3) {
+            break;
+        }
+        if (destData[0].isEmpty()) {
+            destData.removeAt(0);
+        }
+        QStringList destRowAndCol = destData[0].trimmed().split(COMMA);
+        if (destRowAndCol.count() != 2) {
+            break;
+        }
+        int destRow = destRowAndCol[0].toInt();
+        int destCol = destRowAndCol[1].toInt();
+        if (srcCol != destRow) {
+            break;
+        }
+
+        // 执行Rtk接口，未实现该结果
+        double* srcMatrixData = new double[static_cast<unsigned long long>(srcRow * srcCol)];
+        memset(srcMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * srcCol));
+        // Rtk 矩阵乘法，按列读写数据
+        for (int rowIdx = 0; rowIdx < srcRow; ++rowIdx) {
+            QStringList colDatas = srcData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < srcCol; ++colIdx) {
+                srcMatrixData[rowIdx + colIdx * srcRow] = colDatas[colIdx].toDouble();
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        double* destMatrixData = new double[static_cast<unsigned long long>(destRow * destCol)];
+        memset(destMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(destRow * destCol));
+        for (int rowIdx = 0; rowIdx < destRow; ++rowIdx) {
+            QStringList colDatas = destData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < destCol; ++colIdx) {
+                destMatrixData[rowIdx + colIdx * destRow] = colDatas[colIdx].toDouble();
+            }
+        }
+
+        double* resultMatrixData = new double[static_cast<unsigned long long>(srcRow * destCol)];
+        memset(resultMatrixData, 0, sizeof (double)* static_cast<unsigned long long>(srcRow * destCol));
+
+        double alpha = 1.0;
+        double beta = 0.0;
+
+        UINT32 timeRtkBeg = GetTickCount();
+        matmul("NN", srcRow, destCol, srcCol, alpha, srcMatrixData, destMatrixData, beta, resultMatrixData);
+        UINT32 timeRtkEnd = GetTickCount();
+        UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
+        rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
+                "\nEnd Time:" + QString::number(timeRtkEnd) +
+                "\nUse Time:" +QString::number(rtkUseTime) + "\n";
+        rtkRet += QString::number(srcRow) + COMMA + QString::number(destCol) + "\n";
+        int dataIdx = 0;
+        for (int rIdx = 0; rIdx < srcRow; rIdx ++) {
+            for (int cIdx = 0; cIdx < destCol; cIdx++) {
+                rtkRet += QString::number(resultMatrixData[rIdx + cIdx * srcRow], 'f', MATRIX_ACCURACY);
+                if (cIdx != destCol - 1) {
+                    rtkRet += COMMA;
+                }
+                dataIdx ++;
+            }
+            rtkRet = rtkRet + "\n";
+        }
+
+        // 执行GUL接口
+        DOUBLE* leftMatrix = new DOUBLE[static_cast<unsigned long long>(srcRow*srcCol)];
+        memset(leftMatrix, 0, static_cast<unsigned long long>(srcRow*srcCol));
+        dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < srcRow; ++ rowIdx) {
+            QStringList colData = srcData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < srcCol; ++ colIdx) {
+                leftMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
+            }
+        }
+
+        DOUBLE* rightMatrix = new DOUBLE[static_cast<unsigned long long>(destRow*destCol)];
+        memset(rightMatrix, 0, static_cast<unsigned long long>(destRow*destCol));
+        dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < destRow; ++ rowIdx) {
+            QStringList colData = destData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < destCol; ++ colIdx) {
+                rightMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
+            }
+        }
+
+        unsigned int outRow = static_cast<unsigned int>(srcRow);
+        unsigned int outCol = static_cast<unsigned int>(destCol);
+        DOUBLE* outMatrix = new DOUBLE[static_cast<unsigned long long>(outRow * outCol)];
+        memset(outMatrix, 0, static_cast<unsigned long long>(outRow * outCol));
+
+        UINT32 timeGulBeg = GetTickCount();
+        int retGul = sixents::Math::MatrixMul(leftMatrix,
+                                              static_cast<unsigned int>(srcRow), static_cast<unsigned int>(srcCol),
+                                              rightMatrix,
+                                              static_cast<unsigned int>(destRow), static_cast<unsigned int>(destCol),
+                                              outRow, outCol, outMatrix);
+        UINT32 timeGulEnd = GetTickCount();
+        UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+        gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+                "\nEnd Time:" + QString::number(timeGulEnd) +
+                "\nUse Time:" + QString::number(gulUseTime) + "\n";
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(outMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != static_cast<unsigned int>(outCol) - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + "\n" + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+        retFunc = true;
+    } while(false);
+
+    return retFunc;
 }
 
 bool CTestFunc::MatrixTransposition(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = srcData.split("\n");
-    if (allData.count() < 2) {
-        return false;
-    }
-    QStringList rowAndCol = allData[0].split(",");
-    if (rowAndCol.count() != 2) {
-        return false;
-    }
-    int row = rowAndCol[0].toInt();
-    int col = rowAndCol[1].toInt();
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
-    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
-
-    int dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
-        QStringList colData = allData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-        ++dataIdx;
-    }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            break;
+        }
 
-    unsigned int outRow = static_cast<unsigned int>(col);
-    unsigned int outCol = static_cast<unsigned int>(row);
-    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        QString srcData = ReadTxtFile(srcDataFilePath);
+        QStringList allData = srcData.split("\n");
+        if (allData.count() < 2) {
+            break;
+        }
+        QStringList rowAndCol = allData[0].split(COMMA);
+        if (rowAndCol.count() != 2) {
+            break;
+        }
+        int row = rowAndCol[0].toInt();
+        int col = rowAndCol[1].toInt();
 
-    sixents::Math::MatrixTransposition(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                       outRow, outCol, destMatrix);
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != static_cast<unsigned int>(outCol) - 1) {
-                gulRet += ",";
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+        memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
+
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+            QStringList colData = allData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < col; ++ colIdx) {
+                srcMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        unsigned int outRow = static_cast<unsigned int>(col);
+        unsigned int outCol = static_cast<unsigned int>(row);
+        DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+        memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+
+        int retGul = sixents::Math::MatrixTransposition(srcMatrix,
+                                                        static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                                        outRow, outCol, destMatrix);
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != static_cast<unsigned int>(outCol) - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+
+        retFunc = true;
+    } while(false);
+    return retFunc;
 }
 
 bool CTestFunc::MatrixInverse(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList allData = srcData.split("\n");
-    if (allData.count() < 2) {
-        return false;
-    }
-    QStringList rowAndCol = allData[0].split(",");
-    if (rowAndCol.count() != 2) {
-        return false;
-    }
-    int row = rowAndCol[0].toInt();
-    const int col = rowAndCol[1].toInt();
-    if (row != col) {
-        return false;
-    }
-
-    double* data = new double[static_cast<unsigned long long>(row * col)];
-    memset(data, 0, sizeof (double)* static_cast<unsigned long long>(row * col));
-    int dataIdx = 0;
-    for (int rowIdx = 0; rowIdx < row; rowIdx++) {
-        QStringList colDatas = allData[rowIdx + 1].split(",");
-        for (int colIdx = 0; colIdx < col; colIdx++) {
-            //data[rowIdx + colIdx * row] = colDatas[colIdx].toDouble();
-            data[dataIdx] = colDatas[colIdx].toDouble();
-            dataIdx++;
-        }
-    }
-    // 执行Rtk接口，未实现该结果
-    UINT32 timeRtkBeg = GetTickCount();
-    matinv(data, row);
-    UINT32 timeRtkEnd = GetTickCount();
-    UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
     QString rtkRet("Rtk Result\n");
-    rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
-            "\nEnd Time:" + QString::number(timeRtkEnd) +
-            "\nUse Time:" +QString::number(rtkUseTime) + "\n";
-    rtkRet += QString::number(row) + "," + QString::number(col) + "\n";
-    dataIdx = 0;
-    for (int rIdx = 0; rIdx < row; rIdx ++) {
-        for (int cIdx = 0; cIdx < col; cIdx++) {
-            rtkRet += QString::number(data[dataIdx], 'f', MATRIX_ACCURACY);
-            if (cIdx != col - 1) {
-                rtkRet += ",";
-            }
-            dataIdx ++;
-        }
-        rtkRet = rtkRet + "\n";
-    }
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
-    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
-
-    dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
-        QStringList colData = allData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-        ++dataIdx;
-    }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            break;
+        }
 
-    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
-    memset(destMatrix, 0, static_cast<unsigned long long>(row*col));
-    unsigned int outRow = static_cast<unsigned int>(row);
-    unsigned int outCol = static_cast<unsigned int>(col);
-    UINT32 timeGulBeg = GetTickCount();
-    sixents::Math::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                 outRow, outCol, destMatrix);
-    UINT32 timeGulEnd = GetTickCount();
-    UINT32 gulUseTime = timeGulEnd - timeGulBeg;
-    gulRet += "Begin Time:" + QString::number(timeGulBeg) +
-            "\nEnd Time:" + QString::number(timeGulEnd) +
-            "\nUse Time:" + QString::number(gulUseTime) + "\n";
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != outCol - 1) {
-                gulRet += ",";
+        QString srcData = ReadTxtFile(srcDataFilePath);
+        QStringList allData = srcData.split("\n");
+        if (allData.count() < 2) {
+            break;
+        }
+        QStringList rowAndCol = allData[0].split(COMMA);
+        if (rowAndCol.count() != 2) {
+            break;
+        }
+        int row = rowAndCol[0].toInt();
+        const int col = rowAndCol[1].toInt();
+        if (row != col) {
+            break;
+        }
+
+        // 执行Rtk接口
+        // rtk在求逆算法中，按行读写
+        double* data = new double[static_cast<unsigned long long>(row * col)];
+        memset(data, 0, sizeof (double)* static_cast<unsigned long long>(row * col));
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < row; rowIdx++) {
+            QStringList colDatas = allData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < col; colIdx++) {
+                //data[rowIdx + colIdx * row] = colDatas[colIdx].toDouble();
+                data[dataIdx] = colDatas[colIdx].toDouble();
+                dataIdx++;
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        UINT32 timeRtkBeg = GetTickCount();
+        matinv(data, row);
+        UINT32 timeRtkEnd = GetTickCount();
+        UINT32 rtkUseTime = timeRtkEnd - timeRtkBeg;
+        rtkRet += "Begin Time:" + QString::number(timeRtkBeg) +
+                "\nEnd Time:" + QString::number(timeRtkEnd) +
+                "\nUse Time:" +QString::number(rtkUseTime) + "\n";
+        rtkRet += QString::number(row) + COMMA + QString::number(col) + "\n";
+        dataIdx = 0;
+        for (int rIdx = 0; rIdx < row; rIdx ++) {
+            for (int cIdx = 0; cIdx < col; cIdx++) {
+                rtkRet += QString::number(data[dataIdx], 'f', MATRIX_ACCURACY);
+                if (cIdx != col - 1) {
+                    rtkRet += COMMA;
+                }
+                dataIdx ++;
+            }
+            rtkRet = rtkRet + "\n";
+        }
+
+        // 执行GUL接口
+        DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+        memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
+
+        dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+            QStringList colData = allData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < col; ++ colIdx) {
+                srcMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
+            }
+        }
+
+        DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+        memset(destMatrix, 0, static_cast<unsigned long long>(row*col));
+        unsigned int outRow = static_cast<unsigned int>(row);
+        unsigned int outCol = static_cast<unsigned int>(col);
+        UINT32 timeGulBeg = GetTickCount();
+        int retGul = sixents::Math::MatrixInverse(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                     outRow, outCol, destMatrix);
+        UINT32 timeGulEnd = GetTickCount();
+        UINT32 gulUseTime = timeGulEnd - timeGulBeg;
+        gulRet += "Begin Time:" + QString::number(timeGulBeg) +
+                "\nEnd Time:" + QString::number(timeGulEnd) +
+                "\nUse Time:" + QString::number(gulUseTime) + "\n";
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != outCol - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + "\n" + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+        retFunc = true;
+    } while(false);
+    return retFunc;
 }
 
 bool CTestFunc::MatrixAddRowCol(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList srcDataList = srcData.split(";");
-    if (srcDataList.count() != 2) {
-        return false;
-    }
-
-    QStringList newMatrixRowCol = srcDataList[1].split(",");
-    if (newMatrixRowCol.count() != 2) {
-        return false;
-    }
-    int addRow = newMatrixRowCol[0].toInt();
-    int addCol = newMatrixRowCol[1].toInt();
-
-    QStringList allData = srcDataList[0].split("\n");
-    if (allData.count() < 2) {
-        return false;
-    }
-    QStringList rowAndCol = allData[0].split(",");
-    if (rowAndCol.count() != 2) {
-        return false;
-    }
-    int row = rowAndCol[0].toInt();
-    int col = rowAndCol[1].toInt();
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
-    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
-
-    int dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
-        QStringList colData = allData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            break;
         }
-        ++dataIdx;
-    }
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            break;
+        }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            break;
+        }
 
-    unsigned int outRow = static_cast<unsigned int>(row + addRow);
-    unsigned int outCol = static_cast<unsigned int>(col + addCol);
-    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        QString srcData = ReadTxtFile(srcDataFilePath);
+        QStringList srcDataList = srcData.split(SEMICOLON);
+        if (srcDataList.count() != 2) {
+            break;
+        }
 
-    sixents::Math::MatrixAddRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                   outRow, outCol, destMatrix);
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != outCol - 1) {
-                gulRet += ",";
+        QStringList newMatrixRowCol = srcDataList[1].split(COMMA);
+        if (newMatrixRowCol.count() != 2) {
+            break;
+        }
+        int addRow = newMatrixRowCol[0].toInt();
+        int addCol = newMatrixRowCol[1].toInt();
+
+        QStringList allData = srcDataList[0].split("\n");
+        if (allData.count() < 2) {
+            break;
+        }
+        QStringList rowAndCol = allData[0].split(COMMA);
+        if (rowAndCol.count() != 2) {
+            break;
+        }
+        int row = rowAndCol[0].toInt();
+        int col = rowAndCol[1].toInt();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+        memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
+
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+            QStringList colData = allData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < col; ++ colIdx) {
+                srcMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
             }
         }
-        gulRet = gulRet + "\n";
-    }
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        unsigned int outRow = static_cast<unsigned int>(row + addRow);
+        unsigned int outCol = static_cast<unsigned int>(col + addCol);
+        DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow * outCol)];
+        memset(destMatrix, 0, static_cast<unsigned long long>(outRow * outCol));
+
+        int retGul = sixents::Math::MatrixAddRowCol(srcMatrix,
+                                                    static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                                    outRow, outCol, destMatrix);
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != outCol - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + "\n" + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+        retFunc = true;
+    } while(false);
+
+    return retFunc;
 }
 
 bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
 {
-    if (testData.isEmpty()) {
-        return false;
-    }
-    result.clear();
-    // 解析testData
-    QStringList srcTestData = testData.split(";");
-    if (srcTestData.count() != 2) {
-        return false;
-    }
-    QString srcDataFilePath = srcTestData[0];
-    QString destDataFilePath = srcTestData[1];
-    if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-        return false;
-    }
-
-    QString srcData = ReadTxtFile(srcDataFilePath);
-    QStringList srcDataList = srcData.split(";");
-    if (srcDataList.count() != 2) {
-        return false;
-    }
-
-    QStringList subRowCol = srcDataList[1].split(",");
-    if (subRowCol.count() != 2) {
-        return false;
-    }
-    int subRow = subRowCol[0].toInt();
-    int subCol = subRowCol[1].toInt();
-
-    QStringList allData = srcDataList[0].split("\n");
-    if (allData.count() < 2) {
-        return false;
-    }
-    QStringList rowAndCol = allData[0].split(",");
-    if (rowAndCol.count() != 2) {
-        return false;
-    }
-    int row = rowAndCol[0].toInt();
-    int col = rowAndCol[1].toInt();
-
-    // 执行Rtk接口，未实现该结果
     QString rtkRet("Rtk Result\nnull\n");
-    // 执行GUL接口
     QString gulRet("GUL Result\n");
-    DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
-    memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
-
-    int dataIdx = 1;
-    int srcIdx = 0;
-    for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
-        QStringList colData = allData[dataIdx].split(",");
-        for (int colIdx = 0; colIdx < col; ++ colIdx) {
-            srcMatrix[srcIdx] = colData[colIdx].toDouble();
-            ++ srcIdx;
+    bool retFunc = false;
+    do {
+        if (testData.isEmpty()) {
+            return false;
         }
-        ++dataIdx;
-    }
-    unsigned int outRow = static_cast<unsigned int>(row - subRow);
-    unsigned int outCol = static_cast<unsigned int>(col - subCol);
-    DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
-    memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
+        result.clear();
+        // 解析testData
+        QStringList srcTestData = testData.split(SEMICOLON);
+        if (srcTestData.count() != 2) {
+            return false;
+        }
+        QString srcDataFilePath = srcTestData[0];
+        QString destDataFilePath = srcTestData[1];
+        if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
+            return false;
+        }
 
-    sixents::Math::MatrixSubRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
-                                   outRow, outCol, destMatrix);
-    gulRet += QString::number(outRow) + "," + QString::number(outCol) + "\n";
-    dataIdx = 0;
-    for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
-        for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
-            gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
-            ++dataIdx;
-            if (cIdx != outCol - 1) {
-                gulRet += ",";
+        QString srcData = ReadTxtFile(srcDataFilePath);
+        QStringList srcDataList = srcData.split(SEMICOLON);
+        if (srcDataList.count() != 2) {
+            return false;
+        }
+
+        QStringList subRowCol = srcDataList[1].split(COMMA);
+        if (subRowCol.count() != 2) {
+            return false;
+        }
+        int subRow = subRowCol[0].toInt();
+        int subCol = subRowCol[1].toInt();
+
+        QStringList allData = srcDataList[0].split("\n");
+        if (allData.count() < 2) {
+            return false;
+        }
+        QStringList rowAndCol = allData[0].split(COMMA);
+        if (rowAndCol.count() != 2) {
+            return false;
+        }
+        int row = rowAndCol[0].toInt();
+        int col = rowAndCol[1].toInt();
+
+        // 执行Rtk接口，未实现该结果
+
+        // 执行GUL接口
+        DOUBLE* srcMatrix = new DOUBLE[static_cast<unsigned long long>(row*col)];
+        memset(srcMatrix, 0, static_cast<unsigned long long>(row*col));
+
+        int dataIdx = 0;
+        for (int rowIdx = 0; rowIdx < row; ++ rowIdx) {
+            QStringList colData = allData[rowIdx + 1].split(COMMA);
+            for (int colIdx = 0; colIdx < col; ++ colIdx) {
+                srcMatrix[dataIdx] = colData[colIdx].toDouble();
+                ++ dataIdx;
             }
         }
-        gulRet = gulRet + "\n";
-    }
+        unsigned int outRow = static_cast<unsigned int>(row - subRow);
+        unsigned int outCol = static_cast<unsigned int>(col - subCol);
+        DOUBLE* destMatrix = new DOUBLE[static_cast<unsigned long long>(outRow*outCol)];
+        memset(destMatrix, 0, static_cast<unsigned long long>(outRow*outCol));
 
-    // 写文件
-    result = rtkRet + "\n" + gulRet;
-    QDateTime curDateTime =QDateTime::currentDateTime();
-    QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
-    QString destFileName = __func__ + curDateTimeStr + ".txt";
-    WriteTxtFile(destDataFilePath + "/" + destFileName, result);
-    return true;
+        int retGul = sixents::Math::MatrixSubRowCol(srcMatrix, static_cast<unsigned int>(row), static_cast<unsigned int>(col),
+                                       outRow, outCol, destMatrix);
+        gulRet += QString::number(outRow) + COMMA + QString::number(outCol) + "\n";
+        gulRet += "Error Code:" + QString::number(retGul) + "\n";
+        if (retGul != sixents::Math::RETURN_SUCCESS) {
+            break;
+        }
+        dataIdx = 0;
+        for (UINT32 rIdx = 0; rIdx < outRow; ++rIdx) {
+            for (UINT32 cIdx = 0; cIdx < outCol; ++cIdx) {
+                gulRet += QString::number(destMatrix[dataIdx], 'f', MATRIX_ACCURACY);
+                ++dataIdx;
+                if (cIdx != outCol - 1) {
+                    gulRet += COMMA;
+                }
+            }
+            gulRet = gulRet + "\n";
+        }
+
+        // 写文件
+        result = rtkRet + "\n" + gulRet;
+        QDateTime curDateTime =QDateTime::currentDateTime();
+        QString curDateTimeStr =curDateTime.toString("yyyyMMddhhmmss");
+        QString destFileName = __func__ + curDateTimeStr + ".txt";
+        WriteTxtFile(destDataFilePath + "/" + destFileName, result);
+        retFunc = true;
+    } while(false);
+
+    return retFunc;
 }
 
 QString CTestFunc::ReadTxtFile(const QString &filePath)
@@ -2613,32 +2831,23 @@ void CTestFunc::WriteTxtFile(const QString &filePath, const QString &data)
     fileObj.close();
 }
 
-void CTestFunc::FileConvertToBin(const QString &filePath, QString &outFilePath)
+void CTestFunc::FileConvertToBin(const QByteArray& data, const QString& fileName, QString &outFilePath)
 {
     QString destFilePath(".dat");
-    QStringList filePaths = filePath.split(".");
-    if (filePaths[1] != "txt") {
-        outFilePath = filePath;
-        return ;
-    }
+    QStringList filePaths = fileName.split(".");
     outFilePath = filePaths[0] + destFilePath;
-    QFile srcFileObj(filePath);
+
     QFile destFileObj(outFilePath);
-    bool srcRet = srcFileObj.open(QIODevice::ReadOnly);
     bool destRet = destFileObj.open(QIODevice::WriteOnly);
-    if (!srcRet || !destRet) {
+    if (!destRet) {
         return;
     }
-    QTextStream srcStream(&srcFileObj);
-    QString srcData = srcStream.readAll();
-    srcData.trimmed();
-    QByteArray srcDataArr = QByteArray::fromHex(srcData.toLocal8Bit());
+
     QDataStream destStream(&destFileObj);
 //    destStream.setByteOrder(QDataStream::BigEndian); // 设置大端在前
     destStream.setByteOrder(QDataStream::LittleEndian); // 设置小端在前
-    destStream << srcDataArr;
+    destStream << data;
     destFileObj.close();
-    srcFileObj.close();
 }
 
 void CTestFunc::RtcmEphToMathEph(sixents::SEphemeris *rtcmEph, sixents::Math::SEphemeris *gulEph)

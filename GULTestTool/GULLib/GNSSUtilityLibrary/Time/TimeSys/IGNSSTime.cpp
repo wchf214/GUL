@@ -122,7 +122,6 @@ namespace sixents
                     break;
                 }
             }
-
             stdTime.m_year = EPOCHT0.m_year
                              + static_cast<UINT32>(allDays / DAY_IN_4YEAR * LEAP_YEAR_INTERVAL + month / MONTH_IN_YEAR);
             stdTime.m_month = static_cast<UINT32>(month % MONTH_IN_YEAR) + EPOCHT0.m_month;
@@ -130,7 +129,6 @@ namespace sixents
             stdTime.m_hour = static_cast<UINT32>(curSec / (BASE_60 * BASE_60));
             stdTime.m_minute = curSec % (BASE_60 * BASE_60) / BASE_60;
             stdTime.m_second = static_cast<DOUBLE>(curSec % BASE_60) + secOfMsec;
-
             return RETURN_SUCCESS;
         }
 

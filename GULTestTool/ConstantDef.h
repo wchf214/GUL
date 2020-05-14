@@ -16,6 +16,13 @@ const static int BLH_ACCURACY = 11;        // 大地坐标中经纬度的精确�
 const static int MSEC_ACCURACY = 3;        // 小数秒的精确度（精确到毫秒）
 const static int MATRIX_ACCURACY = 6;      // 矩阵中double数据的精确度
 
+// 间隔符定义
+const QString COMMA = ",";
+const QString SEMICOLON = ";";
+const QString COLON = ":";
+const QString DASH_LINE = "-";
+const QString SPACE = " ";
+
 // 星历电文类型
 enum TeleTextID {
     GLONASS_EPH = 1020,

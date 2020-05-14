@@ -14,7 +14,7 @@
 #define _RTCM_CONSTANTS_H_
 #include <map>
 #include <string>
-#include "BasicType.h"
+#include "../Platform/BasicType.h"
 namespace sixents
 {
     namespace common

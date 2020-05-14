@@ -1,5 +1,5 @@
-#include "CGNSSEphemeris.h"
-
+﻿#include "CGNSSEphemeris.h"
+#include <cmath>
 #include <ctime>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../Time/TimeCalc/CCalcTime.h"
@@ -229,7 +229,7 @@ namespace sixents
             gpsObj->SetTime(gpsSec);
             SGNSSTime gpsData;
             gpsObj->GetTime(gpsData);
-            INT64 gpsWeek = gpsData.m_week;
+            INT64 gpsWeek = static_cast<INT64>(gpsData.m_week);
 
             // 剔除掉一天内的秒,只保留整天的秒数
             DOUBLE secOfWeek =
@@ -274,7 +274,7 @@ namespace sixents
             gpsObj->SetTime(gpsSec);
             SGNSSTime gpsData;
             gpsObj->GetTime(gpsData);
-            INT64 gpsWeek = gpsData.m_week;
+            INT64 gpsWeek = static_cast<INT64>(gpsData.m_week);
 
             // 剔除掉一天内的秒,只保留整天的秒数
             DOUBLE secOfWeek =
@@ -367,7 +367,7 @@ namespace sixents
                 return;
             }
 
-            a = 1.5 * J2_GLO * GLO_GRAVITATION;
+            a = ONE_POINT_FIVE * J2_GLO * GLO_GRAVITATION;
             b = NUM_FIVE * x[NUM_TWO] * x[NUM_TWO] / r2;
             c = -GLO_GRAVITATION / r3 - a * (NUM_ONE - b);
             xdot[NUM_ZERO] = x[NUM_THREE];

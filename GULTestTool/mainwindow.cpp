@@ -135,13 +135,13 @@ void MainWindow::ExecTest()
         if (ui->txtTestDataPath->text().isEmpty() || ui->txtSimpleTestData->text().isEmpty()) {
             return;
         }
-        testData = ui->txtTestDataPath->text() + ";" + ui->txtSimpleTestData->text();
+        testData = ui->txtTestDataPath->text() + SEMICOLON + ui->txtSimpleTestData->text();
         result = QString("");
     } else if (funcIdx >= 31 && funcIdx <= 37) { // 矩阵运算，源数据由两个文件组成
         if (ui->txtTestDataPath->text().isEmpty() || ui->txtResultPath->text().isEmpty()) {
             return;
         }
-        testData = ui->txtTestDataPath->text() + ";" + ui->txtResultPath->text();
+        testData = ui->txtTestDataPath->text() + SEMICOLON + ui->txtResultPath->text();
         result = QString("");
         dataType = true;
     } else { // 简单数据
@@ -161,7 +161,7 @@ void MainWindow::ExecTest()
     if (dataType) {
         return;
     }
-    QStringList rets = result.split(";");
+    QStringList rets = result.split(SEMICOLON);
     if (rets.count() != 2) {
         return;
     }

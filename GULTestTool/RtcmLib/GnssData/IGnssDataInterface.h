@@ -20,7 +20,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "BasicType.h"
+#include "../Platform/BasicType.h"
 
 #ifdef UNIT_TEST
 #undef private

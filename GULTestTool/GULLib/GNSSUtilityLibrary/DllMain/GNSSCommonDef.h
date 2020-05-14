@@ -175,33 +175,28 @@ namespace sixents
         const DOUBLE LONGITUDE_UPPER_LIMIT = 180;  ///< 经度上限
         const DOUBLE LATITUDE_LOWER_LIMIT = -90;   ///< 纬度下限
         const DOUBLE LATITUDE_UPPER_LIMIT = 90;    ///< 纬度上限
-
         const DOUBLE LONGITUDE_DOUBLE_UPPER_LIMIT = 360;
-
         const DOUBLE ZERO_POINT_FIVE = 0.5;
         const DOUBLE ONE_POINT_FIVE = 1.5;
 
-        //地球的长半轴
-
+        // 地球的长半轴
+        // WGS84参数
         const DOUBLE WGS84_EARTH_LONG_RADIUS = 6378137.0;     ///< WGS84长半轴
         const DOUBLE WGS84_EARTH_SHORT_RADIUS = 6356752.3142; ///< WGS84短半轴
         const DOUBLE WGS84_EARTH_OBLATEO = 1 / 298.257223563; ///< WGS84扁率
         const DOUBLE WGS84_FIRST_E2 = 0.00669437999013;       ///< WGS84第一偏心率的平方
         const DOUBLE WGS84_SECOND_E2 = 0.006739496742227;     ///< WGS84第二偏心率的平方
 
-        const DOUBLE EARTH_LONG_RADIUS_PZ90 = 6378136.0; ///< pz90的 长半轴
-        //地球的扁率
-        const DOUBLE EARTH_OBLATEO_CGCS2000 = 1 / 298.257222101; ///< cgcs2000 扁率
+        // CGCS2000参数
+        const DOUBLE CGCS2000_EARTH_LONG_RADIUS = 6378137.0;      ///< CGCS2000长半轴
+        const DOUBLE CGCS2000_EARTH_SHORT_RADIUS = 6356752.31414; ///< CGCS2000短半轴
+        const DOUBLE CGCS2000_EARTH_OBLATEO = 1 / 298.257222101;  ///< CGCS2000扁率
+        const DOUBLE CGCS2000_FIRST_E2 = 0.00669438002290;        ///< CGCS2000第一偏心率的平方
+        const DOUBLE CGCS2000_SECOND_E2 = 0.00673949677548;       ///< CGCS2000第二偏心率的平方
 
-        const DOUBLE EARTH_OBLATEO_PZ90 = 1 / 298.257839303; ///< PZ90 扁率
-
-        const DOUBLE EARTH_SHORT_RADIUS =
-            WGS84_EARTH_LONG_RADIUS - WGS84_EARTH_OBLATEO * WGS84_EARTH_LONG_RADIUS; //短半径
-
-        /*const SCoordData WGS84_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_WGS84};
-        const SCoordData PZ90_DATA = {EARTH_LONG_RADIUS_PZ90, EARTH_OBLATEO_PZ90};
-        const SCoordData ITRF96_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_WGS84};
-        const SCoordData CGCS2000_DATA = {EARTH_LONG_RADIUS, EARTH_OBLATEO_CGCS2000};*/
+        // PZ90参数待定
+        const DOUBLE PZ90_EARTH_LONG_RADIUS = 6378136.0;     ///< PZ90长半轴
+        const DOUBLE PZ90_EARTH_OBLATEO = 1 / 298.257839303; ///< PZ90扁率
 
         // 角度模块常量定义
         const static DOUBLE PI = 3.1415926535897932; ///< pi值

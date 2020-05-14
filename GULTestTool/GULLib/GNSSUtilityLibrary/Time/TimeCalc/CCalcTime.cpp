@@ -1,4 +1,5 @@
 ﻿#include "CCalcTime.h"
+#include <cmath>
 #include "../TimeSys/CTimeFactory.h"
 
 namespace sixents

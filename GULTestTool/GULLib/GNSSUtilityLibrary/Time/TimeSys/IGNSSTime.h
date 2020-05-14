@@ -1,4 +1,4 @@
-/** @file          IGNSSTime.h
+﻿/** @file          IGNSSTime.h
  *  @brief         时间父类
  *  @details       时间对象的基类
  *  @author        wuchuanfei@sixens.com
@@ -239,6 +239,9 @@ namespace sixents
              * @note           N/A
              */
             INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
+
+            // 闰月判断
+            bool IsLeapMonth(const SStandardTime& time);
 
         private:
             UINT32 m_timeType; ///< 存放时间,便于直接使用父类指针直接获取对象类型

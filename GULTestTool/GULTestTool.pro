@@ -33,6 +33,19 @@ SOURCES += \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CTimeFactory.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CUTCTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/IGNSSTime.cpp \
+    RtcmLib/Codec/CAppImpl.cpp \
+    RtcmLib/Codec/CCodecUtilities.cpp \
+    RtcmLib/Codec/CRtcmCode.cpp \
+    RtcmLib/Codec/CRtcmDecoder.cpp \
+    RtcmLib/Codec/CRtcmEncoder.cpp \
+    RtcmLib/Codec/IAppOpt.cpp \
+    RtcmLib/Codec/ICodecOpt.cpp \
+    RtcmLib/Framework/CCfgMng.cpp \
+    RtcmLib/Framework/CLog.cpp \
+    RtcmLib/Framework/CParam.cpp \
+    RtcmLib/Framework/CValue.cpp \
+    RtcmLib/Framework/CommonFunc.cpp \
+    RtcmLib/GnssData/IGnssDataInterface.cpp \
     RtkLib/ephemeris.c \
     RtkLib/preceph.c \
     RtkLib/qzslex.c \
@@ -369,11 +382,23 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CTimeFactory.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CUTCTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/IGNSSTime.h \
-    RtcmLib/include/BasicType.h \
-    RtcmLib/include/CParam.h \
-    RtcmLib/include/Constants.h \
-    RtcmLib/include/IAppOpt.h \
-    RtcmLib/include/IGnssDataInterface.h \
+    RtcmLib/Codec/CAppImpl.h \
+    RtcmLib/Codec/CCodecUtilities.h \
+    RtcmLib/Codec/CRtcmCode.h \
+    RtcmLib/Codec/CRtcmDecoder.h \
+    RtcmLib/Codec/CRtcmEncoder.h \
+    RtcmLib/Codec/IAppOpt.h \
+    RtcmLib/Codec/ICodecOpt.h \
+    RtcmLib/Framework/CCfgMng.h \
+    RtcmLib/Framework/CLog.h \
+    RtcmLib/Framework/CParam.h \
+    RtcmLib/Framework/CValue.h \
+    RtcmLib/Framework/CommonFunc.h \
+    RtcmLib/Framework/Constants.h \
+    RtcmLib/GnssData/IGnssDataInterface.h \
+    RtcmLib/Platform/BasicType.h \
+    RtcmLib/Platform/Windows/ToolFunc.h \
+    RtcmLib/Platform/platform.h \
     RtkLib/rtklib.h \
     TestFunc.h \
     mainwindow.h
@@ -381,15 +406,14 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-CONFIG(debug, debug|release):LIBS += -LE:/Codes/myCodesInGit/GUL/GULTestTool/RtcmLib/debug \
-        -lrtcm
-CONFIG(release, debug|release):LIBS += -LE:/Codes/myCodesInGit/GUL/GULTestTool/RtcmLib/release \
-        -lrtcm
-
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/CMakeLists.txt
+    GULLib/GNSSMathUtilityLib/Eigen/eigen-eigen-323c052e1731/Eigen/CMakeLists.txt \
+    RtcmLib/Codec/Readme.txt \
+    RtcmLib/Framework/Readme.txt \
+    RtcmLib/GnssData/README.md \
+    RtcmLib/Platform/README.md

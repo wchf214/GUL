@@ -13,9 +13,9 @@
 #ifndef _IAPPOPT_H_
 #define _IAPPOPT_H_
 
-#include "CParam.h"
-#include "Constants.h"
-#include "BasicType.h"
+#include "../Framework/CParam.h"
+#include "../Framework/Constants.h"
+#include "../Platform/BasicType.h"
 
 namespace sixents
 {

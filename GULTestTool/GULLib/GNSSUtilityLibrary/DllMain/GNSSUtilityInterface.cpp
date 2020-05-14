@@ -1,4 +1,4 @@
-#define DLL_EXPORT
+﻿#define DLL_EXPORT
 
 #include "GNSSUtilityInterface.h"
 #include "../AppIFs/AppInterface.h"
@@ -89,7 +89,7 @@ namespace sixents
         {
             UINT64 weekNum = 0;
             int ret = CAppInterface::StandardTimeToGNSSTime(
-                year, month, day, hour, minute, second, timeType, UTC, weekNum, sec);
+                year, month, day, hour, minute, second, UTC, timeType, weekNum, sec);
             week = static_cast<unsigned int>(weekNum);
             return ret;
         }
@@ -159,7 +159,7 @@ namespace sixents
         {
             UINT64 temp = 0;
             int ret =
-                CAppInterface::StandardTimeToGNSSTime(year, month, day, hour, minute, second, GPS, GLONASS, temp, sec);
+                CAppInterface::StandardTimeToGNSSTime(year, month, day, hour, minute, second, GLONASS, GPS, temp, sec);
             week = static_cast<unsigned int>(temp);
             return ret;
         }

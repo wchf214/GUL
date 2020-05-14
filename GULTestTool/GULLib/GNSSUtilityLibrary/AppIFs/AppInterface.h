@@ -151,8 +151,8 @@ namespace sixents
                                                 const UINT32 hour,
                                                 const UINT32 minute,
                                                 const DOUBLE second,
-                                                const UINT32 gnssTimeType,
                                                 const UINT32 standardTimeType,
+                                                const UINT32 gnssTimeType,
                                                 UINT64& week,
                                                 DOUBLE& sec);
 
