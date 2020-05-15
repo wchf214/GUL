@@ -29,16 +29,16 @@
 
 namespace sixents {
     extern "C" {  // For Rtcm
-    DLL_API INT32 STD_CALL RtcmInit(CParam& pamIn, CParam& pamOut);
-    DLL_API INT32 STD_CALL RtcmGetMessage(const BYTE* pbyBuf,
-                                          const UINT32& uiLen,
-                                          UINT32& uiMsgType,
-                                          UINT32& uiMsgPos,
-                                          UINT32& uiExpectLen);
-    DLL_API INT32 STD_CALL RtcmDecode(CParam& pamIn, CParam& pamOut);
-    DLL_API INT32 STD_CALL RtcmEncode(CParam& pamIn, CParam& pamOut);
-    DLL_API INT32 STD_CALL RtcmCmd(CParam& pamIn, CParam& pamOut);
-    DLL_API INT32 STD_CALL RtcmFinal();
+        DLL_API INT32 STD_CALL RtcmInit(CParam& pamIn, CParam& pamOut);
+        DLL_API INT32 STD_CALL RtcmGetMessage(const BYTE* pbyBuf,
+                                              const UINT32& uiLen,
+                                              UINT32& uiMsgType,
+                                              UINT32& uiMsgPos,
+                                              UINT32& uiExpectLen);
+        DLL_API INT32 STD_CALL RtcmDecode(CParam& pamIn, CParam& pamOut);
+        DLL_API INT32 STD_CALL RtcmEncode(CParam& pamIn, CParam& pamOut);
+        DLL_API INT32 STD_CALL RtcmCmd(CParam& pamIn, CParam& pamOut);
+        DLL_API INT32 STD_CALL RtcmFinal();
     }
     namespace Math {  // For Gul
         extern "C" {
@@ -661,9 +661,9 @@ bool CTestFunc::GNSSTimeToUTCTime(const QString testData, QString& result)
             gulRet += COMMA + QString::number(retGul);
             break;
         }
-        QString gulRet = QString::number(year) + DASH_LINE + QString::number(month) + DASH_LINE + QString::number(day) +
-                         SPACE + QString::number(hour) + COLON + QString::number(minute) + COLON +
-                         QString::number(second, 'f', MSEC_ACCURACY);
+        gulRet = QString::number(year) + DASH_LINE + QString::number(month) + DASH_LINE + QString::number(day) +
+                 SPACE + QString::number(hour) + COLON + QString::number(minute) + COLON +
+                 QString::number(second, 'f', MSEC_ACCURACY);
         gulRet += COMMA + QString::number(retGul);
         retFunc = true;
     } while(false);
@@ -886,10 +886,10 @@ bool CTestFunc::GlonassToUTC(const QString testData, QString &result)
             break;
         }
 
-        QString gulRet = QString::number(utcYear) + DASH_LINE + QString::number(utcMonth) + DASH_LINE +
-                         QString::number(utcDay) + SPACE +
-                         QString::number(utcHour) + COLON + QString::number(utcMinute) + COLON +
-                         QString::number(utcSec, 'f', MSEC_ACCURACY) + COMMA + QString::number(retGul);
+        gulRet = QString::number(utcYear) + DASH_LINE + QString::number(utcMonth) + DASH_LINE +
+                 QString::number(utcDay) + SPACE +
+                 QString::number(utcHour) + COLON + QString::number(utcMinute) + COLON +
+                 QString::number(utcSec, 'f', MSEC_ACCURACY) + COMMA + QString::number(retGul);
         retFunc = true;
     } while (false);
 
