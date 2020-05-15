@@ -1,4 +1,4 @@
-/** @file          CMathAppInterface.h
+﻿/** @file          CMathAppInterface.h
  *  @brief         矩阵运算接口类
  *  @details       N/A
  *  @author        pengshupan@sixens.com
@@ -144,7 +144,7 @@ namespace sixents
                                        DOUBLE* outMatrixData);
 
             /**
-             * @brief           矩阵增加行列
+             * @brief           矩阵增加或减少行列
              * @author          pengshupan@sixents.com
              * @param[in]       inMatrixData        输入矩阵数据
              * @param[in]       inRow               输入矩阵行
@@ -156,32 +156,12 @@ namespace sixents
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static INT32 MatrixAddRowCol(const DOUBLE* inMatrixData,
-                                         const UINT32 inRow,
-                                         const UINT32 inCol,
-                                         const UINT32 outRow,
-                                         const UINT32 outCol,
-                                         DOUBLE* outMatrixData);
-
-            /**
-             * @brief           矩阵减少行列
-             * @author          pengshupan@sixents.com
-             * @param[in]       inMatrixData        输入矩阵数据
-             * @param[in]       inRow               输入矩阵行
-             * @param[in]       inCol               输入矩阵列
-             * @param[in]       outRow              输出矩阵行
-             * @param[in]       outCol              输出矩阵列
-             * @param[out]      outMatrixData       输出矩阵数据
-             * @exception       N/A
-             * @return          函数执行是否成功
-             * @note            N/A
-             */
-            static INT32 MatrixSubRowCol(const DOUBLE* inMatrixData,
-                                         const UINT32 inRow,
-                                         const UINT32 inCol,
-                                         const UINT32 outRow,
-                                         const UINT32 outCol,
-                                         DOUBLE* outMatrixData);
+            static INT32 MatrixRowColChange(const DOUBLE* inMatrixData,
+                                            const UINT32 inRow,
+                                            const UINT32 inCol,
+                                            const UINT32 outRow,
+                                            const UINT32 outCol,
+                                            DOUBLE* outMatrixData);
         };
     } // namespace Math
 } // end namespace sixents

@@ -1,4 +1,4 @@
-#define DLL_EXPORT
+﻿#define DLL_EXPORT
 
 #include "GNSSMathInterface.h"
 #include "../AppIFs/MathAppInterface.h"
@@ -75,7 +75,11 @@ namespace sixents
                                                         const unsigned int outCol,
                                                         double* outMatrixData)
         {
-            return CMathAppInterface::MatrixAddRowCol(inMatrixData, inRow, inCol, outRow, outCol, outMatrixData);
+            if (outRow <= inRow || outCol <= inCol)
+            {
+                return RETURN_ERROR_PARAMETER;
+            }
+            return CMathAppInterface::MatrixRowColChange(inMatrixData, inRow, inCol, outRow, outCol, outMatrixData);
         }
 
         extern "C" DLL_API int STD_CALL MatrixSubRowCol(const double* inMatrixData,
@@ -85,7 +89,11 @@ namespace sixents
                                                         const unsigned int outCol,
                                                         double* outMatrixData)
         {
-            return CMathAppInterface::MatrixSubRowCol(inMatrixData, inRow, inCol, outRow, outCol, outMatrixData);
+            if (outRow >= inRow || outCol >= inCol)
+            {
+                return RETURN_ERROR_PARAMETER;
+            }
+            return CMathAppInterface::MatrixRowColChange(inMatrixData, inRow, inCol, outRow, outCol, outMatrixData);
         }
     } // namespace Math
 } // namespace sixents

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace sixents
 {
@@ -29,6 +29,10 @@ namespace sixents
         // 指针类型
         using PVOID = void*;       ///< 主要是用于CParam传输
         using PCSTR = const char*; ///< C类型的字符串处理
+
+        // DOUBLE值 是否为0 的比较
+        const static DOUBLE DOUBLE_ZONE_LITTLE = -1E9;                ///< DOUBLE值是否为0比较时的最小值
+        const static DOUBLE DOUBLE_ZONE_BIG = 1E9;                    ///< DOUBLE值是否为0比较时的最大值
 
         // 错误码定义
         static const INT32 RETURN_SUCCESS = 0;            ///< 成功

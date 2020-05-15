@@ -76,8 +76,9 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
-                if ((month == 0 || month > MONTH_IN_YEAR) || (day == 0 || day > MAX_DAY_IN_MONTH)
-                    || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60) || (second < 0 || second > BASE_60))
+                if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
+                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                 || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -135,8 +136,11 @@ namespace sixents
             do
             {
                 // srcTimeType, destTimeType,判断
-                if ((srcMonth == 0 || srcMonth > MONTH_IN_YEAR) || (srcDay == 0 || srcDay > MAX_DAY_IN_MONTH)
-                    || (srcHour >= MAX_HOUR_IN_DAY) || (srcMinute >= BASE_60) || (srcSecond < 0 || srcSecond > BASE_60))
+                if ((srcYear < EPOCHT0.m_year || srcYear > CURRENT_MAX_YEAR)
+                 || (srcMonth == 0 || srcMonth > MONTH_IN_YEAR)
+                 || (srcDay == 0 || srcDay > MAX_DAY_IN_MONTH)
+                 || (srcHour >= MAX_HOUR_IN_DAY) || (srcMinute >= BASE_60)
+                 || (srcSecond < 0 || srcSecond > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -269,8 +273,9 @@ namespace sixents
             do
             {
                 // srcTimeType, destTimeType,判断
-                if ((month == 0 || month > MONTH_IN_YEAR) || (day == 0 || day > MAX_DAY_IN_MONTH)
-                    || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60) || (second < 0 || second > BASE_60))
+                if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
+                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                 || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -308,6 +313,10 @@ namespace sixents
                 destTime->SetTime(retSec);
                 SGNSSTime destTimeData;
                 destTime->GetTime(destTimeData);
+                if (destTimeData.m_secAndMsec < 0.0) {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
                 week = destTimeData.m_week;
                 sec = destTimeData.m_secAndMsec;
 
@@ -362,7 +371,7 @@ namespace sixents
                 destTime->SetTime(retSec);
                 SGNSSTime destTimeData;
                 destTime->GetTime(destTimeData);
-                if (destTimeData.m_week < 0 || destTimeData.m_secAndMsec < 0)
+                if (destTimeData.m_secAndMsec < 0.0)
                 {
                     retVal = RETURN_ERROR_PARAMETER;
                     break;
@@ -406,9 +415,9 @@ namespace sixents
             INT32 retVal = RETURN_FAIL;
             do
             {
-                if ((month <= 0 || month > MONTH_IN_YEAR) || (day <= 0 || day > MAX_DAY_IN_MONTH)
-                    || (hour < 0 || hour >= MAX_HOUR_IN_DAY) || (minute < 0 || minute >= BASE_60)
-                    || (second < 0 || second > BASE_60))
+                if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
+                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                 || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;

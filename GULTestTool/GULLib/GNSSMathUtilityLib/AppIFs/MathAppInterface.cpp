@@ -1,5 +1,5 @@
-#include "MathAppInterface.h"
-#include "../Eigen/eigen-eigen-323c052e1731/Eigen/Dense"
+﻿#include "MathAppInterface.h"
+#include "../Eigen/Dense"
 
 namespace sixents
 {
@@ -111,6 +111,18 @@ namespace sixents
                 Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> retMtx(
                     outMatrixData, outRow, outCol);
                 retMtx = leftMtx * rightMtx;
+                // 与Rtk算法时间一致
+//                for (UINT32 rowIdx = 0; rowIdx < outRow; ++rowIdx)
+//                {
+//                    for (UINT32 colIdx = 0; colIdx < outCol; ++colIdx)
+//                    {
+//                        for (UINT32 addIdx = 0; addIdx < leftCol; ++addIdx)
+//                        {
+//                            outMatrixData[rowIdx * outCol + colIdx] += leftMatrixData[rowIdx * leftCol + addIdx] *
+//                                                                       rightMatrixData[addIdx * rightCol + colIdx];
+//                        }
+//                    }
+//                }
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -139,12 +151,13 @@ namespace sixents
                     break;
                 }
 
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
-                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
-                    outMatrixData, outRow, outCol);
-                outMtx = inMtx.transpose();
-
+                for (UINT32 rowIdx = 0; rowIdx < outRow; ++rowIdx)
+                {
+                    for (UINT32 colIdx = 0; colIdx < outCol; ++colIdx)
+                    {
+                        outMatrixData[rowIdx * outCol + colIdx] = inMatrixData[colIdx * inCol + rowIdx];
+                    }
+                }
                 ret = RETURN_SUCCESS;
             } while (false);
 
@@ -183,7 +196,7 @@ namespace sixents
                     const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
 
                 //行列式不能为0=满秩矩阵
-                if (inMtx.determinant() == 0)
+                if (inMtx.determinant() < DOUBLE_ZONE_LITTLE || inMtx.determinant() > DOUBLE_ZONE_BIG)
                 {
                     ret = RETURN_ZERO_DETERMINANT;
                     break;
@@ -199,12 +212,12 @@ namespace sixents
             return ret;
         }
 
-        INT32 CMathAppInterface::MatrixAddRowCol(const DOUBLE* inMatrixData,
-                                                 const UINT32 inRow,
-                                                 const UINT32 inCol,
-                                                 const UINT32 outRow,
-                                                 const UINT32 outCol,
-                                                 DOUBLE* outMatrixData)
+        INT32 CMathAppInterface::MatrixRowColChange(const DOUBLE* inMatrixData,
+                                                    const UINT32 inRow,
+                                                    const UINT32 inCol,
+                                                    const UINT32 outRow,
+                                                    const UINT32 outCol,
+                                                    DOUBLE* outMatrixData)
         {
             INT32 ret = RETURN_FAIL;
             do
@@ -215,7 +228,7 @@ namespace sixents
                     break;
                 }
 
-                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || outRow < inRow || outCol < inCol)
+                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0)
                 {
                     ret = RETURN_ERROR_PARAMETER;
                     break;
@@ -227,69 +240,20 @@ namespace sixents
                     ret = RETURN_NOT_SQUARE_MATRIX;
                     break;
                 }
-
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
-                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
-                    outMatrixData, outRow, outCol);
 
                 for (UINT32 rowIdx = 0; rowIdx < outRow; ++rowIdx)
                 {
                     for (UINT32 colIdx = 0; colIdx < outCol; ++colIdx)
                     {
+                        outMatrixData[rowIdx * outCol + colIdx] = 0;  // 超出输出矩阵的部分
                         if (colIdx < inCol && rowIdx < inRow)
                         {
-                            outMtx.row(rowIdx).col(colIdx) << inMtx.row(rowIdx).col(colIdx);
-                        }
-                        else
-                        {
-                            outMtx.row(rowIdx).col(colIdx) << 0;
+                            outMatrixData[rowIdx * outCol + colIdx] = inMatrixData[rowIdx * inCol + colIdx];
                         }
                     }
                 }
                 ret = RETURN_SUCCESS;
             } while (false);
-
-            return ret;
-        }
-
-        INT32 CMathAppInterface::MatrixSubRowCol(const DOUBLE* inMatrixData,
-                                                 const UINT32 inRow,
-                                                 const UINT32 inCol,
-                                                 const UINT32 outRow,
-                                                 const UINT32 outCol,
-                                                 DOUBLE* outMatrixData)
-        {
-            INT32 ret = RETURN_FAIL;
-            do
-            {
-                if (inMatrixData == nullptr || outMatrixData == nullptr)
-                {
-                    ret = RETURN_NULL_PTR;
-                    break;
-                }
-
-                if (inRow == 0 || inCol == 0 || outRow == 0 || outCol == 0 || outRow >= inRow || outCol >= inCol)
-                {
-                    ret = RETURN_ERROR_PARAMETER;
-                    break;
-                }
-
-                // 根据需求，当前仅支持方阵
-                if (inRow != inCol || outRow != outCol)
-                {
-                    ret = RETURN_NOT_SQUARE_MATRIX;
-                    break;
-                }
-
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> inMtx(
-                    const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
-                Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
-                    outMatrixData, outRow, outCol);
-                outMtx = inMtx.block(0, 0, outRow, outCol);
-                ret = RETURN_SUCCESS;
-            } while (false);
-
             return ret;
         }
     } // namespace Math

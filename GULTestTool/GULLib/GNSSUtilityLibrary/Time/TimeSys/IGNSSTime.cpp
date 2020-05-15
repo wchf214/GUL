@@ -1,4 +1,4 @@
-#include "IGNSSTime.h"
+﻿#include "IGNSSTime.h"
 
 namespace sixents
 {
@@ -56,7 +56,10 @@ namespace sixents
         {
             DOUBLE retSec = 0.0;
             if ((stdTime.m_year < EPOCHT0.m_year || stdTime.m_year > CURRENT_MAX_YEAR)
-                || (stdTime.m_month <= 0 || stdTime.m_month > MONTH_IN_YEAR))
+             || (stdTime.m_month == 0 || stdTime.m_month > MONTH_IN_YEAR)
+             || (stdTime.m_day == 0 || stdTime.m_day > MAX_DAY_IN_MONTH)
+             || (stdTime.m_hour >= MAX_HOUR_IN_DAY) || (stdTime.m_minute >= BASE_60)
+             || (stdTime.m_second < 0 || stdTime.m_second > BASE_60))
             {
                 return retSec;
             }
@@ -145,14 +148,71 @@ namespace sixents
             if (curSec <= 0)
             {
                 stdTime.m_week = 0;
-                stdTime.m_secAndMsec = 0;
+                stdTime.m_secAndMsec = DOUBLE_ZONE_LITTLE;
             }
             else
             {
-                stdTime.m_week = static_cast<INT64>(curSec) / WEEK_SEC;
+                stdTime.m_week = static_cast<UINT64>(curSec) / WEEK_SEC;
                 stdTime.m_secAndMsec = curSec - static_cast<DOUBLE>(stdTime.m_week) * WEEK_SEC;
             }
             return RETURN_SUCCESS;
+        }
+
+        BOOL_T IGNSSTime::IsLeapYear(const UINT32 &time)
+        {
+            BOOL_T retVal = false;
+            do
+            {
+                if (time < EPOCHT0.m_year || time > CURRENT_MAX_YEAR)
+                {
+                    break;
+                }
+
+                if (time % LEAP_YEAR_INTERVAL == 0 || time % CENTURY_LEAP_YEAR == 0)
+                {
+                    retVal = true;
+                    break;
+                }
+            } while(false);
+            return retVal;
+        }
+
+        UINT32 IGNSSTime::GetDayInFeb(const BOOL_T leapYear)
+        {
+            UINT32 retVal = DAY_IN_FEB;
+            if (leapYear)
+            {
+                retVal = DAY_IN_LEAP_FEB;
+            }
+            return retVal;
+        }
+
+        MONTH_TYPE IGNSSTime::GetMonthType(const UINT32 &month)
+        {
+            const UINT32 NUM_TWO = 2;
+            MONTH_TYPE retVal = MONTH_TYPE_NONE;
+            do
+            {
+                if (month == 0 || month > MONTH_IN_YEAR)
+                {
+                    break;
+                }
+
+                if (month == NUM_TWO)
+                {
+                    break;
+                }
+                else if (month != MONTH_AUG && month % NUM_TWO == 0)
+                {
+                    retVal = SMALL_MONTH;
+                    break;
+                }
+                else
+                {
+                    retVal = BIG_MONTH;
+                }
+            } while (false);
+            return retVal;
         }
     } // end namespace Math
 } // end namespace sixents

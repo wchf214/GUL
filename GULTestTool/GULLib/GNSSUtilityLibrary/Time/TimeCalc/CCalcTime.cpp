@@ -32,41 +32,41 @@ namespace sixents
                 retTime = GPSTUTCConvert(srcSec, false);
             }
             else if (srcTimeType == UTC && destTimeType == GLONASS)
-            { // GPS 转 UTC
+            { // UTC 转 GLONASS
                 retTime = GLOTUTCConvert(srcSec, false);
             }
             else if (srcTimeType == UTC && destTimeType == GALILEO)
-            { // GPS 转 UTC
+            { // UTC 转 GALILEO
                 retTime = GSTUTCConvert(srcSec, false);
             }
             else if (srcTimeType == UTC && destTimeType == BDS)
-            { // GPS 转 UTC
+            { // UTC 转 BDS
                 retTime = BDTUTCConvert(srcSec, false);
             }
 
             else if (srcTimeType == GLONASS && destTimeType == GPS)
-            { // GPS 转 UTC
+            { // GLONASS 转 GPS
                 retTime = GLOTGPSTConvert(srcSec, true);
             }
             else if (srcTimeType == GALILEO && destTimeType == GPS)
-            { // GPS 转 UTC
+            { // GALILEO 转 GPS
                 retTime = GSTGPSTConvert(srcSec, true);
             }
             else if (srcTimeType == BDS && destTimeType == GPS)
-            { // GPS 转 UTC
+            { // BDS 转 GPS
                 retTime = BDTGPSTConvert(srcSec, true);
             }
 
             else if (srcTimeType == GPS && destTimeType == GLONASS)
-            { // GPS 转 UTC
+            { // GPS 转 GLONASS
                 retTime = GLOTGPSTConvert(srcSec, false);
             }
             else if (srcTimeType == GPS && destTimeType == GALILEO)
-            { // GPS 转 UTC
+            { // GPS 转 GALILEO
                 retTime = GSTGPSTConvert(srcSec, false);
             }
             else if (srcTimeType == GPS && destTimeType == BDS)
-            { // GPS 转 UTC
+            { // GPS 转 BDS
                 retTime = BDTGPSTConvert(srcSec, false);
             }
             return retTime;

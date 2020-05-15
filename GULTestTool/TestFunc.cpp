@@ -2716,40 +2716,40 @@ bool CTestFunc::MatrixSubRowCol(const QString testData, QString& result)
     bool retFunc = false;
     do {
         if (testData.isEmpty()) {
-            return false;
+            break;
         }
         result.clear();
         // 解析testData
         QStringList srcTestData = testData.split(SEMICOLON);
         if (srcTestData.count() != 2) {
-            return false;
+            break;
         }
         QString srcDataFilePath = srcTestData[0];
         QString destDataFilePath = srcTestData[1];
         if (srcDataFilePath.isEmpty() || destDataFilePath.isEmpty()) {
-            return false;
+            break;
         }
 
         QString srcData = ReadTxtFile(srcDataFilePath);
         QStringList srcDataList = srcData.split(SEMICOLON);
         if (srcDataList.count() != 2) {
-            return false;
+            break;
         }
 
         QStringList subRowCol = srcDataList[1].split(COMMA);
         if (subRowCol.count() != 2) {
-            return false;
+            break;
         }
         int subRow = subRowCol[0].toInt();
         int subCol = subRowCol[1].toInt();
 
         QStringList allData = srcDataList[0].split("\n");
         if (allData.count() < 2) {
-            return false;
+            break;
         }
         QStringList rowAndCol = allData[0].split(COMMA);
         if (rowAndCol.count() != 2) {
-            return false;
+            break;
         }
         int row = rowAndCol[0].toInt();
         int col = rowAndCol[1].toInt();

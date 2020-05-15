@@ -241,8 +241,38 @@ namespace sixents
             INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
 
             // 闰月判断
-            bool IsLeapMonth(const SStandardTime& time);
+            /**
+             * @brief          判断当前年是否闰年
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      time              当前年
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         是否闰年，true为闰年，false为非闰年
+             * @note           N/A
+             */
+            BOOL_T IsLeapYear(const UINT32& time);
 
+            /**
+             * @brief          获取二月中的天数
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      leapYear          是否闰年，true为闰年，false为非闰年
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         二月中的天数
+             * @note           N/A
+             */
+            UINT32 GetDayInFeb(const BOOL_T leapYear);
+
+            /**
+             * @brief          获取月份类型(大月、小月)
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      month              当前月份
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         月份类型
+             * @note           N/A
+             */
+            MONTH_TYPE GetMonthType(const UINT32& month);
         private:
             UINT32 m_timeType; ///< 存放时间,便于直接使用父类指针直接获取对象类型
         };                     // end class IGNSSTime
