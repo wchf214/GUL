@@ -40,6 +40,14 @@ namespace sixents
 
                 SGNSSTime curTime = {week, sec, timeType};
                 timeObj->SetTime(curTime);
+                SStandardTime curStandTime;
+                timeObj->GetTime(curStandTime);
+
+                if (!IGNSSTime::IsRightDay(curStandTime)) {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
                 std::string timeStr("");
                 timeObj->Format(timeStr);
                 const UINT32 NULL_CHAR_LEN = 1;
@@ -84,8 +92,6 @@ namespace sixents
                     break;
                 }
 
-                // todo:缺闰月判断
-
                 IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(UTC));
                 if (timeObj == nullptr)
                 {
@@ -94,6 +100,11 @@ namespace sixents
                 }
 
                 SStandardTime curTime = {year, month, day, hour, minute, second, UTC};
+                if (!IGNSSTime::IsRightDay(curTime)) {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
                 timeObj->SetTime(curTime);
                 std::string timeStr("");
                 timeObj->Format(timeStr);
@@ -164,9 +175,11 @@ namespace sixents
                     break;
                 }
 
-                // todo:缺闰月判断
-
                 SStandardTime srcTimeData = {srcYear, srcMonth, srcDay, srcHour, srcMinute, srcSecond, srcTimeType};
+                if (!IGNSSTime::IsRightDay(srcTimeData)) {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
                 IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(destTimeType));
                 if (srcTime == nullptr || destTime == nullptr)
@@ -246,6 +259,11 @@ namespace sixents
                 destTime->SetTime(retSec);
                 SStandardTime destTimeData;
                 destTime->GetTime(destTimeData);
+                if (!IGNSSTime::IsRightDay(destTimeData))
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
                 year = destTimeData.m_year;
                 month = destTimeData.m_month;
                 day = destTimeData.m_day;
@@ -294,6 +312,11 @@ namespace sixents
                 }
 
                 SStandardTime srcTimeData = {year, month, day, hour, minute, second, standardTimeType};
+                if (!IGNSSTime::IsRightDay(srcTimeData))
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
                 IGNSSTime* destTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(gnssTimeType));
 
@@ -307,8 +330,6 @@ namespace sixents
                 srcTime->GetTime(curSec);
                 DOUBLE retSec = CCalcTime::TimeConvert(
                     curSec, static_cast<TIME_TYPE>(standardTimeType), static_cast<TIME_TYPE>(gnssTimeType));
-
-                // retSec <0判断
 
                 destTime->SetTime(retSec);
                 SGNSSTime destTimeData;
@@ -422,9 +443,14 @@ namespace sixents
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
                 }
-                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(timeType));
+
                 SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
-                sec = timeObj->StandTimeToSec(timeData);
+                if (IGNSSTime::IsRightDay(timeData))
+                {
+                    retVal = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                sec = IGNSSTime::StandTimeToSec(timeData);
                 retVal = RETURN_SUCCESS;
             } while (false);
             return retVal;

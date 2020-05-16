@@ -203,7 +203,7 @@ namespace sixents
              * @return         与标准时间同一标准下的小数秒
              * @note           N/A
              */
-            DOUBLE StandTimeToSec(const SStandardTime& stdTime);
+            static DOUBLE StandTimeToSec(const SStandardTime& stdTime);
 
             /**
              * @brief          秒转标准时间
@@ -214,7 +214,7 @@ namespace sixents
              * @return         当前函数执行是否成功
              * @note           N/A
              */
-            INT32 SecToStandTime(const DOUBLE sec, SStandardTime& stdTime);
+            static INT32 SecToStandTime(const DOUBLE sec, SStandardTime& stdTime);
 
             /**
              * @brief          周内秒时间转秒
@@ -226,7 +226,7 @@ namespace sixents
              * @return         转换后的小数秒时间
              * @note           N/A
              */
-            DOUBLE WeekSecToSec(const SGNSSTime& stdTime, const UINT64 startTime);
+            static DOUBLE WeekSecToSec(const SGNSSTime& stdTime, const UINT64 startTime);
 
             /**
              * @brief          秒转周内秒
@@ -238,7 +238,18 @@ namespace sixents
              * @return         当前函数执行是否成功
              * @note           N/A
              */
-            INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
+            static INT32 SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime);
+
+            /**
+             * @brief          判断当前日期是否正确
+             * @author         wuchuanfei@sixents.com
+             * @param[in]      time              当前时间
+             * @param[out]     N/A
+             * @exception      N/A
+             * @return         是否正确日期，true为正确日期，false为错误日期
+             * @note           N/A
+             */
+            static BOOL_T IsRightDay(const SStandardTime& time);
 
             // 闰月判断
             /**
@@ -250,7 +261,7 @@ namespace sixents
              * @return         是否闰年，true为闰年，false为非闰年
              * @note           N/A
              */
-            BOOL_T IsLeapYear(const UINT32& time);
+            static BOOL_T IsLeapYear(const UINT32& time);
 
             /**
              * @brief          获取二月中的天数
@@ -261,7 +272,7 @@ namespace sixents
              * @return         二月中的天数
              * @note           N/A
              */
-            UINT32 GetDayInFeb(const BOOL_T leapYear);
+            static UINT32 GetDayInFeb(const BOOL_T leapYear);
 
             /**
              * @brief          获取月份类型(大月、小月)
@@ -272,7 +283,7 @@ namespace sixents
              * @return         月份类型
              * @note           N/A
              */
-            MONTH_TYPE GetMonthType(const UINT32& month);
+            static MONTH_TYPE GetMonthType(const UINT32& month);
         private:
             UINT32 m_timeType; ///< 存放时间,便于直接使用父类指针直接获取对象类型
         };                     // end class IGNSSTime

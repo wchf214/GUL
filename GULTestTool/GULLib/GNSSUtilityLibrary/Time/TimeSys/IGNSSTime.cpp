@@ -158,6 +158,27 @@ namespace sixents
             return RETURN_SUCCESS;
         }
 
+        BOOL_T IGNSSTime::IsRightDay(const SStandardTime &time)
+        {
+            BOOL_T rightDayFlag = false;
+            UINT32 realDay = 0;
+            do {
+                if (time.m_month == MONTH_FEB) // 对2月份的日期特殊处理
+                {
+                    BOOL_T leapYearFlag = IsLeapYear(time.m_year);
+                    realDay = GetDayInFeb(leapYearFlag);
+                } else {
+                    realDay = GetMonthType(time.m_month);
+                }
+            } while(false);
+
+            if (realDay != MONTH_TYPE_NONE && time.m_day <= realDay)
+            {
+                rightDayFlag = true;
+            }
+            return rightDayFlag;
+        }
+
         BOOL_T IGNSSTime::IsLeapYear(const UINT32 &time)
         {
             BOOL_T retVal = false;
@@ -182,7 +203,7 @@ namespace sixents
             UINT32 retVal = DAY_IN_FEB;
             if (leapYear)
             {
-                retVal = DAY_IN_LEAP_FEB;
+                retVal = FEB_IN_CENTURY;
             }
             return retVal;
         }

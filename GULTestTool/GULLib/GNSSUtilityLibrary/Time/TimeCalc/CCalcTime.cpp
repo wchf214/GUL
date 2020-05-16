@@ -88,12 +88,7 @@ namespace sixents
                 { // GPS to UTC
                     retTimeSec = static_cast<INT64>(srcTime) + static_cast<INT64>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
-                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                if (timeObj == nullptr)
-                {
-                    retTime = 0;
-                    break;
-                }
+
                 const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
                 const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_ONE]);
                 const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_TWO]);
@@ -101,7 +96,7 @@ namespace sixents
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
-                const DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
+                const DOUBLE leapTimeSec = IGNSSTime::StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0) // 如果差大于等于0则表示为当前时间
                 {
                     retTime = static_cast<DOUBLE>(retTimeSec) + timeMSec;
@@ -142,13 +137,6 @@ namespace sixents
                     retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(GPS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
-                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                if (timeObj == nullptr)
-                {
-                    retTime = 0;
-                    break;
-                }
-
                 const UINT32 year = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][0]);
                 const UINT32 month = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_ONE]);
                 const UINT32 day = static_cast<UINT32>(GPS_LEAPSEC_INFO[i][NUM_TWO]);
@@ -156,7 +144,7 @@ namespace sixents
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
-                DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
+                DOUBLE leapTimeSec = IGNSSTime::StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0) // 如果差大于等于0则表示为当前时间
                 {
                     retTime = static_cast<DOUBLE>(retTimeSec) + timeMSec;
@@ -182,12 +170,6 @@ namespace sixents
                     retTimeSec = static_cast<INT32>(srcTime) + static_cast<INT32>(BDS_LEAPSEC_INFO[i][NUM_SIX]);
                 }
 
-                IGNSSTime* timeObj = CTimeFactory::CreateTimeObj(UTC);
-                if (timeObj == nullptr)
-                {
-                    retTime = 0;
-                    break;
-                }
                 const UINT32 year = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][0]);
                 const UINT32 month = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][NUM_ONE]);
                 const UINT32 day = static_cast<UINT32>(BDS_LEAPSEC_INFO[i][NUM_TWO]);
@@ -195,7 +177,7 @@ namespace sixents
                 const UINT32 min = 0;
                 const DOUBLE sec = 0.0;
                 SStandardTime leapTime = {year, month, day, hour, min, sec, UTC};
-                DOUBLE leapTimeSec = timeObj->StandTimeToSec(leapTime);
+                DOUBLE leapTimeSec = IGNSSTime::StandTimeToSec(leapTime);
                 if (static_cast<DOUBLE>(retTimeSec) - leapTimeSec >= 0.0)
                 {
                     retTime = static_cast<DOUBLE>(retTimeSec) + timeMSec;

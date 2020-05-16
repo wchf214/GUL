@@ -516,7 +516,7 @@ bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
         }
         outStr = new char[static_cast<unsigned long long>(outStrLen)];
         memset(outStr, 0, sizeof (char) * static_cast<unsigned long long>(outStrLen));
-        sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
+        retGul = sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
                                                    outStr, outStrLen);
         if (retGul != 0) {
             gulRet += COMMA + QString::number(retGul);

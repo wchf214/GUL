@@ -54,9 +54,11 @@ namespace sixents
         // 月份定义
         enum MONTH_TYPE
         {
-            MONTH_TYPE_NONE = 0,       ///<  无效值
-            BIG_MONTH = 1,             ///<  大月，指有31天的月份
-            SMALL_MONTH                ///<  小月，指有30天的月份
+            MONTH_TYPE_NONE = 0,          ///<  无效值
+            DAY_IN_FEB = 28,              ///< 二月的天数，28天
+            FEB_IN_CENTURY = 29,          ///< 闰年的二月天数，29天
+            SMALL_MONTH = 30,             ///<  小月，指有30天的月份
+            BIG_MONTH = 31                ///<  大月，指有31天的月份
         };
 
         enum MONTH_NAME
@@ -135,8 +137,6 @@ namespace sixents
         const INT32 SEC_IN_HALF_DAY = SEC_IN_DAY / 2;                 ///< 半天的时间 43200
         const INT32 DAY_IN_WEEK = 7;                                  ///< 一周内的天数
         const INT32 WEEK_SEC = DAY_IN_WEEK * SEC_IN_DAY;              ///< 一周内的秒数 604800
-        const UINT32 DAY_IN_FEB = 28;                                 ///< 二月的天数，28天
-        const UINT32 DAY_IN_LEAP_FEB = 29;                            ///< 闰年的二月天数，29天
 
         // For Time Leap 跳秒值
         const INT32 WEEK_BETWEEN_GPS_GAL = 1024;          ///< GPS 与 Galileo 相差1024周
