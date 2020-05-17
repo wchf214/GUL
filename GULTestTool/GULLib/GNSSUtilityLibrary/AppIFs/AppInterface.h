@@ -342,7 +342,7 @@ namespace sixents
             /**
              * @brief           将小数形式的角度进行格式化
              * @author          wuchuanfei@sixents.com
-             * @param[in]       degree              小数形式的度，精确到小数点后9位
+             * @param[in]       rad                 弧度，精确到小数点后9位
              * @param[in]       formatType          格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
              * @param[out]      formatString        格式化后的字符串
              * @param[out]      len                 formatString的长度
@@ -351,7 +351,7 @@ namespace sixents
              * @note            N/A
              */
             static INT32
-            FormatAngleByDegree(const DOUBLE degree, char* formatString, UINT32& len, const BOOL_T formatType = true);
+            FormatAngleByDegree(const DOUBLE rad, char* formatString, UINT32& len, const BOOL_T formatType = true);
 
             /**
              * @brief           将度分秒形式的角度格式化

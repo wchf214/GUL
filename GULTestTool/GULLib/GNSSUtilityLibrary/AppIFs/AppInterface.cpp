@@ -622,14 +622,13 @@ namespace sixents
             INT32 iRet = RETURN_FAIL;
             do
             {
-                if (minute < 0 || minute >= BASE_60 || sec < 0 || sec >= BASE_60)
+                if (minute >= BASE_60 || sec < 0 || sec >= BASE_60)
                 {
                     iRet = RETURN_ERROR_PARAMETER;
                     break;
                 }
                 CGNSSAngle dms(degree, minute, sec);
-                CAppInterface::Deg2Rad(dms.GetDeg(), radian);
-                iRet = RETURN_SUCCESS;
+                iRet = CAppInterface::Deg2Rad(dms.GetDeg(), radian);
             } while (false);
             return iRet;
         }

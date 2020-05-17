@@ -1848,13 +1848,20 @@ bool CTestFunc::Deg2Rad(const QString testData, QString& result)
 {
     QString rtkRet("null");
     QString gulRet("null");
+    result.clear();
     bool retFunc = false;
+    int retGul = 0;
     do {
         if (testData.isEmpty()) {
             break;
         }
         result.clear();
         // 解析testData
+        int testDataCount = testData.split(",").count();
+        if (testDataCount == 3) {
+            retFunc = DMS2Rad(testData, result);
+            break;
+        }
         double deg = testData.toDouble();
 
         // 执行Rtk接口
@@ -1863,7 +1870,7 @@ bool CTestFunc::Deg2Rad(const QString testData, QString& result)
 
         // 执行GUL接口
         double gulRad = 0.0;
-        int retGul = sixents::Math::Deg2Rad(deg, gulRad);
+        retGul = sixents::Math::Deg2Rad(deg, gulRad);
         if (retGul != sixents::Math::RETURN_SUCCESS) {
             gulRet += COMMA + QString::number(retGul);
             break;
@@ -1872,7 +1879,10 @@ bool CTestFunc::Deg2Rad(const QString testData, QString& result)
         retFunc = true;
     } while(false);
     // 组装结果
-    result = rtkRet + SEMICOLON + gulRet;
+    if (result.isEmpty()) {
+        result = rtkRet + SEMICOLON + gulRet;
+    }
+
     return retFunc;
 }
 
