@@ -27,11 +27,11 @@ namespace sixents
         enum TIME_TYPE
         {
             TIME_TYPE_NONE = 0, ///< 不支持的时间类型
-            UTC,      ///< UTC
-            GPS,      ///< GPS
-            GLONASS,  ///< 格洛纳斯
-            GALILEO,  ///< 伽利略
-            BDS       ///< 北斗
+            UTC,                ///< UTC
+            GPS,                ///< GPS
+            GLONASS,            ///< 格洛纳斯
+            GALILEO,            ///< 伽利略
+            BDS                 ///< 北斗
         };
 
         /// 坐标系统类型定义
@@ -54,17 +54,17 @@ namespace sixents
         // 月份定义
         enum MONTH_TYPE
         {
-            MONTH_TYPE_NONE = 0,          ///<  无效值
-            DAY_IN_FEB = 28,              ///< 二月的天数，28天
-            FEB_IN_CENTURY = 29,          ///< 闰年的二月天数，29天
-            SMALL_MONTH = 30,             ///<  小月，指有30天的月份
-            BIG_MONTH = 31                ///<  大月，指有31天的月份
+            MONTH_TYPE_NONE = 0, ///<  无效值
+            DAY_IN_FEB = 28,     ///< 二月的天数，28天
+            FEB_IN_CENTURY = 29, ///< 闰年的二月天数，29天
+            SMALL_MONTH = 30,    ///<  小月，指有30天的月份
+            BIG_MONTH = 31       ///<  大月，指有31天的月份
         };
 
         enum MONTH_NAME
         {
             MONTH_JAN = 1,
-            MONTH_FEB,    ///<  二月，需特殊处理
+            MONTH_FEB, ///<  二月，需特殊处理
             MONTH_MAR,
             MONTH_APR,
             MONTH_MAY,
@@ -97,7 +97,7 @@ namespace sixents
         const INT32 NUM_FOUR = 4;
         const INT32 NUM_FIVE = 5;
         const INT32 NUM_SIX = 6;
-
+        const INT32 NUM_FIFTEEN = 15;
         // 进制转换
         const INT32 BASE_60 = 60; ///< 60 进制,包含时间进制，角度进制
 
@@ -130,7 +130,7 @@ namespace sixents
         const INT32 MONTH_IN_4YRAR = 48;                              ///< 四年(含一个闰年)的总月数
         const INT32 CURRENT_MAX_YEAR = 2099;                          ///< 当前支持的最大年数
         const INT32 LEAP_YEAR_INTERVAL = 4;                           ///< 闰年间隔
-        const UINT32 CENTURY_LEAP_YEAR = 400;                             ///< 世纪闰年
+        const UINT32 CENTURY_LEAP_YEAR = 400;                         ///< 世纪闰年
         const INT32 MAX_DAY_IN_MONTH = 31;                            ///< 一个月内最大的天数
         const INT32 MAX_HOUR_IN_DAY = 24;                             ///< 一天内最大的小时数
         const INT32 SEC_IN_DAY = MAX_HOUR_IN_DAY * BASE_60 * BASE_60; ///< 一天内的秒数 86400
@@ -138,6 +138,7 @@ namespace sixents
         const INT32 DAY_IN_WEEK = 7;                                  ///< 一周内的天数
         const INT32 WEEK_SEC = DAY_IN_WEEK * SEC_IN_DAY;              ///< 一周内的秒数 604800
 
+        const INT32 GPS_WEEK_LOOP = 2048; // GPS循环2048周
         // For Time Leap 跳秒值
         const INT32 WEEK_BETWEEN_GPS_GAL = 1024;          ///< GPS 与 Galileo 相差1024周
         const INT32 GPSWEEK_TO_BDSWEEK = 1356;            ///< GPS 与 BDS 相差1356周
@@ -165,6 +166,12 @@ namespace sixents
                                                       {0}};
 
         // 星历模块常量定义
+
+        const UINT16 GPS_EPH = 1019;
+        const UINT16 GLO_EPH = 1020;
+        const UINT16 GAL_EPH = 1045;
+        const UINT16 BDS_EPH = 1046;
+
         const INT32 FIFTEEN_MIN = 15;                           ///< 星历计算，15分钟
         const INT32 SEC_OF_FIFTEEN_MIN = FIFTEEN_MIN * BASE_60; ///< 15分钟对应的秒数
 
