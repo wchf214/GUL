@@ -1,4 +1,4 @@
-#include "CGNSSCoord.h"
+﻿#include "CGNSSCoord.h"
 #include <cmath>
 #include "../Angle/CGNSSAngle.h"
 #include "../DllMain/GNSSCommonDef.h"
@@ -176,7 +176,9 @@ namespace sixents
             lon = lon * R2D;
             lat = lat * R2D;
             if (lon > LONGITUDE_UPPER_LIMIT)
+            {
                 lon = lon - LONGITUDE_DOUBLE_UPPER_LIMIT;
+            }
             return RETURN_SUCCESS;
         }
 
@@ -227,9 +229,25 @@ namespace sixents
             DOUBLE lat = refB * D2R;
             DOUBLE lon = refL * D2R;
 
-            curX = refX - sin(lat) * cos(lon) * curEast - sin(lon) * curNorth + cos(lat) * cos(lon) * curUp;
-            curY = refY - sin(lat) * sin(lon) * curEast + cos(lon) * curNorth + cos(lat) * sin(lon) * curUp;
-            curZ = refZ + cos(lat) * curEast + sin(lat) * curUp;
+            DOUBLE sinLat = sin(lat);
+            DOUBLE cosLat = cos(lat);
+            DOUBLE sinLon = sin(lon);
+            DOUBLE cosLon = cos(lon);
+
+            DOUBLE tempX1 = sinLat * cosLon * curNorth;
+            DOUBLE tempX2 = sinLon * curEast;
+            DOUBLE tempX3 = cosLat * cosLon * curUp;
+            curX = refX - tempX1 - tempX2 + tempX3;
+
+            tempX1 = sinLat * sinLon * curNorth;
+            tempX2 = cosLon * curEast;
+            tempX3 = cosLat * sinLon * curUp;
+            curY = refY - tempX1 + tempX2 + tempX3;
+
+            tempX1 = cosLat * curNorth;
+            tempX2 = sinLat * curUp;
+            curZ = refZ + tempX1 + tempX2;
+
             return RETURN_SUCCESS;
         }
 
