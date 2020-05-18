@@ -196,7 +196,7 @@ namespace sixents
                     const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
 
                 //行列式不能为0=满秩矩阵
-                if (inMtx.determinant() < DOUBLE_ZONE_LITTLE || inMtx.determinant() > DOUBLE_ZONE_BIG)
+                if (inMtx.determinant() > DOUBLE_ZONE_LITTLE || inMtx.determinant() < DOUBLE_ZONE_BIG)
                 {
                     ret = RETURN_ZERO_DETERMINANT;
                     break;
