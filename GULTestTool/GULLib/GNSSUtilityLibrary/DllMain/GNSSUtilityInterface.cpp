@@ -240,22 +240,12 @@ namespace sixents
             return CAppInterface::CalcEphSatPos(sec, ephObj, x, y, z);
         }
 
-        extern "C" DLL_API int STD_CALL FormatAngleByDegree(const double degree,
-                                                            char* formatString,
-                                                            unsigned int& len,
-                                                            const bool formatType)
+        extern "C" DLL_API int STD_CALL FormatAngle(const double radian,
+                                                    char* formatString,
+                                                    unsigned int& len,
+                                                    const bool formatType)
         {
-            return CAppInterface::FormatAngleByDegree(degree, formatString, len, formatType);
-        }
-
-        extern "C" DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                                         const unsigned int minute,
-                                                         const double sec,
-                                                         char* formatString,
-                                                         unsigned int& len,
-                                                         const bool formatType)
-        {
-            return CAppInterface::FormatAngleByDMS(degree, minute, sec, formatString, len, formatType);
+            return CAppInterface::FormatAngle(radian, formatString, len, formatType);
         }
 
         extern "C" DLL_API int STD_CALL Deg2Rad(const double degree, double& radian)

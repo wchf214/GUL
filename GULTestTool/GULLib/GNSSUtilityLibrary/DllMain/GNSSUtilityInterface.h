@@ -1,4 +1,4 @@
-/** @file          GNSSUtilityInterface.h
+﻿/** @file          GNSSUtilityInterface.h
  *  @brief         对外接口
  *  @details       GNSS Utility 对外接口，包含星历的钟差和位置计算、导航时间转换和格式化、坐标转换、角度转换和格式化
  *  @author        wuchuanfei@sixens.com
@@ -412,7 +412,7 @@ namespace sixents
         /**
          * @brief           将小数形式的角度进行格式化
          * @author          wuchuanfei@sixents.com
-         * @param[in]       degree              小数形式的度，精确到小数点后11位
+         * @param[in]       radian              弧度，精确到小数点后11位
          * @param[in]       formatType          格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
          * @param[out]      formatString        格式化后的字符串
          * @param[out]      len                 formatString的长度
@@ -420,30 +420,10 @@ namespace sixents
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL FormatAngleByDegree(const double degree,
-                                                 char* formatString,
-                                                 unsigned int& len,
-                                                 const bool formatType = true);
-
-        /**
-         * @brief           将度分秒形式的角度格式化
-         * @author          wuchuanfei@sixents.com
-         * @param[in]       degree              度
-         * @param[in]       minute              分
-         * @param[in]       sec                 秒，精确到小数点后5位
-         * @param[in]       formatType          格式化类型；true时，格式化为度，false时格式化为度分秒;默认为true
-         * @param[out]      formatString        输出参数，格式化后的字符串
-         * @param[out]      len                 formatString的长度
-         * @exception       N/A
-         * @return          函数执行是否成功
-         * @note            N/A
-         */
-        DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                              const unsigned int minute,
-                                              const double sec,
-                                              char* formatString,
-                                              unsigned int& len,
-                                              const bool formatType = true);
+        DLL_API int STD_CALL FormatAngle(const double radian,
+                                         char* formatString,
+                                         unsigned int& len,
+                                         const bool formatType = true);
 
         /**
          * @brief           度转弧度

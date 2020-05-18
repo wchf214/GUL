@@ -165,16 +165,10 @@ namespace sixents {
             CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
             DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj,
                                               double& x, double& y, double& z);
-            DLL_API int STD_CALL FormatAngleByDegree(const double degree,
+            DLL_API int STD_CALL FormatAngle(const double radian,
                                                     char* formatString,
                                                     unsigned int& len,
                                                     const bool formatType);
-            DLL_API int STD_CALL FormatAngleByDMS(const int degree,
-                                                  const unsigned int minute,
-                                                  const double sec,
-                                                  char* formatString,
-                                                  unsigned int& len,
-                                                  const bool formatType);
             DLL_API int STD_CALL Deg2Rad(const double degree, double& radian);
             DLL_API int STD_CALL DMS2Rad(const int degree, const unsigned int minute, const double sec, double& radian);
             DLL_API int STD_CALL Rad2Deg(const double radian, double& degree);
@@ -1769,14 +1763,22 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
         }
         result.clear();
         // 解析testData
-        double deg = testData.toDouble();
+        QStringList testDatas = testData.split(COMMA);
+        bool formatType = true;
+        double deg = 0.0;
+        if (testDatas.count() == 2) {
+            formatType = false;
+            deg = testDatas[0].toDouble();
+        } else {
+            deg = testData.toDouble();
+        }
 
         // 执行Rtk接口，未实现该结果
 
         // 执行GUL接口
         char* gulChRet = nullptr;
         unsigned int len = 0;
-        int retGul = sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+        int retGul = sixents::Math::FormatAngle(deg, gulChRet, len, formatType);
         if (retGul != sixents::Math::RETURN_SUCCESS) {
             gulRet += COMMA + QString::number(retGul);
             break;
@@ -1784,7 +1786,7 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
 
         gulChRet=new char[len];
         memset(gulChRet, 0, sizeof (char)*len);
-        retGul = sixents::Math::FormatAngleByDegree(deg, gulChRet, len);
+        retGul = sixents::Math::FormatAngle(deg, gulChRet, len, formatType);
         if (retGul != sixents::Math::RETURN_SUCCESS) {
             gulRet += COMMA + QString::number(retGul);
             break;
@@ -1800,48 +1802,10 @@ bool CTestFunc::FormatAngleByDegree(const QString testData, QString& result)
     return retFunc;
 }
 
-bool CTestFunc::FormatAngleByDMS(const QString testData, QString& result)
+bool CTestFunc::FormatAngleByDMS(const QString testData, QString &result)
 {
-    QString rtkRet("null");
-    QString gulRet("null");
-    bool retFunc = false;
-    do {
-        if (testData.isEmpty()) {
-            break;
-        }
-        result.clear();
-        // 解析testData
-        QStringList dmsList = testData.split(COMMA);
-        if (dmsList.count() != 3) {
-            break;
-        }
-        int degree = dmsList[0].toInt();
-        unsigned int minute = static_cast<unsigned int>(dmsList[1].toInt());
-        double sec = dmsList[2].toDouble();
-
-        // 执行Rtk接口，未实现该结果
-
-        // 执行GUL接口
-        char* gulChRet = nullptr;
-        unsigned int len = 0;
-        int retGul = sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
-        if (retGul != sixents::Math::RETURN_SUCCESS) {
-            gulRet += COMMA + QString::number(retGul);
-            break;
-        }
-        gulChRet=new char[len + 1];
-        retGul = sixents::Math::FormatAngleByDMS(degree, minute, sec, gulChRet, len, false);
-        if (retGul != sixents::Math::RETURN_SUCCESS) {
-            gulRet += COMMA + QString::number(retGul);
-            break;
-        }
-        gulRet = gulChRet + COMMA + QString::number(retGul);
-        retFunc = true;
-    } while(false);
-
-    // 组装结果
-    result = rtkRet + SEMICOLON + gulRet;
-    return retFunc;
+    QString curData = testData + COMMA + QString("T");
+    return FormatAngleByDegree(curData, result);
 }
 
 bool CTestFunc::Deg2Rad(const QString testData, QString& result)
@@ -1857,7 +1821,7 @@ bool CTestFunc::Deg2Rad(const QString testData, QString& result)
         }
         result.clear();
         // 解析testData
-        int testDataCount = testData.split(",").count();
+        int testDataCount = testData.split(COMMA).count();
         if (testDataCount == 3) {
             retFunc = DMS2Rad(testData, result);
             break;

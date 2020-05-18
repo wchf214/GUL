@@ -540,55 +540,14 @@ namespace sixents
         }
 
         INT32
-        CAppInterface::FormatAngleByDegree(const DOUBLE degree,
-                                           CHAR* formatString,
-                                           UINT32& len,
-                                           const BOOL_T formatType)
+        CAppInterface::FormatAngle(const DOUBLE radian, char* formatString, UINT32& len, const BOOL_T formatType)
         {
             INT32 retVal = RETURN_FAIL;
             do
             {
                 std::string result = "";
+                DOUBLE degree = radian * R2D;
                 CGNSSAngle angleObj(degree);
-                angleObj.DegToString(result, formatType);
-
-                const UINT32 NULL_CHAR_LEN = 1;
-                if (len != static_cast<UINT32>(result.size()) + NULL_CHAR_LEN)
-                {
-                    len = static_cast<UINT32>(result.size()) + NULL_CHAR_LEN;
-                    retVal = RETURN_SUCCESS;
-                    break;
-                }
-
-                if (formatString == nullptr)
-                {
-                    retVal = RETURN_NULL_PTR;
-                    break;
-                }
-
-                memcpy(formatString, result.c_str(), static_cast<size_t>(len));
-                retVal = RETURN_SUCCESS;
-            } while (false);
-            return retVal;
-        }
-
-        INT32 CAppInterface::FormatAngleByDMS(const INT32 degree,
-                                              const UINT32 minute,
-                                              const DOUBLE sec,
-                                              CHAR* formatString,
-                                              UINT32& len,
-                                              const BOOL_T formatType)
-        {
-            INT32 retVal = RETURN_FAIL;
-            do
-            {
-                if (sec < 0.0)
-                {
-                    retVal = RETURN_ERROR_PARAMETER;
-                    break;
-                }
-                std::string result = "";
-                CGNSSAngle angleObj(degree, minute, sec);
                 angleObj.DegToString(result, formatType);
 
                 const UINT32 NULL_CHAR_LEN = 1;
