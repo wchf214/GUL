@@ -1367,43 +1367,125 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         int minute = timeList[1].toInt();
         double second = timeList[2].toDouble();
 
-        // 从文件中读取星历电文
-        QString binFilePath("");
-//        FileConvertToBin(testDataFilePath, binFilePath);
-        FILE *rtkFP = new FILE();
-        std::string temp = binFilePath.toStdString();
-        const char* fileName = temp.c_str();
-        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-        if (openFlag != 0) {
+        // 读取星历电文
+        QFile fileObj(testDataFilePath);
+        if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
             break;
         }
+        QByteArray ephHexText = fileObj.readAll();// 原始电文
+        // 从所有电文中读取星历电文
+        UINT32 msgType = 0;
+        UINT32 msgPos = 0;
+        UINT32 expectLen = 0;
+        QByteArray msg;
+        do {
+            INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
+                                             static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
+            if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
+                ephHexText.clear();
+                msgPos = 0;
+                break;
+            } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
+                ephHexText.remove(0, static_cast<int>(msgPos));
+                msgPos = 0;
+                break;
+            } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
+                if (msgType == GLONASS_EPH) {  // 当收到一包完整星历电文
+                    msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
+                    break;
+                }
+                int startPos = 0;    // 删除时的起始位置
+                int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
+                ephHexText.remove(startPos, delLength);
+                msgPos = 0;
+                msgType = 0;
+            }
+        } while (!ephHexText.isEmpty());
+
+        // 解星历电文
+        if (msg.isEmpty()) { // 当前指针不能为空指针
+            break;
+        }
+
+        // 执行Rtk接口
         // 文本文件转二进制文件
         rtcm_t rtcm;
         init_rtcm(&rtcm);
-        int ret = input_rtcm3f(&rtcm, rtkFP);
-        if (ret < 0) {
-            break;
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
         }
-        fclose(rtkFP);
-        delete rtkFP;
-        rtkFP = nullptr;
-        // 执行Rtk接口，未实现该结果
+
         // 调用Rtk接口解算
         gtime_t rtkClk;
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t tTemp = epoch2time(epochTime);
-        rtkClk = utc2gpst(tTemp);
-        double rtkClkRet = geph2clk(rtkClk, rtcm.nav.geph);
+        gtime_t rtkSecTime = epoch2time(epochTime);
+        rtkClk = utc2gpst(rtkSecTime);
+        geph_t realEph = rtcm.nav.geph[0];
+        double rtkClkRet = geph2clk(rtkClk, &realEph);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
 
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
-        //sixents::Math::SGlonassEphemeris glonassEphemeris;
+        // 初始化RTCM
+        sixents::CParam paramInForInit;
+        sixents::CParam paramOutForInit;
+        INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
+        if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
+            qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
+            break;
+        }
 
-        // 调用GUL接口解算
-        gulRet = "null";
+        // 1、AddValue,把电文添加到入参
+        sixents::CParam paramInForDecode;
+        int msgLen = static_cast<int>(msg.count());
+        paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
+                                  reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
+                                  reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
+        // 2、Decode
+        sixents::CParam paramOutForDecode;
+        INT32 retDecode = sixents::RtcmDecode(paramInForDecode, paramOutForDecode);
+        if (retDecode != sixents::common::rtcm::RETURN_SUCCESS) {
+            break;
+        }
+
+        // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
+        // 注：最后一步处理，不对返回值进行判断
+        sixents::IGnssDataInterface *gnssData = nullptr;
+        sixents::Math::SGlonassEphemeris ephemeris;
+        sixents::SGlonassEphemeris ephTemp;
+        bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
+        if (!retGetValue || !gnssData) {
+            break;
+        }
+        sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
+        if (dataType == sixents::IGnssDataInterface::GDT_GLO_EPH) {
+            sixents::CGlonassEphemeris *ephObj = dynamic_cast<sixents::CGlonassEphemeris *>(gnssData);
+            ephTemp = ephObj->GetGlonassEphemeris();
+        } else {
+            break;
+        }
+        RtcmGloEphToMathGloEph(&ephTemp, &ephemeris);
+        // 将当前时间转为double时间
+        double clock=0;
+        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+
+        int retGul = sixents::Math::CalcGlonassEphSatClock(gulSecTime, ephemeris, clock);
+        // 释放RTCM对象
+        sixents::RtcmFinal();
+
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
         retFunc = true;
     } while(false);
 
@@ -1490,26 +1572,18 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
         }
 
         // 执行Rtk接口
-        // 从文件中读取星历电文
-        QString binFilePath("");
-        FileConvertToBin(msg, testDataFilePath, binFilePath);
-        FILE *rtkFP = new FILE();
-        std::string temp = binFilePath.toStdString();
-        const char* fileName = temp.c_str();
-        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-        if (openFlag != 0) {
-            break;
-        }
         // 文本文件转二进制文件
         rtcm_t rtcm;
         init_rtcm(&rtcm);
-        int ret = input_rtcm3f(&rtcm, rtkFP);
-        if (ret < 0) {
-            break;
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
         }
-        fclose(rtkFP);
-        delete rtkFP;
-        rtkFP = nullptr;
 
         // 调用Rtk接口解算
         gtime_t rtkClk;
@@ -1517,7 +1591,8 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
                                static_cast<double>(hour), static_cast<double>(minute), second};
         gtime_t rtkSecTime = epoch2time(epochTime);
         rtkClk = utc2gpst(rtkSecTime);
-        double rtkClkRet = eph2clk(rtkClk, rtcm.nav.eph);
+        eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
+        double rtkClkRet = eph2clk(rtkClk, &realEph);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
 
@@ -1620,46 +1695,136 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         int minute = timeList[1].toInt();
         double second = timeList[2].toDouble();
 
-        // 从文件中读取星历电文
-        QString binFilePath("");
-//        FileConvertToBin(testDataFilePath, binFilePath);
-        FILE *rtkFP = new FILE();
-        std::string temp = binFilePath.toStdString();
-        const char* fileName = temp.c_str();
-        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-        if (openFlag != 0) {
+        // 读取星历电文
+        QFile fileObj(testDataFilePath);
+        if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
             break;
         }
+        QByteArray ephHexText = fileObj.readAll();// 原始电文
+        // 从所有电文中读取星历电文
+        UINT32 msgType = 0;
+        UINT32 msgPos = 0;
+        UINT32 expectLen = 0;
+        QByteArray msg;
+        do {
+            INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
+                                             static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
+            if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
+                ephHexText.clear();
+                msgPos = 0;
+                break;
+            } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
+                ephHexText.remove(0, static_cast<int>(msgPos));
+                msgPos = 0;
+                break;
+            } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
+                if (msgType == GLONASS_EPH) {  // 当收到一包完整星历电文
+                    msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
+                    break;
+                }
+                int startPos = 0;    // 删除时的起始位置
+                int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
+                ephHexText.remove(startPos, delLength);
+                msgPos = 0;
+                msgType = 0;
+            }
+        } while (!ephHexText.isEmpty());
+
+        // 解星历电文
+        if (msg.isEmpty()) { // 当前指针不能为空指针
+            break;
+        }
+
+        // 执行Rtk接口
         // 文本文件转二进制文件
         rtcm_t rtcm;
         init_rtcm(&rtcm);
-        int ret = input_rtcm3f(&rtcm, rtkFP);
-        if (ret < 0) {
-            break;
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
         }
-        fclose(rtkFP);
-        delete rtkFP;
-        rtkFP = nullptr;
-        // 执行Rtk接口，未实现该结果
+
         // 调用Rtk接口解算
         gtime_t rtkClk;
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t timeTemp = epoch2time(epochTime);
-        rtkClk = utc2gpst(timeTemp);
-        double rtkClkRet = 0.0;
-        double rtkPos[3] = {0.0, 0.0, 0.0};
-        double rtkVar = 0.0;
-        geph2pos(rtkClk, rtcm.nav.geph, rtkPos, &rtkClkRet, &rtkVar);
+        gtime_t rtkSecTime = epoch2time(epochTime);
+        rtkClk = utc2gpst(rtkSecTime);
+        geph_t realEph = rtcm.nav.geph[0];
+        double rsRtk[3];
+        memset(rsRtk, 0, sizeof(double)*3);
+        double dtsRtk = 0.0;
+        double varRtk = 0.0;
+        geph2pos(rtkClk, &realEph, rsRtk, &dtsRtk, &varRtk);
         free_rtcm(&rtcm);
-        rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + COMMA +
-                         QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + COMMA +
-                         QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
+        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
+
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
+        // 初始化RTCM
+        sixents::CParam paramInForInit;
+        sixents::CParam paramOutForInit;
+        INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
+        if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
+            qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
+            break;
+        }
 
-        // 调用GUL接口解算
+        // 1、AddValue,把电文添加到入参
+        sixents::CParam paramInForDecode;
+        int msgLen = static_cast<int>(msg.count());
+        paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
+                                  reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
+                                  reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
+        // 2、Decode
+        sixents::CParam paramOutForDecode;
+        INT32 retDecode = sixents::RtcmDecode(paramInForDecode, paramOutForDecode);
+        if (retDecode != sixents::common::rtcm::RETURN_SUCCESS) {
+            break;
+        }
 
+        // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
+        // 注：最后一步处理，不对返回值进行判断
+        sixents::IGnssDataInterface *gnssData = nullptr;
+        sixents::Math::SGlonassEphemeris ephemeris;
+        sixents::SGlonassEphemeris ephTemp;
+        bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
+        if (!retGetValue || !gnssData) {
+            break;
+        }
+        sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
+        if (dataType == sixents::IGnssDataInterface::GDT_GLO_EPH) {
+            sixents::CGlonassEphemeris *ephObj = dynamic_cast<sixents::CGlonassEphemeris *>(gnssData);
+            ephTemp = ephObj->GetGlonassEphemeris();
+        } else {
+            break;
+        }
+        RtcmGloEphToMathGloEph(&ephTemp, &ephemeris);
+        // 将当前时间转为double时间
+        double x = 0.0;
+        double y = 0.0;
+        double z = 0.0;
+        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+
+        int retGul = sixents::Math::CalcGlonassEphSatPos(gulSecTime, ephemeris, x, y, z);
+        // 释放RTCM对象
+        sixents::RtcmFinal();
+
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(retGul);
         retFunc = true;
     } while(false);
 
@@ -1705,46 +1870,135 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
         int minute = timeList[1].toInt();
         double second = timeList[2].toDouble();
 
-        // 从文件中读取星历电文
-        QString binFilePath("");
-//        FileConvertToBin(testDataFilePath, binFilePath);
-        FILE *rtkFP = new FILE();
-        std::string temp = binFilePath.toStdString();
-        const char* fileName = temp.c_str();
-        errno_t openFlag = fopen_s(&rtkFP, fileName, "rb+");
-        if (openFlag != 0) {
+        // 读取星历电文
+        QFile fileObj(testDataFilePath);
+        if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly)) {
             break;
         }
+        QByteArray ephHexText = fileObj.readAll();// 原始电文
+        // 从所有电文中读取星历电文
+        UINT32 msgType = 0;
+        UINT32 msgPos = 0;
+        UINT32 expectLen = 0;
+        QByteArray msg;
+        do {
+            INT32 retGetMsg = sixents::RtcmGetMessage(reinterpret_cast<BYTE *>(const_cast<char *>(ephHexText.data())),
+                                             static_cast<UINT32>(ephHexText.count()), msgType, msgPos, expectLen);
+            if (retGetMsg < sixents::common::rtcm::RETURN_SUCCESS) {  // 未找到D3或其它原因失败
+                ephHexText.clear();
+                msgPos = 0;
+                break;
+            } else if (retGetMsg == sixents::common::rtcm::RETURN_SUCCESS) {  // 找到D3，但电文不全
+                ephHexText.remove(0, static_cast<int>(msgPos));
+                msgPos = 0;
+                break;
+            } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
+                if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
+                    msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
+                    break;
+                }
+                int startPos = 0;    // 删除时的起始位置
+                int delLength = static_cast<int>(msgPos) + static_cast<int>(retGetMsg);    // 删除电文的长度
+                ephHexText.remove(startPos, delLength);
+                msgPos = 0;
+                msgType = 0;
+            }
+        } while (!ephHexText.isEmpty());
+
+        // 解星历电文
+        if (msg.isEmpty()) { // 当前指针不能为空指针
+            break;
+        }
+
+        // 执行Rtk接口
         // 文本文件转二进制文件
         rtcm_t rtcm;
         init_rtcm(&rtcm);
-        int ret = input_rtcm3f(&rtcm, rtkFP);
-        if (ret < 0) {
-            break;
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
         }
-        fclose(rtkFP);
-        delete rtkFP;
-        rtkFP = nullptr;
-        // 执行Rtk接口，未实现该结果
+
         // 调用Rtk接口解算
         gtime_t rtkClk;
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t timeTemp = epoch2time(epochTime);
-        rtkClk = utc2gpst(timeTemp);
-        double rtkClkRet = 0.0;
-        double rtkPos[3] = {0.0, 0.0, 0.0};
-        double rtkVar = 0.0;
-        eph2pos(rtkClk, rtcm.nav.eph, rtkPos, &rtkClkRet, &rtkVar);
+        gtime_t rtkSecTime = epoch2time(epochTime);
+        rtkClk = utc2gpst(rtkSecTime);
+        eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
+        double rsRtk[3];
+        memset(rsRtk, 0, sizeof (double)*3);
+        double dtsRtk = 0.0;
+        double varRtk = 0.0;
+        eph2pos(rtkClk, &realEph, rsRtk, &dtsRtk, &varRtk);
         free_rtcm(&rtcm);
-        rtkRet = QString::number(rtkPos[0], 'f', COORDINATE_ACCURACY) + COMMA +
-                         QString::number(rtkPos[1], 'f', COORDINATE_ACCURACY) + COMMA +
-                         QString::number(rtkPos[2], 'f', COORDINATE_ACCURACY);
+        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
+
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
+        // 初始化RTCM
+        sixents::CParam paramInForInit;
+        sixents::CParam paramOutForInit;
+        INT32 retInit = sixents::RtcmInit(paramInForInit, paramOutForInit);
+        if (retInit != sixents::common::rtcm::RETURN_SUCCESS) {
+            qDebug() << __FUNCTION__ << __LINE__ << "loadRtcm failed";
+            break;
+        }
 
-        // 调用GUL接口解算
+        // 1、AddValue,把电文添加到入参
+        sixents::CParam paramInForDecode;
+        int msgLen = static_cast<int>(msg.count());
+        paramInForDecode.AddValue(sixents::common::rtcm::PN_BA_MESSAGE_DATA, sixents::PDT_BYTE_ARRAY,
+                                  reinterpret_cast<PVOID>(const_cast<char *>(msg.toStdString().data())),
+                                  reinterpret_cast<PVOID>(static_cast<long long>(msgLen)));
+        // 2、Decode
+        sixents::CParam paramOutForDecode;
+        INT32 retDecode = sixents::RtcmDecode(paramInForDecode, paramOutForDecode);
+        if (retDecode != sixents::common::rtcm::RETURN_SUCCESS) {
+            break;
+        }
 
+        // 3、GetValue,解析outputParam，找到IGnssDataInterface对象
+        // 注：最后一步处理，不对返回值进行判断
+        sixents::IGnssDataInterface *gnssData = nullptr;
+        sixents::Math::SEphemeris ephemeris;
+        sixents::SEphemeris ephTemp;
+        bool retGetValue = paramOutForDecode.GetValue(sixents::common::rtcm::PN_PTR_GNSS_DATA_OBJECT, &gnssData, nullptr);
+        if (!retGetValue || !gnssData) {
+            break;
+        }
+        sixents::IGnssDataInterface::GnssDataType dataType = gnssData->GetGnssDataType();
+        if (dataType == sixents::IGnssDataInterface::GDT_EPH) {
+            sixents::CEphemeris *ephObj = dynamic_cast<sixents::CEphemeris *>(gnssData);
+            ephTemp = ephObj->GetEphemeris();
+        } else {
+            break;
+        }
+        RtcmEphToMathEph(&ephTemp, &ephemeris);
+        // 将当前时间转为double时间
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        int retGul = sixents::Math::CalcEphSatPos(gulSecTime, ephemeris, x, y, z);
+        // 释放RTCM对象
+        sixents::RtcmFinal();
+
+        if (retGul != 0) {
+            gulRet += COMMA + QString::number(retGul);
+            break;
+        }
+        gulRet = QString::number(x, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(retGul);
         retFunc = true;
     } while(false);
     // 组装结果

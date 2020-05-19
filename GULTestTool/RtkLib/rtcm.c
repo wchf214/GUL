@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+﻿/*------------------------------------------------------------------------------
 * rtcm.c : rtcm functions
 *
 *          Copyright (C) 2009-2018 by T.TAKASU, All rights reserved.
@@ -70,6 +70,8 @@ extern int encode_rtcm3(rtcm_t *rtcm, int type, int sync);
 *-----------------------------------------------------------------------------*/
 extern int init_rtcm(rtcm_t *rtcm)
 {
+#define MINPRNGLO 1
+#define MAXPRNGLO 27
     gtime_t time0={0};
     obsd_t data0={{0}};
     eph_t  eph0 ={0,-1,-1};
@@ -133,11 +135,14 @@ extern int init_rtcm(rtcm_t *rtcm)
 extern void free_rtcm(rtcm_t *rtcm)
 {
     trace(3,"free_rtcm:\n");
-    
+#define MINPRNGLO 1
+#define MAXPRNGLO 27
     /* free memory for observation and ephemeris buffer */
     free(rtcm->obs.data); rtcm->obs.data=NULL; rtcm->obs.n=0;
     free(rtcm->nav.eph ); rtcm->nav.eph =NULL; rtcm->nav.n=0;
-    free(rtcm->nav.geph); rtcm->nav.geph=NULL; rtcm->nav.ng=0;
+    free(rtcm->nav.geph);
+    rtcm->nav.geph=NULL;
+    rtcm->nav.ng=0;
 }
 /* input rtcm 2 message from stream --------------------------------------------
 * fetch next rtcm 2 message and input a message from byte stream

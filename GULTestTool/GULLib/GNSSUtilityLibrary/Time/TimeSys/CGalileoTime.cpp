@@ -1,4 +1,4 @@
-/** @file          CGPSTime.h
+﻿/** @file          CGPSTime.h
  *  @brief         GPS时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -60,11 +60,13 @@ namespace sixents
         void CGalileoTime::ToStandTime(SStandardTime &time)
         {
             SecToStandTime(m_sec, time);
+            time.m_timeType = GALILEO;
         }
 
         void CGalileoTime::ToWeekSec(SGNSSTime &time)
         {
             SecToWeekSec(m_sec, EPOCH_TO_GALT0, time);
+            time.m_timeType = GALILEO;
         }
 
         void CGalileoTime::SetTime(const DOUBLE &time)

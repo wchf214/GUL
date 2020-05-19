@@ -1,4 +1,4 @@
-#include "CBDSTime.h"
+﻿#include "CBDSTime.h"
 #include <iomanip>
 #include <sstream>
 
@@ -43,6 +43,7 @@ namespace sixents
         void CBDSTime::ToStandTime(SStandardTime& time)
         {
             SecToStandTime(m_sec, time);
+            time.m_timeType = BDS;
         }
 
         void CBDSTime::ToStandTime()
@@ -51,6 +52,7 @@ namespace sixents
         void CBDSTime::ToWeekSec(SGNSSTime& time)
         {
             SecToWeekSec(m_sec, EPOCH_TO_BDT0, time);
+            time.m_timeType = BDS;
         }
 
         void CBDSTime::SetTime(const DOUBLE& time)

@@ -41,10 +41,11 @@ namespace sixents
                 SGNSSTime curTime = {week, sec, timeType};
                 timeObj->SetTime(curTime);
                 SStandardTime curStandTime;
-                timeObj->GetTime(curStandTime);
+                timeObj->ToStandTime(curStandTime);
 
-                if (!IGNSSTime::IsRightDay(curStandTime)) {
-                    retVal = RETURN_ERROR_PARAMETER;
+                if (!IGNSSTime::IsRightDay(curStandTime))
+                {
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
 
@@ -85,8 +86,8 @@ namespace sixents
             do
             {
                 if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
-                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
-                 || (second < 0 || second > BASE_60))
+                    || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                    || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -100,8 +101,9 @@ namespace sixents
                 }
 
                 SStandardTime curTime = {year, month, day, hour, minute, second, UTC};
-                if (!IGNSSTime::IsRightDay(curTime)) {
-                    retVal = RETURN_ERROR_PARAMETER;
+                if (!IGNSSTime::IsRightDay(curTime))
+                {
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
 
@@ -148,10 +150,8 @@ namespace sixents
             {
                 // srcTimeType, destTimeType,判断
                 if ((srcYear < EPOCHT0.m_year || srcYear > CURRENT_MAX_YEAR)
-                 || (srcMonth == 0 || srcMonth > MONTH_IN_YEAR)
-                 || (srcDay == 0 || srcDay > MAX_DAY_IN_MONTH)
-                 || (srcHour >= MAX_HOUR_IN_DAY) || (srcMinute >= BASE_60)
-                 || (srcSecond < 0 || srcSecond > BASE_60))
+                    || (srcMonth == 0 || srcMonth > MONTH_IN_YEAR) || (srcDay == 0 || srcDay > MAX_DAY_IN_MONTH)
+                    || (srcHour >= MAX_HOUR_IN_DAY) || (srcMinute >= BASE_60) || (srcSecond < 0 || srcSecond > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -176,8 +176,9 @@ namespace sixents
                 }
 
                 SStandardTime srcTimeData = {srcYear, srcMonth, srcDay, srcHour, srcMinute, srcSecond, srcTimeType};
-                if (!IGNSSTime::IsRightDay(srcTimeData)) {
-                    retVal = RETURN_ERROR_PARAMETER;
+                if (!IGNSSTime::IsRightDay(srcTimeData))
+                {
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(srcTimeType));
@@ -261,7 +262,7 @@ namespace sixents
                 destTime->GetTime(destTimeData);
                 if (!IGNSSTime::IsRightDay(destTimeData))
                 {
-                    retVal = RETURN_ERROR_PARAMETER;
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
                 year = destTimeData.m_year;
@@ -292,8 +293,8 @@ namespace sixents
             {
                 // srcTimeType, destTimeType,判断
                 if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
-                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
-                 || (second < 0 || second > BASE_60))
+                    || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                    || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -314,7 +315,7 @@ namespace sixents
                 SStandardTime srcTimeData = {year, month, day, hour, minute, second, standardTimeType};
                 if (!IGNSSTime::IsRightDay(srcTimeData))
                 {
-                    retVal = RETURN_ERROR_PARAMETER;
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
                 IGNSSTime* srcTime = CTimeFactory::CreateTimeObj(static_cast<TIME_TYPE>(standardTimeType));
@@ -334,7 +335,8 @@ namespace sixents
                 destTime->SetTime(retSec);
                 SGNSSTime destTimeData;
                 destTime->GetTime(destTimeData);
-                if (destTimeData.m_secAndMsec < 0.0) {
+                if (destTimeData.m_secAndMsec < 0.0)
+                {
                     retVal = RETURN_ERROR_PARAMETER;
                     break;
                 }
@@ -437,8 +439,8 @@ namespace sixents
             do
             {
                 if ((year < EPOCHT0.m_year || year > CURRENT_MAX_YEAR) || (month == 0 || month > MONTH_IN_YEAR)
-                 || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
-                 || (second < 0 || second > BASE_60))
+                    || (day == 0 || day > MAX_DAY_IN_MONTH) || (hour >= MAX_HOUR_IN_DAY) || (minute >= BASE_60)
+                    || (second < 0 || second > BASE_60))
                 {
                     retVal = RETURN_ERROR_STANDARDTIME;
                     break;
@@ -447,7 +449,7 @@ namespace sixents
                 SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
                 if (IGNSSTime::IsRightDay(timeData))
                 {
-                    retVal = RETURN_ERROR_PARAMETER;
+                    retVal = RETURN_ERROR_DAY;
                     break;
                 }
                 sec = IGNSSTime::StandTimeToSec(timeData);

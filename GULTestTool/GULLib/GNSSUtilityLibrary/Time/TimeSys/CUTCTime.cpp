@@ -1,4 +1,4 @@
-/** @file          CGPSTime.h
+﻿/** @file          CGPSTime.h
  *  @brief         GPSʱ����
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -50,6 +50,7 @@ namespace sixents
         void CUTCTime::ToStandTime(SStandardTime& time)
         {
             SecToStandTime(m_sec, time);
+            time.m_timeType = UTC;
         }
 
         void CUTCTime::ToStandTime()

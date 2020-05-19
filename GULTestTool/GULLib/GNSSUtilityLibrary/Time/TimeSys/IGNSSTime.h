@@ -284,6 +284,7 @@ namespace sixents
              * @note           N/A
              */
             static MONTH_TYPE GetMonthType(const UINT32& month);
+
         private:
             UINT32 m_timeType; ///< 存放时间,便于直接使用父类指针直接获取对象类型
         };                     // end class IGNSSTime

@@ -88,6 +88,7 @@ namespace sixents
         static const INT32 RETURN_ERROR_SEC = -7;          ///< 输入的秒数据有误
         static const INT32 RETURN_ERROR_STANDARDTIME = -8; ///< 输入的标准时间数据有误
         static const INT32 RETURN_ERROR_PARAMETER = -9;    ///< 参数错误
+        static const INT32 RETURN_ERROR_DAY = -10;         ///< 日期不是正确的日期(闰月、大小月的问题)
 
         const INT32 NUM_NEGATIVE_ONE = -1;
         const INT32 NUM_ZERO = 0;

@@ -394,6 +394,8 @@ extern int satno(int sys, int prn)
             if (prn<MINPRNGPS||MAXPRNGPS<prn) return 0;
             return prn-MINPRNGPS+1;
         case SYS_GLO_RTK:
+#define MINPRNGLO 1
+#define MAXPRNGLO 27
             if (prn<MINPRNGLO||MAXPRNGLO<prn) return 0;
             return NSATGPS+prn-MINPRNGLO+1;
         case SYS_GAL_RTK:

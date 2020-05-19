@@ -1,4 +1,4 @@
-/** @file          CGPSTime.h
+﻿/** @file          CGPSTime.h
  *  @brief         GPS时间类
  *  @details       N/A
  *  @author        wuchuanfei@sixens.com
@@ -58,6 +58,7 @@ namespace sixents
         void CGlonassTime::ToStandTime(SStandardTime &time)
         {
             SecToStandTime(m_sec, time);
+            time.m_timeType = GLONASS;
         }
 
         void CGlonassTime::SetTime(const DOUBLE &time)

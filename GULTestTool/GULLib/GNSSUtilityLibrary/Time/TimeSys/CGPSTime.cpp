@@ -1,4 +1,4 @@
-#include <iomanip>
+﻿#include <iomanip>
 #include <sstream>
 #include "CGPSTime.h"
 
@@ -48,11 +48,13 @@ namespace sixents
         void CGPSTime::ToStandTime(SStandardTime& time)
         {
             SecToStandTime(m_sec, time);
+            time.m_timeType = GPS;
         }
 
         void CGPSTime::ToWeekSec(SGNSSTime& time)
         {
             SecToWeekSec(m_sec, EPOCH_TO_GPST0, time);
+            time.m_timeType = GPS;
         }
 
         void CGPSTime::SetTime(const DOUBLE& time)
