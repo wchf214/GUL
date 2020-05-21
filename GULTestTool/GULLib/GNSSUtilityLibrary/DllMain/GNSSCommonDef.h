@@ -99,9 +99,10 @@ namespace sixents
         const INT32 NUM_FIVE = 5;
         const INT32 NUM_SIX = 6;
         const INT32 NUM_FIFTEEN = 15;
-        // 进制转换
-        const INT32 BASE_60 = 60; ///< 60 进制,包含时间进制，角度进制
 
+        // 进制转换
+        const INT32 BASE_60 = 60;     ///< 60 进制,包含时间进制，角度进制
+        const INT32 BASE_1000 = 1000; ///< 1000进制,毫秒等的进制
         // 时间模块常量定义
         const std::string DAY_INTERVAL = "-";      ///< 日期间隔符
         const std::string TIME_INTERVAL = ":";     ///< 时间间隔符、度分秒间隔符
@@ -186,14 +187,13 @@ namespace sixents
         const static DOUBLE GAL_GRAVITATION = 3.986004418E14; ///< earth gravitational constant   ref [7]
         const static DOUBLE BDS_GRAVITATION = 3.986004418E14; ///< earth gravitational constant   ref [9]
 
-        const static DOUBLE GPS_ANGULAR_VELOCITY = 7.2921151467E-5;   ///< earth angular velocity (IS-GPS) (rad/s)
-        const static DOUBLE GLO_ANGULAR_VELOCITY = 7.292115E-5;       ///< earth angular velocity (rad/s) ref [2]
-        const static DOUBLE GAL_ANGULAR_VELOCITY = 7.2921151467E-5;   ///< earth angular velocity (rad/s) ref [7]
-        const static DOUBLE BDS_ANGULAR_VELOCITY = 7.292115E-5;       ///< earth angular velocity (rad/s) ref [9]
-        const static DOUBLE DOUBLE_ZONE_LITTLE = -1E9;                ///< DOUBLE值是否为0比较时的最小值
-        const static DOUBLE DOUBLE_ZONE_BIG = 1E9;                    ///< DOUBLE值是否为0比较时的最大值
-        const static DOUBLE GLO_EPHENERI_INTEGRATION_STEP_PRN = 1e-9; ///< GLONASS星历位置微分方程步长的精度
-        const static INT32 GLO_EPHENERI_INTEGRATION_STEP = 60;        ///< glonass星历位置微分方程步长
+        const static DOUBLE GPS_ANGULAR_VELOCITY = 7.2921151467E-5; ///< earth angular velocity (IS-GPS) (rad/s)
+        const static DOUBLE GLO_ANGULAR_VELOCITY = 7.292115E-5;     ///< earth angular velocity (rad/s) ref [2]
+        const static DOUBLE GAL_ANGULAR_VELOCITY = 7.2921151467E-5; ///< earth angular velocity (rad/s) ref [7]
+        const static DOUBLE BDS_ANGULAR_VELOCITY = 7.292115E-5;     ///< earth angular velocity (rad/s) ref [9]
+        const static DOUBLE DOUBLE_ZONE_LITTLE = -1E-9;             ///< DOUBLE值是否为0比较时的最小值
+        const static DOUBLE DOUBLE_ZONE_BIG = 1E-9; ///< DOUBLE值是否为0比较时的最大值,GLONASS星历位置微分方程步长的精度
+        const static INT32 GLO_EPHENERI_INTEGRATION_STEP = 60; ///< glonass星历位置微分方程步长
 
         const static DOUBLE SIN_5 = -0.0871557427476582; ///< sin(-5.0 deg)
         const static DOUBLE COS_5 = 0.9961946980917456;  ///< cos(-5.0 deg)

@@ -88,10 +88,6 @@ namespace sixents {
                                                   unsigned int& hour,
                                                   unsigned int& minute,
                                                   double& second);
-            DLL_API int STD_CALL GNSSTimeToUTCSecTime(const unsigned int week,
-                                                     const double second,
-                                                     const unsigned int timeType,
-                                                     double& sec);
             DLL_API int STD_CALL UTCTimeToGNSSTime(const unsigned int year,
                                                   const unsigned int month,
                                                   const unsigned int day,
@@ -101,14 +97,6 @@ namespace sixents {
                                                   const unsigned int timeType,
                                                   unsigned int& week,
                                                   double& sec);
-            DLL_API int STD_CALL UTCTimeToGNSSSecTime(const unsigned int year,
-                                                     const unsigned int month,
-                                                     const unsigned int day,
-                                                     const unsigned int hour,
-                                                     const unsigned int minute,
-                                                     const double second,
-                                                     const unsigned int timeType,
-                                                     double& sec);
             DLL_API int STD_CALL GNSSTimeConvert(const unsigned int srcWeek,
                                                 const double srcSec,
                                                 const unsigned int srcTimeType,
@@ -502,8 +490,8 @@ bool CTestFunc::FormatWeekSecTime(const QString testData, QString& result)
         // 执行Rtk接口，未实现该接口
 
         // 执行GUL接口
-        int retGul = sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec, static_cast<unsigned int>(flag),
-                                                      outStr, outStrLen);
+        int retGul = sixents::Math::FormatWeekSecTime(static_cast<unsigned int>(week), sec,
+                                                      static_cast<unsigned int>(flag), outStr, outStrLen);
         if (retGul != 0) {
             gulRet += COMMA + QString::number(retGul);
             break;
@@ -1421,14 +1409,12 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
             }
         }
 
-        // 调用Rtk接口解算
-        gtime_t rtkClk;
+        // 调用Rtk接口解算,我们传入的就是GPS时间
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkSecTime = epoch2time(epochTime);
-        rtkClk = utc2gpst(rtkSecTime);
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
         geph_t realEph = rtcm.nav.geph[0];
-        double rtkClkRet = geph2clk(rtkClk, &realEph);
+        double rtkClkRet = geph2clk(rtkGPSSecTime, &realEph);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
 
@@ -1475,7 +1461,15 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         RtcmGloEphToMathGloEph(&ephTemp, &ephemeris);
         // 将当前时间转为double时间
         double clock=0;
-        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        double gulSecTime = 0.0;
+        unsigned int gulGpsWeek = 0.0;
+        double gulGpsSec = 0.0;
+
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                         static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                         static_cast<unsigned int>(minute), second, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
 
         int retGul = sixents::Math::CalcGlonassEphSatClock(gulSecTime, ephemeris, clock);
         // 释放RTCM对象
@@ -1585,14 +1579,12 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
             }
         }
 
-        // 调用Rtk接口解算
-        gtime_t rtkClk;
+        // 调用Rtk接口解算,我们传入的就是GPS时间
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkSecTime = epoch2time(epochTime);
-        rtkClk = utc2gpst(rtkSecTime);
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
         eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
-        double rtkClkRet = eph2clk(rtkClk, &realEph);
+        double rtkClkRet = eph2clk(rtkGPSSecTime, &realEph);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
 
@@ -1639,8 +1631,15 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
         RtcmEphToMathEph(&ephTemp, &ephemeris);
         // 将当前时间转为double时间
         double clock=0;
-        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        double gulSecTime = 0.0;
+        unsigned int gulGpsWeek = 0.0;
+        double gulGpsSec = 0.0;
 
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                         static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                         static_cast<unsigned int>(minute), second, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
         int retGul = sixents::Math::CalcEphSatClock(gulSecTime, ephemeris, clock);
         // 释放RTCM对象
         sixents::RtcmFinal();
@@ -1749,18 +1748,16 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
             }
         }
 
-        // 调用Rtk接口解算
-        gtime_t rtkClk;
+        // 调用Rtk接口解算,我们传入的就是GPS时间
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkSecTime = epoch2time(epochTime);
-        rtkClk = utc2gpst(rtkSecTime);
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
         geph_t realEph = rtcm.nav.geph[0];
         double rsRtk[3];
         memset(rsRtk, 0, sizeof(double)*3);
         double dtsRtk = 0.0;
         double varRtk = 0.0;
-        geph2pos(rtkClk, &realEph, rsRtk, &dtsRtk, &varRtk);
+        geph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
                 QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
@@ -1811,7 +1808,15 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         double x = 0.0;
         double y = 0.0;
         double z = 0.0;
-        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        double gulSecTime = 0.0;
+        unsigned int gulGpsWeek = 0.0;
+        double gulGpsSec = 0.0;
+
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                         static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                         static_cast<unsigned int>(minute), second, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
 
         int retGul = sixents::Math::CalcGlonassEphSatPos(gulSecTime, ephemeris, x, y, z);
         // 释放RTCM对象
@@ -1924,18 +1929,16 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
             }
         }
 
-        // 调用Rtk接口解算
-        gtime_t rtkClk;
+        // 调用Rtk接口解算,我们传入的就是GPS时间
         double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
                                static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkSecTime = epoch2time(epochTime);
-        rtkClk = utc2gpst(rtkSecTime);
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
         eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
         double rsRtk[3];
-        memset(rsRtk, 0, sizeof (double)*3);
+        memset(rsRtk, 0, sizeof (double) * 3);
         double dtsRtk = 0.0;
         double varRtk = 0.0;
-        eph2pos(rtkClk, &realEph, rsRtk, &dtsRtk, &varRtk);
+        eph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
         free_rtcm(&rtcm);
         rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
                  QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
@@ -1986,7 +1989,16 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
         double x = 0;
         double y = 0;
         double z = 0;
-        double gulSecTime = static_cast<double>(rtkSecTime.time) + rtkSecTime.sec;
+        double gulSecTime = 0.0;
+        unsigned int gulGpsWeek = 0.0;
+        double gulGpsSec = 0.0;
+
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
+                                         static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
+                                         static_cast<unsigned int>(minute), second, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
+
         int retGul = sixents::Math::CalcEphSatPos(gulSecTime, ephemeris, x, y, z);
         // 释放RTCM对象
         sixents::RtcmFinal();

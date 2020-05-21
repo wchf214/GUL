@@ -56,10 +56,9 @@ namespace sixents
         {
             DOUBLE retSec = 0.0;
             if ((stdTime.m_year < EPOCHT0.m_year || stdTime.m_year > CURRENT_MAX_YEAR)
-             || (stdTime.m_month == 0 || stdTime.m_month > MONTH_IN_YEAR)
-             || (stdTime.m_day == 0 || stdTime.m_day > MAX_DAY_IN_MONTH)
-             || (stdTime.m_hour >= MAX_HOUR_IN_DAY) || (stdTime.m_minute >= BASE_60)
-             || (stdTime.m_second < 0 || stdTime.m_second > BASE_60))
+                || (stdTime.m_month == 0 || stdTime.m_month > MONTH_IN_YEAR)
+                || (stdTime.m_day == 0 || stdTime.m_day > MAX_DAY_IN_MONTH) || (stdTime.m_hour >= MAX_HOUR_IN_DAY)
+                || (stdTime.m_minute >= BASE_60) || (stdTime.m_second < 0 || stdTime.m_second > BASE_60))
             {
                 return retSec;
             }
@@ -145,7 +144,7 @@ namespace sixents
         INT32 IGNSSTime::SecToWeekSec(const DOUBLE sec, const UINT64 startTime, SGNSSTime& stdTime)
         {
             DOUBLE curSec = sec - static_cast<DOUBLE>(startTime);
-            if (curSec <= 0)
+            if (curSec < 0)
             {
                 stdTime.m_week = 0;
                 stdTime.m_secAndMsec = DOUBLE_ZONE_LITTLE;
@@ -158,19 +157,22 @@ namespace sixents
             return RETURN_SUCCESS;
         }
 
-        BOOL_T IGNSSTime::IsRightDay(const SStandardTime &time)
+        BOOL_T IGNSSTime::IsRightDay(const SStandardTime& time)
         {
             BOOL_T rightDayFlag = false;
             UINT32 realDay = 0;
-            do {
+            do
+            {
                 if (time.m_month == MONTH_FEB) // 对2月份的日期特殊处理
                 {
                     BOOL_T leapYearFlag = IsLeapYear(time.m_year);
                     realDay = GetDayInFeb(leapYearFlag);
-                } else {
+                }
+                else
+                {
                     realDay = GetMonthType(time.m_month);
                 }
-            } while(false);
+            } while (false);
 
             if (realDay != MONTH_TYPE_NONE && time.m_day <= realDay)
             {
@@ -179,7 +181,7 @@ namespace sixents
             return rightDayFlag;
         }
 
-        BOOL_T IGNSSTime::IsLeapYear(const UINT32 &time)
+        BOOL_T IGNSSTime::IsLeapYear(const UINT32& time)
         {
             BOOL_T retVal = false;
             do
@@ -194,7 +196,7 @@ namespace sixents
                     retVal = true;
                     break;
                 }
-            } while(false);
+            } while (false);
             return retVal;
         }
 
@@ -208,7 +210,7 @@ namespace sixents
             return retVal;
         }
 
-        MONTH_TYPE IGNSSTime::GetMonthType(const UINT32 &month)
+        MONTH_TYPE IGNSSTime::GetMonthType(const UINT32& month)
         {
             const UINT32 NUM_TWO = 2;
             MONTH_TYPE retVal = MONTH_TYPE_NONE;

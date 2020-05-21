@@ -93,7 +93,7 @@ namespace sixents
              * @brief       计算GLONASS卫星系统的
              * @author      pengshupan@sixents.com
              * @param[in]   sec         接收机获取星历文件的时间(s)
-             * @param[in]   ephObj      jGPS,GALILEO,BDS星历文件
+             * @param[in]   ephObj      GPS,GALILEO,BDS星历文件
              * @param[out]  x           GLONASS卫星系统位置x
              * @param[out]  y           GLONASS卫星系统位置y
              * @param[out]  z           GLONASS卫星系统位置z
@@ -104,10 +104,9 @@ namespace sixents
             INT32 CalcGloEphSatPos(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
 
         private:
-            
             DOUBLE VectorDot(const DOUBLE* a, const DOUBLE* b, INT32 n);
-            void OrbitDifferentialEquations(const DOUBLE* x, DOUBLE* xdot, const DOUBLE* acc);
-            void Glorbit(DOUBLE t, DOUBLE* x, const DOUBLE* acc);
+            INT32 OrbitDifferentialEquations(const DOUBLE* x, DOUBLE* xdot, const DOUBLE* acc);
+            INT32 Glorbit(DOUBLE t, DOUBLE* x, const DOUBLE* acc);
         };
     } // end namespace Math
 } // end namespace sixents

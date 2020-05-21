@@ -447,7 +447,7 @@ namespace sixents
                 }
 
                 SStandardTime timeData = {year, month, day, hour, minute, second, timeType};
-                if (IGNSSTime::IsRightDay(timeData))
+                if (!IGNSSTime::IsRightDay(timeData))
                 {
                     retVal = RETURN_ERROR_DAY;
                     break;

@@ -1,11 +1,10 @@
 ﻿#include "CGNSSEphemeris.h"
+#include <chrono>
 #include <cmath>
-#include <ctime>
 #include "../DllMain/GNSSCommonDef.h"
 #include "../Time/TimeCalc/CCalcTime.h"
 #include "../Time/TimeSys/CTimeFactory.h"
 #include "../Time/TimeSys/IGNSSTime.h"
-
 namespace sixents
 {
     namespace Math
@@ -19,10 +18,16 @@ namespace sixents
         INT32 CGNSSEphemeris::CalcEphSatClock(const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& clockVal)
         {
             INT32 iRet = RETURN_FAIL;
-            // 获取Toc时间
             do
             {
-                SGNSSTime srcTime = {0};
+                // 传入的时间为负数或者星历电文卫星编号为0表示目前星历结构体没有数据
+                if (sec < 0 || ephObj.m_ui8SatId == 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
+                SGNSSTime srcTime;
                 IGNSSTime* srcTimeObj = nullptr;
                 if (ephObj.m_ui16MsgType == GPS_EPH)
                 {
@@ -77,20 +82,27 @@ namespace sixents
         INT32 CGNSSEphemeris::CalcEphSatPos(
             const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& xPos, DOUBLE& yPos, DOUBLE& zPos)
         {
-            // 2020-04-24,08:23:37.927820
             INT32 iRet = RETURN_FAIL;
             do
             {
+                // 传入的时间为负数或者星历电文卫星编号为0表示目前星历结构体没有数据
+                if (sec < 0 || ephObj.m_ui8SatId == 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+
                 if (pow(ephObj.m_dbAHalf, NUM_TWO) <= 0)
                 {
                     xPos = 0;
                     yPos = 0;
                     zPos = 0;
                     iRet = RETURN_ERROR_PARAMETER;
+                    break;
                 }
 
                 // 获取W+S
-                SGNSSTime srcTime = {0};
+                SGNSSTime srcTime;
                 IGNSSTime* srcTimeObj = nullptr;
                 if (ephObj.m_ui16MsgType == GPS_EPH)
                 {
@@ -100,14 +112,12 @@ namespace sixents
                                static_cast<DOUBLE>(ephObj.m_ui32Toe),
                                GPS};
                 }
-
                 else if (ephObj.m_ui16MsgType == GAL_EPH)
                 {
                     srcTimeObj = CTimeFactory::CreateTimeObj(GALILEO);
                     srcTime = {
                         static_cast<UINT64>(ephObj.m_ui16WeekNum), static_cast<DOUBLE>(ephObj.m_ui32Toe), GALILEO};
                 }
-
                 else if (ephObj.m_ui16MsgType == BDS_EPH)
                 {
                     srcTimeObj = CTimeFactory::CreateTimeObj(BDS);
@@ -152,6 +162,7 @@ namespace sixents
                     angularVelocity = BDS_ANGULAR_VELOCITY;
                 }
 
+                //注意，m_dbAHalf是地球长半轴不是半轴
                 DOUBLE earthA = ephObj.m_dbAHalf;
                 // 1.计算观测瞬间卫星的平近点角M
                 // timeDifference代表tk
@@ -179,7 +190,7 @@ namespace sixents
                 DOUBLE cosE = cos(E);
                 DOUBLE u = atan2(sqrt(NUM_ONE - ephObj.m_dbEccentricity * ephObj.m_dbEccentricity) * sinE,
                                  cosE - ephObj.m_dbEccentricity)
-                           + ephObj.m_dbCrc;
+                           + ephObj.m_dbArgumentOfPerigee;
                 DOUBLE r = earthA * (NUM_ONE - ephObj.m_dbEccentricity * cosE);
                 DOUBLE i = ephObj.m_dbI0 + ephObj.m_dbIdot * timeDifference;
                 DOUBLE sin2u = sin(NUM_TWO * u);
@@ -228,118 +239,152 @@ namespace sixents
 
         INT32 CGNSSEphemeris::CalcGloEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal)
         {
-            // 获取系统秒数 utc时间不是本地时间
-            DOUBLE utcSec = time(nullptr);
-            // 计算星历时间
-            // 注意: 这里的时间还是UTC时间，只不过是利用GPS的函数来进行计算
-            IGNSSTime* utcObj = CTimeFactory::CreateTimeObj(GPS);
-            utcObj->SetTime(utcSec);
-            SGNSSTime utcData;
-            utcObj->GetTime(utcData);
-            INT64 utcWeek = static_cast<INT64>(utcData.m_week);
-
-            // 剔除掉一天内的秒,只保留整天的秒数
-            DOUBLE secOfWeek =
-                utcData.m_secAndMsec - static_cast<DOUBLE>(static_cast<INT64>(utcData.m_secAndMsec) % SEC_IN_DAY);
-            // 计算一天内的秒数
-            DOUBLE secOfDay = static_cast<DOUBLE>(static_cast<INT64>(utcData.m_secAndMsec) % SEC_IN_DAY);
-
-            // 通过星历文件计算具体的秒数m_ui16Tb单位为15min
-            DOUBLE timeOfEphemeris = static_cast<DOUBLE>(ephObj.m_ui16Tb * SEC_OF_FIFTEEN_MIN / NUM_FIFTEEN)
-                                     - static_cast<DOUBLE>(SEC_OF_3HOUR);
-            if (timeOfEphemeris < secOfDay - SEC_IN_HALF_DAY)
+            INT32 iRet = RETURN_FAIL;
+            do
             {
-                timeOfEphemeris += SEC_IN_DAY;
-            }
-            else if (timeOfEphemeris > secOfDay + SEC_IN_HALF_DAY)
-            {
-                timeOfEphemeris -= SEC_IN_DAY;
-            }
+                // 传入的时间为负数或者星历电文卫星编号为0表示目前星历结构体没有数据
+                if (sec < 0 || ephObj.m_ui8SatId == 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
 
-            DOUBLE glonassEphemerisTime = static_cast<DOUBLE>(EPOCH_TO_GPST0) + static_cast<DOUBLE>(utcWeek * WEEK_SEC)
-                                          + secOfWeek + timeOfEphemeris;
-            DOUBLE glonassEphemerisTimeToGPSTime = CCalcTime::TimeConvert(glonassEphemerisTime, UTC, GPS);
+                // 获取系统秒数 utc时间不是本地时间
+                INT64 sysTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch())
+                                    .count();
+                DOUBLE utcSec = static_cast<DOUBLE>(sysTime) / BASE_1000;
 
-            DOUBLE timeDiff = sec - glonassEphemerisTimeToGPSTime;
-            for (INT32 i = 0; i < NUM_TWO; ++i)
-            {
-                timeDiff -= -ephObj.m_dbTnTb + ephObj.m_dbGammaTb * timeDiff;
-            }
-            clockVal = -ephObj.m_dbTnTb + ephObj.m_dbGammaTb * timeDiff;
-            return RETURN_SUCCESS;
+                // 计算星历时间
+                // 注意: 这里的时间还是UTC时间，只不过是利用GPS的函数来进行计算
+                IGNSSTime* utcObj = CTimeFactory::CreateTimeObj(GPS);
+                utcObj->SetTime(utcSec);
+                SGNSSTime utcData;
+                utcObj->GetTime(utcData);
+                INT64 utcWeek = static_cast<INT64>(utcData.m_week);
+
+                // 剔除掉一天内的秒,只保留整天的秒数，使用fmod函数，剔除掉毫秒数
+                DOUBLE secOfWeek = utcData.m_secAndMsec - fmod(utcData.m_secAndMsec, static_cast<DOUBLE>(SEC_IN_DAY));
+                // 计算一天内的秒数
+                DOUBLE secOfDay = fmod(utcData.m_secAndMsec, static_cast<DOUBLE>(SEC_IN_DAY));
+
+                // 通过星历文件计算具体的秒数m_ui16Tb单位为15min ，在RTCM中为分钟，不是15分钟
+                DOUBLE timeOfEphemeris =
+                    static_cast<DOUBLE>(ephObj.m_ui16Tb * BASE_60) - static_cast<DOUBLE>(SEC_OF_3HOUR);
+                if (timeOfEphemeris < secOfDay - SEC_IN_HALF_DAY)
+                {
+                    timeOfEphemeris += SEC_IN_DAY;
+                }
+                else if (timeOfEphemeris > secOfDay + SEC_IN_HALF_DAY)
+                {
+                    timeOfEphemeris -= SEC_IN_DAY;
+                }
+
+                DOUBLE glonassEphemerisTime = static_cast<DOUBLE>(EPOCH_TO_GPST0)
+                                              + static_cast<DOUBLE>(utcWeek * WEEK_SEC) + secOfWeek + timeOfEphemeris;
+                DOUBLE glonassEphemerisTimeToGPSTime = CCalcTime::TimeConvert(glonassEphemerisTime, UTC, GPS);
+
+                DOUBLE timeDiff = sec - glonassEphemerisTimeToGPSTime;
+                for (INT32 i = 0; i < NUM_TWO; ++i)
+                {
+                    timeDiff -= -ephObj.m_dbTnTb + ephObj.m_dbGammaTb * timeDiff;
+                }
+                clockVal = -ephObj.m_dbTnTb + ephObj.m_dbGammaTb * timeDiff;
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         INT32 CGNSSEphemeris::CalcGloEphSatPos(
             const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& xPos, DOUBLE& yPos, DOUBLE& zPos)
         {
-            // 获取系统秒数 utc时间不是本地时间
-            DOUBLE utcSec = time(nullptr);
-            // 计算星历时间
-            // 注意: 这里的时间还是UTC时间，只不过是利用GPS的函数来进行计算
-            IGNSSTime* utcObj = CTimeFactory::CreateTimeObj(GPS);
-            utcObj->SetTime(utcSec);
-            SGNSSTime utcData;
-            utcObj->GetTime(utcData);
-            INT64 utcWeek = static_cast<INT64>(utcData.m_week);
-
-            // 剔除掉一天内的秒,只保留整天的秒数
-            DOUBLE secOfWeek =
-                utcData.m_secAndMsec - static_cast<DOUBLE>(static_cast<INT64>(utcData.m_secAndMsec) % SEC_IN_DAY);
-            // 计算一天内的秒数
-            DOUBLE secOfDay = static_cast<DOUBLE>(static_cast<INT64>(utcData.m_secAndMsec) % SEC_IN_DAY);
-
-            // 通过星历文件计算具体的秒数m_ui16Tb单位为15min
-            DOUBLE timeOfEphemeris = static_cast<DOUBLE>(ephObj.m_ui16Tb * SEC_OF_FIFTEEN_MIN / NUM_FIFTEEN)
-                                     - static_cast<DOUBLE>(SEC_OF_3HOUR);
-            if (timeOfEphemeris < secOfDay - SEC_IN_HALF_DAY)
+            INT32 iRet = RETURN_FAIL;
+            do
             {
-                timeOfEphemeris += SEC_IN_DAY;
-            }
-            else if (timeOfEphemeris > secOfDay + SEC_IN_HALF_DAY)
-            {
-                timeOfEphemeris -= SEC_IN_DAY;
-            }
-            DOUBLE glonassEphemerisTime = static_cast<DOUBLE>(EPOCH_TO_GPST0) + static_cast<DOUBLE>(utcWeek * WEEK_SEC)
-                                          + secOfWeek + timeOfEphemeris;
-            DOUBLE glonassEphemerisTimeToGPSTime = CCalcTime::TimeConvert(glonassEphemerisTime, UTC, GPS);
+                // 传入的时间为负数或者星历电文卫星编号为0表示目前星历结构体没有数据
+                if (sec < 0 || ephObj.m_ui8SatId == 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                // 获取系统秒数 utc时间不是本地时间
+                INT64 sysTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch())
+                                    .count();
+                DOUBLE utcSec = static_cast<DOUBLE>(sysTime) / BASE_1000;
 
-            DOUBLE x[NUM_SIX] = {0};
-            x[NUM_ZERO] = ephObj.m_dbXnTb;
-            x[NUM_ONE] = ephObj.m_dbYnTb;
-            x[NUM_TWO] = ephObj.m_dbZnTb;
-            x[NUM_THREE] = ephObj.m_dbXnTbFirstDerivative;
-            x[NUM_FOUR] = ephObj.m_dbYnTbFirstDerivative;
-            x[NUM_FIVE] = ephObj.m_dbZnTbFirstDerivative;
-            DOUBLE* acc = new DOUBLE[NUM_THREE];
-            acc[NUM_ZERO] = ephObj.m_dbXnTbSecondDerivative;
-            acc[NUM_ONE] = ephObj.m_dbYnTbSecondDerivative;
-            acc[NUM_TWO] = ephObj.m_dbZnTbSecondDerivative;
+                // 计算星历时间
+                // 注意: 这里的时间还是UTC时间，只不过是利用GPS的函数来进行计算
+                IGNSSTime* utcObj = CTimeFactory::CreateTimeObj(GPS);
+                utcObj->SetTime(utcSec);
+                SGNSSTime utcData;
+                utcObj->GetTime(utcData);
+                INT64 utcWeek = static_cast<INT64>(utcData.m_week);
 
-            DOUBLE tt = 0;
-            DOUBLE timeDiff = sec - glonassEphemerisTimeToGPSTime;
-            if (timeDiff < 0.0)
-            {
-                tt = -GLO_EPHENERI_INTEGRATION_STEP;
-            }
-            else
-            {
-                tt = GLO_EPHENERI_INTEGRATION_STEP;
-            }
+                // 剔除掉一天内的秒,只保留整天的秒数,使用fmod函数，剔除掉毫秒数
+                DOUBLE secOfWeek = utcData.m_secAndMsec - fmod(utcData.m_secAndMsec, static_cast<DOUBLE>(SEC_IN_DAY));
+                // 计算一天内的秒数
+                DOUBLE secOfDay = fmod(utcData.m_secAndMsec, static_cast<DOUBLE>(SEC_IN_DAY));
 
-            for (; fabs(timeDiff) > GLO_EPHENERI_INTEGRATION_STEP_PRN; timeDiff -= tt)
-            {
-                if (fabs(timeDiff) < GLO_EPHENERI_INTEGRATION_STEP)
-                    tt = timeDiff;
-                Glorbit(tt, x, acc);
-            }
-            xPos = x[NUM_ZERO];
-            yPos = x[NUM_ONE];
-            zPos = x[NUM_TWO];
-            return RETURN_SUCCESS;
+                // 通过星历文件计算具体的秒数m_ui16Tb单位为15min，但是RTCM中单位为分钟
+                DOUBLE timeOfEphemeris =
+                    static_cast<DOUBLE>(ephObj.m_ui16Tb * BASE_60) - static_cast<DOUBLE>(SEC_OF_3HOUR);
+                if (timeOfEphemeris < secOfDay - SEC_IN_HALF_DAY)
+                {
+                    timeOfEphemeris += SEC_IN_DAY;
+                }
+                else if (timeOfEphemeris > secOfDay + SEC_IN_HALF_DAY)
+                {
+                    timeOfEphemeris -= SEC_IN_DAY;
+                }
+
+                DOUBLE glonassEphemerisTime = static_cast<DOUBLE>(EPOCH_TO_GPST0)
+                                              + static_cast<DOUBLE>(utcWeek * WEEK_SEC) + secOfWeek + timeOfEphemeris;
+                DOUBLE glonassEphemerisTimeToGPSTime = CCalcTime::TimeConvert(glonassEphemerisTime, UTC, GPS);
+
+                DOUBLE x[NUM_SIX] = {0};
+                x[NUM_ZERO] = ephObj.m_dbXnTb;
+                x[NUM_ONE] = ephObj.m_dbYnTb;
+                x[NUM_TWO] = ephObj.m_dbZnTb;
+                x[NUM_THREE] = ephObj.m_dbXnTbFirstDerivative;
+                x[NUM_FOUR] = ephObj.m_dbYnTbFirstDerivative;
+                x[NUM_FIVE] = ephObj.m_dbZnTbFirstDerivative;
+                DOUBLE* acc = new DOUBLE[NUM_THREE];
+                acc[NUM_ZERO] = ephObj.m_dbXnTbSecondDerivative;
+                acc[NUM_ONE] = ephObj.m_dbYnTbSecondDerivative;
+                acc[NUM_TWO] = ephObj.m_dbZnTbSecondDerivative;
+
+                DOUBLE tt = 0;
+                DOUBLE timeDiff = sec - glonassEphemerisTimeToGPSTime;
+                if (timeDiff < 0.0)
+                {
+                    tt = -GLO_EPHENERI_INTEGRATION_STEP;
+                }
+                else
+                {
+                    tt = GLO_EPHENERI_INTEGRATION_STEP;
+                }
+
+                for (; fabs(timeDiff) > DOUBLE_ZONE_BIG; timeDiff -= tt)
+                {
+                    if (fabs(timeDiff) < GLO_EPHENERI_INTEGRATION_STEP)
+                        tt = timeDiff;
+                    Glorbit(tt, x, acc);
+                }
+                xPos = x[NUM_ZERO];
+                yPos = x[NUM_ONE];
+                zPos = x[NUM_TWO];
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         DOUBLE CGNSSEphemeris::VectorDot(const DOUBLE* leftVector, const DOUBLE* rightVector, INT32 n)
         {
+            if (leftVector == nullptr || rightVector == nullptr || n < 0)
+            {
+                return 0;
+            }
             DOUBLE result = 0.0;
             while (true)
             {
@@ -354,66 +399,89 @@ namespace sixents
         }
 
         // 轨道微分方程
-        void CGNSSEphemeris::OrbitDifferentialEquations(const DOUBLE* x, DOUBLE* xdot, const DOUBLE* acc)
+        INT32 CGNSSEphemeris::OrbitDifferentialEquations(const DOUBLE* x, DOUBLE* xdot, const DOUBLE* acc)
         {
-            DOUBLE a = 0;
-            DOUBLE b = 0;
-            DOUBLE c = 0;
-            DOUBLE r2 = VectorDot(x, x, NUM_THREE);
-            DOUBLE r3 = r2 * sqrt(r2);
-            DOUBLE omg2 = pow(GLO_ANGULAR_VELOCITY, NUM_TWO);
-            if (r2 <= 0.0)
+            INT32 iRet = RETURN_FAIL;
+            do
             {
-                xdot[NUM_ZERO] = 0;
-                xdot[NUM_ONE] = 0;
-                xdot[NUM_TWO] = 0;
-                xdot[NUM_THREE] = 0;
-                xdot[NUM_FOUR] = 0;
-                xdot[NUM_FIVE] = 0;
-                return;
-            }
-            a = ONE_POINT_FIVE * J2_GLO * GLO_GRAVITATION * pow(PZ90_EARTH_LONG_RADIUS, 2) / r2 / r3;
-            b = (NUM_FIVE * x[NUM_TWO] * x[NUM_TWO]) / static_cast<DOUBLE>(r2);
-            c = -GLO_GRAVITATION / r3 - a * (NUM_ONE - b);
-            xdot[NUM_ZERO] = x[NUM_THREE];
-            xdot[NUM_ONE] = x[NUM_FOUR];
-            xdot[NUM_TWO] = x[NUM_FIVE];
-            xdot[NUM_THREE] = (c + omg2) * x[NUM_ZERO]
-                              + static_cast<DOUBLE>(NUM_TWO) * GLO_ANGULAR_VELOCITY * x[NUM_FOUR] + acc[NUM_ZERO];
-            xdot[NUM_FOUR] = (c + omg2) * x[NUM_ONE]
-                             - static_cast<DOUBLE>(NUM_TWO) * GLO_ANGULAR_VELOCITY * x[NUM_THREE] + acc[NUM_ONE];
-            xdot[NUM_FIVE] = (c - static_cast<DOUBLE>(NUM_TWO) * a) * x[NUM_TWO] + acc[NUM_TWO];
+                if (x == nullptr || xdot == nullptr || acc == nullptr)
+                {
+                    iRet = RETURN_NULL_PTR;
+                    break;
+                }
+                DOUBLE a = 0;
+                DOUBLE b = 0;
+                DOUBLE c = 0;
+                DOUBLE r2 = VectorDot(x, x, NUM_THREE);
+                DOUBLE r3 = r2 * sqrt(r2);
+                DOUBLE omg2 = pow(GLO_ANGULAR_VELOCITY, NUM_TWO);
+                if (r2 <= 0.0)
+                {
+                    xdot[NUM_ZERO] = 0;
+                    xdot[NUM_ONE] = 0;
+                    xdot[NUM_TWO] = 0;
+                    xdot[NUM_THREE] = 0;
+                    xdot[NUM_FOUR] = 0;
+                    xdot[NUM_FIVE] = 0;
+                    break;
+                }
+                a = ONE_POINT_FIVE * J2_GLO * GLO_GRAVITATION * pow(PZ90_EARTH_LONG_RADIUS, NUM_TWO) / r2 / r3;
+                b = (NUM_FIVE * x[NUM_TWO] * x[NUM_TWO]) / static_cast<DOUBLE>(r2);
+                c = -GLO_GRAVITATION / r3 - a * (NUM_ONE - b);
+                xdot[NUM_ZERO] = x[NUM_THREE];
+                xdot[NUM_ONE] = x[NUM_FOUR];
+                xdot[NUM_TWO] = x[NUM_FIVE];
+                xdot[NUM_THREE] = (c + omg2) * x[NUM_ZERO]
+                                  + static_cast<DOUBLE>(NUM_TWO) * GLO_ANGULAR_VELOCITY * x[NUM_FOUR] + acc[NUM_ZERO];
+                xdot[NUM_FOUR] = (c + omg2) * x[NUM_ONE]
+                                 - static_cast<DOUBLE>(NUM_TWO) * GLO_ANGULAR_VELOCITY * x[NUM_THREE] + acc[NUM_ONE];
+                xdot[NUM_FIVE] = (c - static_cast<DOUBLE>(NUM_TWO) * a) * x[NUM_TWO] + acc[NUM_TWO];
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         // glonass位置和速度的数值积分
-        void CGNSSEphemeris::Glorbit(DOUBLE t, DOUBLE* x, const DOUBLE* acc)
+        INT32 CGNSSEphemeris::Glorbit(DOUBLE t, DOUBLE* x, const DOUBLE* acc)
         {
-            DOUBLE k1[NUM_SIX] = {0};
-            DOUBLE k2[NUM_SIX] = {0};
-            DOUBLE k3[NUM_SIX] = {0};
-            DOUBLE k4[NUM_SIX] = {0};
-            DOUBLE w[NUM_SIX] = {0};
-            OrbitDifferentialEquations(x, k1, acc);
-            for (INT32 i = 0; i < NUM_SIX; ++i)
+            INT32 iRet = RETURN_FAIL;
+            do
             {
-                w[i] = x[i] + k1[i] * t / static_cast<DOUBLE>(NUM_TWO);
-            }
-            OrbitDifferentialEquations(w, k2, acc);
-            for (INT32 i = 0; i < NUM_SIX; ++i)
-            {
-                w[i] = x[i] + k2[i] * t / static_cast<DOUBLE>(NUM_TWO);
-            }
-            OrbitDifferentialEquations(w, k3, acc);
-            for (INT32 i = 0; i < NUM_SIX; ++i)
-            {
-                w[i] = x[i] + k3[i] * t;
-            }
-            OrbitDifferentialEquations(w, k4, acc);
-            for (INT32 i = 0; i < NUM_SIX; ++i)
-            {
-                x[i] += (k1[i] + static_cast<DOUBLE>(NUM_TWO) * k2[i] + static_cast<DOUBLE>(NUM_TWO) * k3[i] + k4[i])
+                if (x == nullptr || acc == nullptr)
+                {
+                    iRet = RETURN_NULL_PTR;
+                    break;
+                }
+                DOUBLE k1[NUM_SIX] = {0};
+                DOUBLE k2[NUM_SIX] = {0};
+                DOUBLE k3[NUM_SIX] = {0};
+                DOUBLE k4[NUM_SIX] = {0};
+                DOUBLE w[NUM_SIX] = {0};
+                OrbitDifferentialEquations(x, k1, acc);
+                for (INT32 i = 0; i < NUM_SIX; ++i)
+                {
+                    w[i] = x[i] + k1[i] * t / static_cast<DOUBLE>(NUM_TWO);
+                }
+                OrbitDifferentialEquations(w, k2, acc);
+                for (INT32 i = 0; i < NUM_SIX; ++i)
+                {
+                    w[i] = x[i] + k2[i] * t / static_cast<DOUBLE>(NUM_TWO);
+                }
+                OrbitDifferentialEquations(w, k3, acc);
+                for (INT32 i = 0; i < NUM_SIX; ++i)
+                {
+                    w[i] = x[i] + k3[i] * t;
+                }
+                OrbitDifferentialEquations(w, k4, acc);
+                for (INT32 i = 0; i < NUM_SIX; ++i)
+                {
+                    x[i] +=
+                        (k1[i] + static_cast<DOUBLE>(NUM_TWO) * k2[i] + static_cast<DOUBLE>(NUM_TWO) * k3[i] + k4[i])
                         * t / static_cast<DOUBLE>(NUM_SIX);
-            }
+                }
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
     } // namespace Math
 } // namespace sixents

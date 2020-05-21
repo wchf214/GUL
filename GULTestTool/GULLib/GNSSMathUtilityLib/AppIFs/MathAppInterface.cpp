@@ -71,7 +71,6 @@ namespace sixents
                 }
                 ret = RETURN_SUCCESS;
             } while (false);
-
             return ret;
         }
 
@@ -196,19 +195,17 @@ namespace sixents
                     const_cast<DOUBLE*>(inMatrixData), inRow, inCol);
 
                 //行列式不能为0=满秩矩阵
-                if (inMtx.determinant() > DOUBLE_ZONE_LITTLE || inMtx.determinant() < DOUBLE_ZONE_BIG)
+                if (inMtx.determinant() > DOUBLE_ZONE_LITTLE && inMtx.determinant() < DOUBLE_ZONE_BIG)
                 {
                     ret = RETURN_ZERO_DETERMINANT;
                     break;
                 }
-
                 Eigen::Map<Eigen::Matrix<DOUBLE, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> outMtx(
                     outMatrixData, outRow, outCol);
                 outMtx = inMtx.inverse();
 
                 ret = RETURN_SUCCESS;
             } while (false);
-
             return ret;
         }
 
@@ -245,7 +242,7 @@ namespace sixents
                 {
                     for (UINT32 colIdx = 0; colIdx < outCol; ++colIdx)
                     {
-                        outMatrixData[rowIdx * outCol + colIdx] = 0;  // 超出输出矩阵的部分
+                        outMatrixData[rowIdx * outCol + colIdx] = 0; // 超出输出矩阵的部分
                         if (colIdx < inCol && rowIdx < inRow)
                         {
                             outMatrixData[rowIdx * outCol + colIdx] = inMatrixData[rowIdx * inCol + colIdx];
