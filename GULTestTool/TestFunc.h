@@ -38,6 +38,8 @@ public:
     // dataType is true, test file data;
     // dataType is false, test simple data;
     int ExecuteTest(const QString testData, const int testFunc, QString& result);
+    // 读星历文件
+    void FileConvertToBin(const QByteArray& data, const QString& fileName, QString& outFilePath);
 private:
     void ExecuteTestTime(QString& testData, const int testFunc);
     // 测试函数接口
@@ -75,8 +77,7 @@ private:
     QString ReadTxtFile(const QString& filePath);
     // 读写矩阵文件
     void WriteTxtFile(const QString& filePath, const QString& data);
-    // 读星历文件
-    void FileConvertToBin(const QByteArray& data, const QString& fileName, QString& outFilePath);
+
     // 为RTCM解码二进制星历电文
     void DecodeEph();
     void RtcmEphToMathEph(sixents::SEphemeris* rtcmEph, sixents::Math::SEphemeris* gulEph);

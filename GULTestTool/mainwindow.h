@@ -27,6 +27,7 @@ public Q_SLOTS:
     void OpenFolderDlg();
     // 执行用例
     void ExecTest();
+    void slot_FileToBin();
 public: // 界面功能
     // 初始化
     void InitializeUI();

@@ -4,6 +4,9 @@
 #include "TestFunc.h"
 
 #include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QDataStream>
 #include <QMessageBox>       // for show error message
 #include <QDir>
 
@@ -95,6 +98,7 @@ void MainWindow::InitConnect()
     connect(ui->btnTestDataPath, &QPushButton::clicked, this, &MainWindow::OpenFileDlg);
     connect(ui->btnResultPath, &QPushButton::clicked, this, &MainWindow::OpenFolderDlg);
     connect(ui->btnExecTest, &QPushButton::clicked, this, &MainWindow::ExecTest);
+    connect(ui->btnFileToBin, &QPushButton::clicked, this, &MainWindow::slot_FileToBin);
 }
 
 void MainWindow::OpenFileDlg()
@@ -167,5 +171,22 @@ void MainWindow::ExecTest()
     }
     ui->txtRtkResult->setText(rets[0]);
     ui->txtGULResult->setText(rets[1]);
+}
+
+void MainWindow::slot_FileToBin()
+{
+    CTestFunc testFunc(this);
+    QString filePath = ui->txtTestDataPath->text();
+    QString outFilePath("");
+    QByteArray readData("");
+    QFile fileObj(filePath);
+    // 文件不存在或以只读方式打开文本失败，返回
+    if (!fileObj.exists() || !fileObj.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return ;
+    }
+    readData = fileObj.readAll();
+    readData = QByteArray::fromHex(readData);
+    testFunc.FileConvertToBin(readData, filePath, outFilePath);
+    ui->txtResultPath->setText(outFilePath);
 }
 

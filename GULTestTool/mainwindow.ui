@@ -154,6 +154,19 @@
          <string>执行测试</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="btnFileToBin">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>210</y>
+          <width>80</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>转二进制</string>
+        </property>
+       </widget>
       </widget>
      </item>
      <item>
