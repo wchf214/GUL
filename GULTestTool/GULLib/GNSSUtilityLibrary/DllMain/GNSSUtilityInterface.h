@@ -360,16 +360,27 @@ namespace sixents
         /**
          * @brief           计算Glonass钟差
          * @author          wuchuanfei@sixents.com
-         * @param[in]       sec             指定时间，秒，精确到毫秒
+         * @param[in]       sec             指定时间，秒，精确到毫秒     在GPS时间系统下的时间
+         * @param[in]       gloEphSec       输入GLONASS星历时间，该时间在GPS系统下
          * @param[in]       ephObj          Glonass星历数据
          * @param[out]      clockVal        计算出来的钟差值，精确到小数点后9位
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec,
-                                                    const SGlonassEphemeris& ephObj,
+        DLL_API int STD_CALL CalcGlonassEphSatClock(const double sec,
+                                                    const double gloEphSec,
+                                                    const SGlonassEphemeris ephObj,
                                                     double& clockVal);
+
+        // m_ui8SatId  m_ui16Tb m_dbTnTb  m_dbGammaTb
+        DLL_API int STD_CALL CalcGloEphClock(const double sec,
+                                             const double gloEphSec,
+                                             const unsigned int satId,
+                                             const unsigned int tb,
+                                             const double tnTb,
+                                             const double gammaTb,
+                                             double& clockVal);
 
         /**
          * @brief           计算钟差
@@ -381,20 +392,50 @@ namespace sixents
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+        DLL_API int STD_CALL CalcEphSatClock(const double sec, const SEphemeris ephObj, double& clockVal);
+        // m_ui8SatId m_ui16MsgType m_ui16WeekNum m_ui32Toc m_dbAf0 m_dbAf1 m_dbAf2
+        DLL_API int STD_CALL CalcEphClock(const double sec,
+                                          const unsigned int satId,
+                                          const unsigned int msgType,
+                                          const unsigned int weekNum,
+                                          const unsigned int toc,
+                                          const double af0,
+                                          const double af1,
+                                          const double af2,
+                                          double& clockVal);
 
         /**
          * @brief           计算Glonass位置
          * @author          wuchuanfei@sixents.com
          * @param[in]       sec         指定时间，秒，精确到毫秒
+         * @param[in]       gloEphSec   输入GLONASS星历时间，该时间在GPS系统下
          * @param[in]       ephObj      Glonass星历数据
          * @param[out]      x,y,z       计算出来的空间位置值，精确到小数点后9位，单位为米
          * @exception       N/A
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL
-        CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
+        DLL_API int STD_CALL CalcGlonassEphSatPos(
+            const double sec, const double gloEphSec, const SGlonassEphemeris ephObj, double& x, double& y, double& z);
+
+        // m_ui8SatId  m_ui16Tb m_dbXnTb m_dbYnTb m_dbZnTb m_dbXnTbFirstDerivative m_dbYnTbFirstDerivative
+        // m_dbZnTbFirstDerivative m_dbXnTbSecondDerivative m_dbYnTbSecondDerivative m_dbZnTbSecondDerivative;
+        DLL_API int STD_CALL CalcGloEphPos(const double sec,
+                                           const double gloEphSec,
+                                           const unsigned int satId,
+                                           const unsigned int tb,
+                                           const double xnTb,
+                                           const double ynTb,
+                                           const double znTb,
+                                           const double xnTbFirstDer,
+                                           const double ynTbFirstDer,
+                                           const double znTbFirstDer,
+                                           const double xnTbSecDer,
+                                           const double ynTbSecDer,
+                                           const double znTbSecDer,
+                                           double& x,
+                                           double& y,
+                                           double& z);
 
         /**
          * @brief           计算位置
@@ -406,7 +447,33 @@ namespace sixents
          * @return          函数执行是否成功
          * @note            N/A
          */
-        DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z);
+        DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris ephObj, double& x, double& y, double& z);
+
+        // m_ui8SatId m_ui16MsgType m_ui16WeekNum m_ui32Toe m_dbAHalf m_dbM0 m_dbDeltaN m_dbEccentricity
+        // m_dbArgumentOfPerigee m_dbI0 m_dbIdot m_dbCus m_dbCuc m_dbCrs m_dbCrc m_dbCis m_dbCic m_dbOmega0 m_dbOmegaDot
+        DLL_API int STD_CALL CalcEphPos(const double sec,
+                                        const unsigned int satId,
+                                        const unsigned int msgType,
+                                        const unsigned int weekNum,
+                                        const unsigned int toe,
+                                        const double aHalf,
+                                        const double m0,
+                                        const double deltaN,
+                                        const double eccentricity,
+                                        const double argumentOfPerigee,
+                                        const double i0,
+                                        const double idot,
+                                        const double cus,
+                                        const double cuc,
+                                        const double crs,
+                                        const double crc,
+                                        const double cis,
+                                        const double cic,
+                                        const double omega0,
+                                        const double omegaDot,
+                                        double& x,
+                                        double& y,
+                                        double& z);
 
         // 角度相关接口
         /**

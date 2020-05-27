@@ -27,8 +27,9 @@ const QString SPACE = " ";
 enum TeleTextID {
     GLONASS_EPH = 1020,
     GPS_EPH = 1019,
-    GAL_EPH = 1045,
-    BDS_EPH = 1046
+    GAL_EPH_1 = 1045,
+    GAL_EPH_2 = 1046,
+    BDS_EPH = 1042
 };
 
 

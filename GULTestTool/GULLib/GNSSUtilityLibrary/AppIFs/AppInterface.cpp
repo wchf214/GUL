@@ -4,7 +4,9 @@
 #include "../Angle/CGNSSAngle.h"
 #include "../Coordinate/CGNSSCoord.h"
 #include "../DllMain/GNSSCommonDef.h"
-#include "../Ephemeris/CGNSSEphemeris.h"
+#include "../Ephemeris/CEphemeris.h"
+#include "../Ephemeris/CGLOEphemeris.h"
+
 #include "../Time/TimeCalc/CCalcTime.h"
 #include "../Time/TimeSys/CTimeFactory.h"
 
@@ -511,34 +513,87 @@ namespace sixents
             return RETURN_SUCCESS;
         }
 
-        INT32
-        CAppInterface::CalcGlonassEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal)
-        {
-            CGNSSEphemeris gloGNSSEphemeris;
-            gloGNSSEphemeris.CalcGloEphSatClock(sec, ephObj, clockVal);
-            return RETURN_SUCCESS;
-        }
-
         INT32 CAppInterface::CalcEphSatClock(const DOUBLE& sec, const SEphemeris& ephObj, DOUBLE& clockVal)
         {
-            CGNSSEphemeris gnssEphemeris;
-            gnssEphemeris.CalcEphSatClock(sec, ephObj, clockVal);
-            return RETURN_SUCCESS;
-        }
-
-        INT32 CAppInterface::CalcGlonassEphSatPos(
-            const DOUBLE sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z)
-        {
-            CGNSSEphemeris gloGNSSEphemeris;
-            gloGNSSEphemeris.CalcGloEphSatPos(sec, ephObj, x, y, z);
-            return RETURN_SUCCESS;
+            INT32 iRet = RETURN_FAIL;
+            do
+            {
+                if (sec < 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                CEphemeris gnssEphemeris(ephObj);
+                gnssEphemeris.SetCurTime(sec);
+                clockVal = gnssEphemeris.GetClock();
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         INT32 CAppInterface::CalcEphSatPos(const DOUBLE sec, const SEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z)
         {
-            CGNSSEphemeris gnssEphemeris;
-            gnssEphemeris.CalcEphSatPos(sec, ephObj, x, y, z);
-            return RETURN_SUCCESS;
+            INT32 iRet = RETURN_FAIL;
+            do
+            {
+                if (sec < 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                CEphemeris gnssEphemeris(ephObj);
+                gnssEphemeris.SetCurTime(sec);
+                x = gnssEphemeris.GetPos().m_x;
+                y = gnssEphemeris.GetPos().m_y;
+                z = gnssEphemeris.GetPos().m_z;
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
+        }
+
+        INT32
+        CAppInterface::CalcGlonassEphSatClock(const DOUBLE& sec,
+                                              const DOUBLE& gloEphSec,
+                                              const SGlonassEphemeris& ephObj,
+                                              DOUBLE& clockVal)
+        {
+            INT32 iRet = RETURN_FAIL;
+            do
+            {
+                if (sec < 0 || gloEphSec <= 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                CGLOEphemeris gnssEphemeris(ephObj);
+                gnssEphemeris.SetCurTime(sec);
+                gnssEphemeris.SetGloEphTime(gloEphSec);
+                clockVal = gnssEphemeris.GetClock();
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
+        }
+
+        INT32 CAppInterface::CalcGlonassEphSatPos(
+            const DOUBLE sec, const DOUBLE& gloEphSec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z)
+        {
+            INT32 iRet = RETURN_FAIL;
+            do
+            {
+                if (sec < 0 || gloEphSec <= 0)
+                {
+                    iRet = RETURN_ERROR_PARAMETER;
+                    break;
+                }
+                CGLOEphemeris gnssEphemeris(ephObj);
+                gnssEphemeris.SetCurTime(sec);
+                gnssEphemeris.SetGloEphTime(gloEphSec);
+                x = gnssEphemeris.GetPos().m_x;
+                y = gnssEphemeris.GetPos().m_y;
+                z = gnssEphemeris.GetPos().m_z;
+                iRet = RETURN_SUCCESS;
+            } while (false);
+            return iRet;
         }
 
         INT32

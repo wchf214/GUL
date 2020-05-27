@@ -293,13 +293,17 @@ namespace sixents
              * @brief           计算Glonass钟差
              * @author          wuchuanfei@sixents.com
              * @param[in]       sec             指定时间，秒，精确到毫秒
+             * @param[in]       gloEphSec       输入GLONASS星历时间，该时间在GPS系统下
              * @param[in]       ephObj          Glonass星历数据
              * @param[out]      clockVal        计算出来的钟差值，精确到小数点后9位
              * @exception       N/A
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static INT32 CalcGlonassEphSatClock(const DOUBLE& sec, const SGlonassEphemeris& ephObj, DOUBLE& clockVal);
+            static INT32 CalcGlonassEphSatClock(const DOUBLE& sec,
+                                                const DOUBLE& gloEphSec,
+                                                const SGlonassEphemeris& ephObj,
+                                                DOUBLE& clockVal);
 
             /**
              * @brief           计算钟差
@@ -317,14 +321,19 @@ namespace sixents
              * @brief           计算Glonass位置
              * @author          wuchuanfei@sixents.com
              * @param[in]       sec             指定时间，秒，精确到毫秒
+             * @param[in]       gloEphSec       输入GLONASS星历时间，该时间在GPS系统下
              * @param[in]       ephObj          Glonass星历数据
              * @param[out]      x,y,z           计算出来的空间位置值，精确到小数点后9位
              * @exception       N/A
              * @return          函数执行是否成功
              * @note            N/A
              */
-            static INT32
-            CalcGlonassEphSatPos(const DOUBLE sec, const SGlonassEphemeris& ephObj, DOUBLE& x, DOUBLE& y, DOUBLE& z);
+            static INT32 CalcGlonassEphSatPos(const DOUBLE sec,
+                                              const DOUBLE& gloEphSec,
+                                              const SGlonassEphemeris& ephObj,
+                                              DOUBLE& x,
+                                              DOUBLE& y,
+                                              DOUBLE& z);
 
             /**
              * @brief           计算位置

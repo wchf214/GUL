@@ -216,28 +216,145 @@ namespace sixents
             return CAppInterface::ENU2XYZ(east, north, up, refX, refY, refZ, curX, curY, curZ);
         }
 
-        extern "C" DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec,
-                                                               const SGlonassEphemeris& ephObj,
+        extern "C" DLL_API int STD_CALL CalcGlonassEphSatClock(const double sec,
+                                                               const double gloEphSec,
+                                                               const SGlonassEphemeris ephObj,
                                                                double& clockVal)
         {
-            return CAppInterface::CalcGlonassEphSatClock(sec, ephObj, clockVal);
+            return CAppInterface::CalcGlonassEphSatClock(sec, gloEphSec, ephObj, clockVal);
         }
 
-        extern "C" DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal)
+        extern "C" DLL_API int STD_CALL CalcGloEphClock(const double sec,
+                                                        const double gloEphSec,
+                                                        const unsigned int satId,
+                                                        const unsigned int tb,
+                                                        const double tnTb,
+                                                        const double gammaTb,
+                                                        double& clockVal)
+        {
+            SGlonassEphemeris ephObj;
+            ephObj.m_ui8SatId = satId;
+            ephObj.m_ui16Tb = tb;
+            ephObj.m_dbTnTb = tnTb;
+            ephObj.m_dbGammaTb = gammaTb;
+            return CalcGlonassEphSatClock(sec, gloEphSec, ephObj, clockVal);
+        }
+
+        extern "C" DLL_API int STD_CALL CalcEphSatClock(const double sec, const SEphemeris ephObj, double& clockVal)
         {
             return CAppInterface::CalcEphSatClock(sec, ephObj, clockVal);
         }
 
-        extern "C" DLL_API int STD_CALL
-        CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z)
+        extern "C" DLL_API int STD_CALL CalcEphClock(const double sec,
+                                                     const unsigned int satId,
+                                                     const unsigned int msgType,
+                                                     const unsigned int weekNum,
+                                                     const unsigned int toc,
+                                                     const double af0,
+                                                     const double af1,
+                                                     const double af2,
+                                                     double& clockVal)
         {
-            return CAppInterface::CalcGlonassEphSatPos(sec, ephObj, x, y, z);
+            SEphemeris ephObj;
+            ephObj.m_ui8SatId = satId;
+            ephObj.m_ui16MsgType = msgType;
+            ephObj.m_ui16WeekNum = weekNum;
+            ephObj.m_ui32Toc = toc;
+            ephObj.m_dbAf0 = af0;
+            ephObj.m_dbAf1 = af1;
+            ephObj.m_dbAf2 = af2;
+            return CalcEphSatClock(sec, ephObj, clockVal);
+        }
+
+        extern "C" DLL_API int STD_CALL CalcGlonassEphSatPos(
+            const double sec, const double gloEphSec, const SGlonassEphemeris ephObj, double& x, double& y, double& z)
+        {
+            return CAppInterface::CalcGlonassEphSatPos(sec, gloEphSec, ephObj, x, y, z);
+        }
+
+        extern "C" DLL_API int STD_CALL CalcGloEphPos(const double sec,
+                                                      const double gloEphSec,
+                                                      const unsigned int satId,
+                                                      const unsigned int tb,
+                                                      const double xnTb,
+                                                      const double ynTb,
+                                                      const double znTb,
+                                                      const double xnTbFirstDer,
+                                                      const double ynTbFirstDer,
+                                                      const double znTbFirstDer,
+                                                      const double xnTbSecDer,
+                                                      const double ynTbSecDer,
+                                                      const double znTbSecDer,
+                                                      double& x,
+                                                      double& y,
+                                                      double& z)
+        {
+            SGlonassEphemeris ephObj;
+            ephObj.m_ui8SatId = satId;
+            ephObj.m_ui16Tb = tb;
+            ephObj.m_dbXnTb = xnTb;
+            ephObj.m_dbYnTb = ynTb;
+            ephObj.m_dbZnTb = znTb;
+            ephObj.m_dbXnTbFirstDerivative = xnTbFirstDer;
+            ephObj.m_dbYnTbFirstDerivative = ynTbFirstDer;
+            ephObj.m_dbZnTbFirstDerivative = znTbFirstDer;
+            ephObj.m_dbXnTbSecondDerivative = xnTbSecDer;
+            ephObj.m_dbYnTbSecondDerivative = ynTbSecDer;
+            ephObj.m_dbZnTbSecondDerivative = znTbSecDer;
+            return CalcGlonassEphSatPos(sec, gloEphSec, ephObj, x, y, z);
         }
 
         extern "C" DLL_API int STD_CALL
-        CalcEphSatPos(const double sec, const SEphemeris& ephObj, double& x, double& y, double& z)
+        CalcEphSatPos(const double sec, const SEphemeris ephObj, double& x, double& y, double& z)
         {
             return CAppInterface::CalcEphSatPos(sec, ephObj, x, y, z);
+        }
+
+        extern "C" DLL_API int STD_CALL CalcEphPos(const double sec,
+                                                   const unsigned int satId,
+                                                   const unsigned int msgType,
+                                                   const unsigned int weekNum,
+                                                   const unsigned int toe,
+                                                   const double aHalf,
+                                                   const double m0,
+                                                   const double deltaN,
+                                                   const double eccentricity,
+                                                   const double argumentOfPerigee,
+                                                   const double i0,
+                                                   const double idot,
+                                                   const double cus,
+                                                   const double cuc,
+                                                   const double crs,
+                                                   const double crc,
+                                                   const double cis,
+                                                   const double cic,
+                                                   const double omega0,
+                                                   const double omegaDot,
+                                                   double& x,
+                                                   double& y,
+                                                   double& z)
+        {
+            SEphemeris ephObj;
+            ephObj.m_ui8SatId = satId;
+            ephObj.m_ui16MsgType = msgType;
+            ephObj.m_ui16WeekNum = weekNum;
+            ephObj.m_ui32Toe = toe;
+            ephObj.m_dbAHalf = aHalf;
+            ephObj.m_dbM0 = m0;
+            ephObj.m_dbDeltaN = deltaN;
+            ephObj.m_dbEccentricity = eccentricity;
+            ephObj.m_dbArgumentOfPerigee = argumentOfPerigee;
+            ephObj.m_dbI0 = i0;
+            ephObj.m_dbIdot = idot;
+            ephObj.m_dbCus = cus;
+            ephObj.m_dbCuc = cuc;
+            ephObj.m_dbCrs = crs;
+            ephObj.m_dbCrc = crc;
+            ephObj.m_dbCis = cis;
+            ephObj.m_dbCic = cic;
+            ephObj.m_dbOmega0 = omega0;
+            ephObj.m_dbOmegaDot = omegaDot;
+            return CalcEphSatPos(sec, ephObj, x, y, z);
         }
 
         extern "C" DLL_API int STD_CALL FormatAngle(const double radian,

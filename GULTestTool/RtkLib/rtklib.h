@@ -48,6 +48,12 @@
 extern "C" {
 #endif
 
+// Begin: modified by wuchuanfei 20200527 for test
+#define ENAGLO
+#define ENAGAL
+#define ENACMP
+// End: modified by wuchuanfei 20200527 for test
+
 #ifdef WIN_DLL
 #define EXPORT __declspec(dllexport) /* for Windows DLL */
 #else

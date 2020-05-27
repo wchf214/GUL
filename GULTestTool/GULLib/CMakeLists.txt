@@ -1,4 +1,4 @@
-# 指定CMake的最低版本
+# 指定CMake编译器的最低版本
 cmake_minimum_required(VERSION 2.8)
 
 # 指定c/c++的编译器

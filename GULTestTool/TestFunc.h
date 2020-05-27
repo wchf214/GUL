@@ -4,7 +4,8 @@
 #include <QLibrary>
 #include <map>
 #include <functional>
-
+#define ENAGLO
+#define ENAGAL
 class CTestFunc;
 class MainWindow;
 //typedef bool(CTestFunc::* TestFunc)(const QString , QString&);
@@ -91,6 +92,8 @@ private:
 
     // 加函数映射
     void InitFuncMap();
+    // Rtk计算satNo
+//    int satno(int sys, int prn);
 private:
     bool mLoadRtkLibFlag;
     bool mLoadGULLibFlag;

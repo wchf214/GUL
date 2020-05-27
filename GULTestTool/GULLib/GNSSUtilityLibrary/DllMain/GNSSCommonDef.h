@@ -168,11 +168,14 @@ namespace sixents
                                                       {0}};
 
         // 星历模块常量定义
-
-        const UINT16 GPS_EPH = 1019;
-        const UINT16 GLO_EPH = 1020;
-        const UINT16 GAL_EPH = 1045;
-        const UINT16 BDS_EPH = 1046;
+        // 星历电文类型
+        enum TeleTextID {
+            GLONASS_EPH = 1020,
+            GPS_EPH = 1019,
+            GAL_EPH_1 = 1045,
+            GAL_EPH_2 = 1046,
+            BDS_EPH = 1042
+        };
 
         const INT32 FIFTEEN_MIN = 15;                           ///< 星历计算，15分钟
         const INT32 SEC_OF_FIFTEEN_MIN = FIFTEEN_MIN * BASE_60; ///< 15分钟对应的秒数

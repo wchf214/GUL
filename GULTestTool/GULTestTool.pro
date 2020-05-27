@@ -24,7 +24,9 @@ SOURCES += \
     GULLib/GNSSUtilityLibrary/AppIFs/AppInterface.cpp \
     GULLib/GNSSUtilityLibrary/Coordinate/CGNSSCoord.cpp \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.cpp \
-    GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.cpp \
+    GULLib/GNSSUtilityLibrary/Ephemeris/CEphemeris.cpp \
+    GULLib/GNSSUtilityLibrary/Ephemeris/CGLOEphemeris.cpp \
+    GULLib/GNSSUtilityLibrary/Ephemeris/IGNSSEphemeris.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeCalc/CCalcTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.cpp \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.cpp \
@@ -284,7 +286,9 @@ HEADERS += \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSCommonDef.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSDataStruct.h \
     GULLib/GNSSUtilityLibrary/DllMain/GNSSUtilityInterface.h \
-    GULLib/GNSSUtilityLibrary/Ephemeris/CGNSSEphemeris.h \
+    GULLib/GNSSUtilityLibrary/Ephemeris/CEphemeris.h \
+    GULLib/GNSSUtilityLibrary/Ephemeris/CGLOEphemeris.h \
+    GULLib/GNSSUtilityLibrary/Ephemeris/IGNSSEphemeris.h \
     GULLib/GNSSUtilityLibrary/Time/TimeCalc/CCalcTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CBDSTime.h \
     GULLib/GNSSUtilityLibrary/Time/TimeSys/CGPSTime.h \

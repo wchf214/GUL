@@ -145,13 +145,15 @@ namespace sixents {
                                         double& curX,
                                         double& curY,
                                         double& curZ);
-            DLL_API int STD_CALL CalcGlonassEphSatClock(const double& sec,
-                                                       const SGlonassEphemeris& ephObj,
+            DLL_API int STD_CALL CalcGlonassEphSatClock(const double sec,
+                                                        const double gloEphSec,
+                                                       const SGlonassEphemeris ephObj,
                                                        double& clockVal);
-            DLL_API int STD_CALL CalcEphSatClock(const double& sec, const SEphemeris& ephObj, double& clockVal);
+            DLL_API int STD_CALL CalcEphSatClock(const double sec, const SEphemeris ephObj, double& clockVal);
             DLL_API int STD_CALL
-            CalcGlonassEphSatPos(const double sec, const SGlonassEphemeris& ephObj, double& x, double& y, double& z);
-            DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris& ephObj,
+            CalcGlonassEphSatPos(const double sec, const double gloEphSec, const SGlonassEphemeris ephObj,
+                                 double& x, double& y, double& z);
+            DLL_API int STD_CALL CalcEphSatPos(const double sec, const SEphemeris ephObj,
                                               double& x, double& y, double& z);
             DLL_API int STD_CALL FormatAngle(const double radian,
                                                     char* formatString,
@@ -1330,10 +1332,12 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         result.clear();
         // 解析testData
         QStringList srcTestData = testData.split(SEMICOLON);
-        if (srcTestData.count() != 2) {
+        if (srcTestData.count() != 3) {
             break;
         }
+        // 星历文件路径
         QString testDataFilePath = srcTestData[0];
+        // 指定时间
         QStringList testTimeList = srcTestData[1].split(COMMA);
         if (testTimeList.count() != 2) {
             break;
@@ -1354,6 +1358,31 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         int hour = timeList[0].toInt();
         int minute = timeList[1].toInt();
         double second = timeList[2].toDouble();
+
+        // 与星历文件匹配的当前时间
+        testTimeList.clear();
+        testTimeList = srcTestData[2].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
+
+        dateList.clear();
+        dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int curYear = dateList[0].toInt();
+        int curMonth = dateList[1].toInt();
+        int curDay = dateList[2].toInt();
+
+        timeList.clear();
+        timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int curHour = timeList[0].toInt();
+        int curMinute = timeList[1].toInt();
+        double curSecond = timeList[2].toDouble();
 
         // 读取星历电文
         QFile fileObj(testDataFilePath);
@@ -1394,30 +1423,6 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         if (msg.isEmpty()) { // 当前指针不能为空指针
             break;
         }
-
-        // 执行Rtk接口
-        // 文本文件转二进制文件
-        rtcm_t rtcm;
-        init_rtcm(&rtcm);
-        int ret = 0;
-        unsigned char data = 0;
-        for (int i = 0; i < msg.size(); ++i) {
-            data = static_cast<unsigned char>(msg.at(i));
-            ret = input_rtcm3(&rtcm, data);
-            if (ret == 2) {
-                break;
-            }
-        }
-
-        // 调用Rtk接口解算,我们传入的就是GPS时间
-        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                               static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkGPSSecTime = epoch2time(epochTime);
-        geph_t realEph = rtcm.nav.geph[0];
-        double rtkClkRet = geph2clk(rtkGPSSecTime, &realEph);
-        free_rtcm(&rtcm);
-        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
-
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
         // 初始化RTCM
@@ -1460,7 +1465,8 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
         }
         RtcmGloEphToMathGloEph(&ephTemp, &ephemeris);
         // 将当前时间转为double时间
-        double clock=0;
+        double clock = 0.0;
+        double gloEphSec = 0.0;
         double gulSecTime = 0.0;
         unsigned int gulGpsWeek = 0.0;
         double gulGpsSec = 0.0;
@@ -1471,7 +1477,13 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
                                          gulGpsWeek, gulGpsSec);
         sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
 
-        int retGul = sixents::Math::CalcGlonassEphSatClock(gulSecTime, ephemeris, clock);
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(curYear), static_cast<unsigned int>(curMonth),
+                                         static_cast<unsigned int>(curDay), static_cast<unsigned int>(curHour),
+                                         static_cast<unsigned int>(curMinute), curSecond, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gloEphSec);
+
+        int retGul = sixents::Math::CalcGlonassEphSatClock(gulSecTime, gloEphSec, ephemeris, clock);
         // 释放RTCM对象
         sixents::RtcmFinal();
 
@@ -1480,6 +1492,38 @@ bool CTestFunc::CalcGlonassEphSatClock(const QString testData, QString& result)
             break;
         }
         gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+
+        // 执行Rtk接口
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
+        }
+
+        // 调用Rtk接口解算,我们传入的就是GPS时间
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
+        rtkGPSSecTime = utc2gpst(rtkGPSSecTime);
+        geph_t realEph = rtcm.nav.geph[ephemeris.m_ui8SatId - 1];
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(curYear), static_cast<unsigned int>(curMonth),
+                                         static_cast<unsigned int>(curDay), static_cast<unsigned int>(curHour),
+                                         static_cast<unsigned int>(curMinute), curSecond, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        double rtkToe = 0.0;
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), rtkToe);
+        realEph.toe = {static_cast<time_t>(floor(rtkToe)), rtkToe - floor(rtkToe)};
+        double rtkClkRet = geph2clk(rtkGPSSecTime, &realEph);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
+
         retFunc = true;
     } while(false);
 
@@ -1548,7 +1592,7 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
                 msgPos = 0;
                 break;
             } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
-                if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
+                if (msgType == GAL_EPH_1 || msgType == GAL_EPH_2 || msgType == BDS_EPH || msgType == GPS_EPH) {  // 当收到一包完整星历电文
                     msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
                     break;
                 }
@@ -1564,29 +1608,6 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
         if (msg.isEmpty()) { // 当前指针不能为空指针
             break;
         }
-
-        // 执行Rtk接口
-        // 文本文件转二进制文件
-        rtcm_t rtcm;
-        init_rtcm(&rtcm);
-        int ret = 0;
-        unsigned char data = 0;
-        for (int i = 0; i < msg.size(); ++i) {
-            data = static_cast<unsigned char>(msg.at(i));
-            ret = input_rtcm3(&rtcm, data);
-            if (ret == 2) {
-                break;
-            }
-        }
-
-        // 调用Rtk接口解算,我们传入的就是GPS时间
-        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                               static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkGPSSecTime = epoch2time(epochTime);
-        eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
-        double rtkClkRet = eph2clk(rtkGPSSecTime, &realEph);
-        free_rtcm(&rtcm);
-        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
 
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
@@ -1649,6 +1670,43 @@ bool CTestFunc::CalcEphSatClock(const QString testData, QString& result)
             break;
         }
         gulRet = QString::number(clock, 'f', COORDINATE_ACCURACY) + COMMA + QString::number(retGul);
+
+        // 执行Rtk接口
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
+        }
+
+        // 调用Rtk接口解算,我们传入的就是年月日时分秒
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
+
+        //把年月日时分秒转GPS秒
+        rtkGPSSecTime=utc2gpst(rtkGPSSecTime);
+        int satID = 0;
+        int sysNo = 0;
+        if (ephemeris.m_ui16MsgType == GPS_EPH) {
+            sysNo = SYS_GPS_RTK;
+        } else if (ephemeris.m_ui16MsgType == GAL_EPH_1 || ephemeris.m_ui16MsgType == GAL_EPH_2){
+            sysNo = SYS_GAL_RTK;
+        } else if (ephemeris.m_ui16MsgType == BDS_EPH) {
+            sysNo = SYS_CMP_RTK;
+        }
+        satID = satno(sysNo, ephemeris.m_ui8SatId);
+        eph_t realEph = rtcm.nav.eph[satID - 1];
+        double rtkClkRet = eph2clk(rtkGPSSecTime, &realEph);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rtkClkRet, 'f', COORDINATE_ACCURACY);
+
         retFunc = true;
     } while (false);
 
@@ -1669,10 +1727,13 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         result.clear();
         // 解析testData
         QStringList srcTestData = testData.split(SEMICOLON);
-        if (srcTestData.count() != 2) {
+        if (srcTestData.count() != 3) {
             break;
         }
+
+        // 星历文件位置
         QString testDataFilePath = srcTestData[0];
+        // 指定计算的时间
         QStringList testTimeList = srcTestData[1].split(COMMA);
         if (testTimeList.count() != 2) {
             break;
@@ -1693,6 +1754,31 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         int hour = timeList[0].toInt();
         int minute = timeList[1].toInt();
         double second = timeList[2].toDouble();
+
+        // 与星历匹配的时间
+        testTimeList.clear();
+        testTimeList = srcTestData[2].split(COMMA);
+        if (testTimeList.count() != 2) {
+            break;
+        }
+
+        dateList.clear();
+        dateList = testTimeList[0].split(DASH_LINE);
+        if (dateList.count() != 3) {
+            break;
+        }
+        int curYear = dateList[0].toInt();
+        int curMonth = dateList[1].toInt();
+        int curDay = dateList[2].toInt();
+
+        timeList.clear();
+        timeList = testTimeList[1].split(COLON);
+        if (timeList.count() != 3) {
+            break;
+        }
+        int curHour = timeList[0].toInt();
+        int curMinute = timeList[1].toInt();
+        double curSecond = timeList[2].toDouble();
 
         // 读取星历电文
         QFile fileObj(testDataFilePath);
@@ -1733,36 +1819,6 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         if (msg.isEmpty()) { // 当前指针不能为空指针
             break;
         }
-
-        // 执行Rtk接口
-        // 文本文件转二进制文件
-        rtcm_t rtcm;
-        init_rtcm(&rtcm);
-        int ret = 0;
-        unsigned char data = 0;
-        for (int i = 0; i < msg.size(); ++i) {
-            data = static_cast<unsigned char>(msg.at(i));
-            ret = input_rtcm3(&rtcm, data);
-            if (ret == 2) {
-                break;
-            }
-        }
-
-        // 调用Rtk接口解算,我们传入的就是GPS时间
-        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                               static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkGPSSecTime = epoch2time(epochTime);
-        geph_t realEph = rtcm.nav.geph[0];
-        double rsRtk[3];
-        memset(rsRtk, 0, sizeof(double)*3);
-        double dtsRtk = 0.0;
-        double varRtk = 0.0;
-        geph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
-        free_rtcm(&rtcm);
-        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
-                QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
-                QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
-
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
         // 初始化RTCM
@@ -1808,6 +1864,7 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
         double x = 0.0;
         double y = 0.0;
         double z = 0.0;
+        double gulGloEphSec = 0.0;
         double gulSecTime = 0.0;
         unsigned int gulGpsWeek = 0.0;
         double gulGpsSec = 0.0;
@@ -1818,7 +1875,13 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
                                          gulGpsWeek, gulGpsSec);
         sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulSecTime);
 
-        int retGul = sixents::Math::CalcGlonassEphSatPos(gulSecTime, ephemeris, x, y, z);
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(curYear), static_cast<unsigned int>(curMonth),
+                                         static_cast<unsigned int>(curDay), static_cast<unsigned int>(curHour),
+                                         static_cast<unsigned int>(curMinute), curSecond, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), gulGloEphSec);
+
+        int retGul = sixents::Math::CalcGlonassEphSatPos(gulSecTime, gulGloEphSec, ephemeris, x, y, z);
         // 释放RTCM对象
         sixents::RtcmFinal();
 
@@ -1830,6 +1893,46 @@ bool CTestFunc::CalcGlonassEphSatPos(const QString testData, QString& result)
                  QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
                  QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
                  QString::number(retGul);
+
+        // 执行Rtk接口
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
+        }
+
+        // 调用Rtk接口解算,我们传入的就是GPS时间
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
+        rtkGPSSecTime = utc2gpst(rtkGPSSecTime);
+        geph_t realEph = rtcm.nav.geph[ephemeris.m_ui8SatId - 1];
+        sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(curYear), static_cast<unsigned int>(curMonth),
+                                         static_cast<unsigned int>(curDay), static_cast<unsigned int>(curHour),
+                                         static_cast<unsigned int>(curMinute), curSecond, static_cast<unsigned int>(2),
+                                         gulGpsWeek, gulGpsSec);
+        double rtkToe = 0.0;
+        sixents::Math::WeekSecToSec(gulGpsWeek, gulGpsSec, static_cast<unsigned int>(2), rtkToe);
+
+        realEph.toe = {static_cast<time_t>(floor(rtkToe)), rtkToe - floor(rtkToe)};
+        double rsRtk[3];
+        memset(rsRtk, 0, sizeof(double)*3);
+        double dtsRtk = 0.0;
+        double varRtk = 0.0;
+
+        geph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
+
         retFunc = true;
     } while(false);
 
@@ -1898,7 +2001,7 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
                 msgPos = 0;
                 break;
             } else if (retGetMsg > sixents::common::rtcm::RETURN_SUCCESS) {  // 有至少一包完整电文
-                if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH) {  // 当收到一包完整星历电文
+                if (msgType == GPS_EPH || msgType == BDS_EPH || msgType == GAL_EPH_1 || msgType == GAL_EPH_2) {  // 当收到一包完整星历电文
                     msg = ephHexText.mid(static_cast<int>(msgPos), static_cast<int>(retGetMsg));
                     break;
                 }
@@ -1914,35 +2017,6 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
         if (msg.isEmpty()) { // 当前指针不能为空指针
             break;
         }
-
-        // 执行Rtk接口
-        // 文本文件转二进制文件
-        rtcm_t rtcm;
-        init_rtcm(&rtcm);
-        int ret = 0;
-        unsigned char data = 0;
-        for (int i = 0; i < msg.size(); ++i) {
-            data = static_cast<unsigned char>(msg.at(i));
-            ret = input_rtcm3(&rtcm, data);
-            if (ret == 2) {
-                break;
-            }
-        }
-
-        // 调用Rtk接口解算,我们传入的就是GPS时间
-        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
-                               static_cast<double>(hour), static_cast<double>(minute), second};
-        gtime_t rtkGPSSecTime = epoch2time(epochTime);
-        eph_t realEph = rtcm.nav.eph[rtcm.ephsat - 1];
-        double rsRtk[3];
-        memset(rsRtk, 0, sizeof (double) * 3);
-        double dtsRtk = 0.0;
-        double varRtk = 0.0;
-        eph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
-        free_rtcm(&rtcm);
-        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
-                 QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
-                 QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
 
         // 执行GUL接口
         // 调用RTCM接口，解码星历电文
@@ -1993,6 +2067,8 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
         unsigned int gulGpsWeek = 0.0;
         double gulGpsSec = 0.0;
 
+
+        //用户输入年月日时分秒，我们把年月日时分秒转GPS秒
         sixents::Math::UTCTimeToGNSSTime(static_cast<unsigned int>(year), static_cast<unsigned int>(month),
                                          static_cast<unsigned int>(day), static_cast<unsigned int>(hour),
                                          static_cast<unsigned int>(minute), second, static_cast<unsigned int>(2),
@@ -2011,6 +2087,48 @@ bool CTestFunc::CalcEphSatPos(const QString testData, QString& result)
                  QString::number(y, 'f', COORDINATE_ACCURACY) + COMMA +
                  QString::number(z, 'f', COORDINATE_ACCURACY) + COMMA +
                  QString::number(retGul);
+
+        // 执行Rtk接口
+        // 文本文件转二进制文件
+        rtcm_t rtcm;
+        init_rtcm(&rtcm);
+        int ret = 0;
+        unsigned char data = 0;
+        for (int i = 0; i < msg.size(); ++i) {
+            data = static_cast<unsigned char>(msg.at(i));
+            ret = input_rtcm3(&rtcm, data);
+            if (ret == 2) {
+                break;
+            }
+        }
+
+        // 用户输入年月日时分秒，调用Rtk接口解算,我们传入的就是GPS时间
+        double epochTime[6] = {static_cast<double>(year), static_cast<double>(month), static_cast<double>(day),
+                               static_cast<double>(hour), static_cast<double>(minute), second};
+        gtime_t rtkGPSSecTime = epoch2time(epochTime);
+        int satID = 0;
+        int sysNo = 0;
+        if (ephemeris.m_ui16MsgType == GPS_EPH) {
+            sysNo = SYS_GPS_RTK;
+        } else if (ephemeris.m_ui16MsgType == GAL_EPH_1 || ephemeris.m_ui16MsgType == GAL_EPH_2){
+            sysNo = SYS_GAL_RTK;
+        } else if (ephemeris.m_ui16MsgType == BDS_EPH) {
+            sysNo = SYS_CMP_RTK;
+        }
+        satID = satno(sysNo, ephemeris.m_ui8SatId);
+        eph_t realEph = rtcm.nav.eph[satID - 1];
+        double rsRtk[3];
+        memset(rsRtk, 0, sizeof (double) * 3);
+        double dtsRtk = 0.0;
+        double varRtk = 0.0;
+
+        //把年月日时分秒转GPS秒
+        rtkGPSSecTime=utc2gpst(rtkGPSSecTime);
+        eph2pos(rtkGPSSecTime, &realEph, rsRtk, &dtsRtk, &varRtk);
+        free_rtcm(&rtcm);
+        rtkRet = QString::number(rsRtk[0], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rsRtk[1], 'f', COORDINATE_ACCURACY) + COMMA +
+                 QString::number(rsRtk[2], 'f', COORDINATE_ACCURACY);
         retFunc = true;
     } while(false);
     // 组装结果
@@ -3189,4 +3307,34 @@ void CTestFunc::RtcmGloEphToMathGloEph(sixents::SGlonassEphemeris *rtcmEph, sixe
     gulEph->m_ui8Reserved                  = rtcmEph->m_ui8Reserved;
 }
 
-
+//int CTestFunc::satno(int sys, int prn)
+//{
+//    int satNo = 0;
+//    if (prn <= 0)
+//    {
+//        return satNo;
+//    }
+//    const int MIN_PRN = 1;
+//    const int MAX_PRN_GPS = 32;
+//    const int MAX_PRN_GLO = 27;
+//    const int MAX_PRN_GAL = 36;
+//    const int MAX_PRN_BDS = 37;
+//    const int MIN_PRN_QZS = 193;
+//    const int MAX_PRN_QZS = 202;
+//    const int QZS_SAT_NUM = MAX_PRN_QZS - MIN_PRN_QZS + 1;
+//    switch (sys) {
+//        case GPS_EPH:
+//            if (prn<MIN_PRN||MAX_PRN_GPS<prn) return 0;
+//            return prn;
+//        case GLONASS_EPH:
+//            if (prn<MIN_PRN||MAX_PRN_GLO<prn) return 0;
+//            return MAX_PRN_GPS + prn;
+//        case GAL_EPH:
+//            if (prn<MIN_PRN||MAX_PRN_GAL<prn) return 0;
+//            return MAX_PRN_GPS + MAX_PRN_GLO + prn;
+//        case BDS_EPH:
+//            if (prn<MIN_PRN||MAX_PRN_BDS<prn) return 0;
+//            return MAX_PRN_GPS + MAX_PRN_GLO + MAX_PRN_GAL + QZS_SAT_NUM + prn;
+//    }
+//    return 0;
+//}

@@ -4,7 +4,7 @@
  *  @author        wuchuanfei@sixens.com
  *  @date          2020/04/14
  *  @version       1.0
- *  @note          暂无
+ *  @note          2020.05.26  modified by wuchuanfei 为适配JAVA的数据类型，将星历结构中UINT8修改为UINT16
  *  @copyright     Copyright(c) 2019-2020 Beijing Sixents Technology Co., Ltd. All rights reserved.
  */
 #ifndef GNSS_DATA_STRUCT_H
